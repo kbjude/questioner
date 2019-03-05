@@ -19,7 +19,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.Index.as_view()),
+    url(r'^$', views.Index.as_view(), name='welcome'),
     url(r'^admin/', admin.site.urls),
 ]
 
