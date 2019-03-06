@@ -6,3 +6,4 @@
 .coverage
 __pycache__
 .idea/
+.pytest_cache
