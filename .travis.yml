@@ -11,7 +11,7 @@ env:
     - PYTHONPATH="/home/travis/build/AtamaZack/questioner"
     - PIP_USE_MIRRORS=true
   matrix:
-    - Django==2.1.7 DB=postgresql
+    - Django==2.0.13 DB=postgresql
 
 #commands to install dependencies
 install:
