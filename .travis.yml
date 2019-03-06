@@ -14,13 +14,14 @@ env:
     - Django==2.0.13 DB=postgresql
 
 #commands to install dependencies
-install:
-  - pip install -q Django==2.0.13
-  - pip install -q -r requirements.txt
+install: 
+  - pip install -r requirements.txt
 
 before_script:
   - psql -c 'create database travis_ci_db;' -U postgres
 
 #command to run the test suite
 script:
-  - python manage.py test
+  - python manage.py makemigrations
+  - python manage.py migrate
+  - python manage.py test questioner
