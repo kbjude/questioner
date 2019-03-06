@@ -88,10 +88,10 @@ WSGI_APPLICATION = 'questioner.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('NAME'),
-        'HOST':  os.environ.get('HOST'),
-        'USER': os.environ.get('USER'),
-        'PASSWORD': os.environ.get('PASSWORD')
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'HOST':  os.environ.get('DATABASE_HOST'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
 }
 
