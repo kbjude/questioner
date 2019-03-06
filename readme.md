@@ -1,7 +1,7 @@
 # Questioner
 by The dojos
 
-# Application test badges
+#### Application test badges
 ##### [![Build Status](https://travis-ci.org/AtamaZack/questioner.svg?branch=develop)](https://travis-ci.org/AtamaZack/questioner)
 
 Questioner is ...
