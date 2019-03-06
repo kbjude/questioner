@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/kalsmic/questioner.svg?branch=ch-164393776-setup-testing-environment)](https://travis-ci.org/kalsmic/questioner) [![Coverage Status](https://coveralls.io/repos/github/kalsmic/questioner/badge.svg?branch=develop)](https://coveralls.io/github/kalsmic/questioner?branch=develop)
+[![Build Status](https://travis-ci.org/kalsmic/questioner.svg?branch=ch-164393776-setup-testing-environment)](https://travis-ci.org/kalsmic/questioner) [![Coverage Status](https://coveralls.io/repos/github/kalsmic/questioner/badge.svg?branch=master)](https://coveralls.io/github/kalsmic/questioner?branch=master)
 
 # Questioner
 by The dojos
