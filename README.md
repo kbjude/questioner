@@ -21,6 +21,7 @@ Questioner is ...
     python manage.py runserver
     
   Command to run tests.
+  
     pytest  
     
   In a browser type the Url: http//localhost:8000.
