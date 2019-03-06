@@ -11,10 +11,10 @@ by The dojos
   - Install the requirements.txt
   - Add a ".env" file that has:
     - export DJANGO_SETTINGS_MODULE="questioner.settings"
-    - export NAME
-    - export HOST
-    - export USER
-    - export PASSWORD
+    - export DATABASE_NAME
+    - export DATABASE_HOST
+    - export DATABASE_USER
+    - export DATABASE_PASSWORD
 
 
  ## Running the application:
