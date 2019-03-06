@@ -13,3 +13,4 @@ omit =
     manager.py
     */settings.py
     */tests/*
+    */urls.py
