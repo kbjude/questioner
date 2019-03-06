@@ -1,9 +1,10 @@
-/venv
-.vscode/
+*.env
+venv/*
+.vscode/*
 *.pyc
-.env
-.sqlite3
-.coverage
 __pycache__
-.idea/
-.pytest_cache
+__pycache__/
+*/__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/*

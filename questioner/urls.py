@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name="welcome"),
     url(r'^admin/', admin.site.urls),
+    path('', include('meetup.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
