@@ -15,7 +15,7 @@ env:
 
 #commands to install dependencies
 install:
-  - pip install -q Django==$DJANGO
+  - pip install -q Django==2.0.13
   - pip install -q -r requirements.txt
 
 before_script:
