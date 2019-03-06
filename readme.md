@@ -25,8 +25,23 @@ by The dojos
 
    In a browser type the Url: http//localhost:8000.
 
+ ## Login
+
+  Using postman login with endpoint
+   ```
+    http://127.0.0.1:8000/auth/login/
+  ```
+  Provide your credentials under the body tab
+  ```
+  {
+  	"username": "your-username",
+	  "password": "your-password"
+  }
+
+  ```
 
  ## Endpoints
-| Method | Endpoint | Description |
-| ------ | -------- | ----------- |
-| GET    | /        | Index       |
+| Method | Endpoint         | Description |
+| ------ | -----------------| ----------- |
+| GET    | /                | Index       |
+| POST   |/auth/login       | login
