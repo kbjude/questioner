@@ -1,32 +1,30 @@
 # Questioner
 by The dojos
 
+# Application test badges
+##### [![Build Status](https://travis-ci.org/AtamaZack/questioner.svg?branch=develop)](https://travis-ci.org/AtamaZack/questioner)
 
- Questioner is ...
+Questioner is ...
 
 
- ## Installation:
+## Installation:
   - Clone this repository.
   - Setup a virtual environment and activate it.
   - Install the requirements.txt
   - Add a ".env" file that has:
     - export DJANGO_SETTINGS_MODULE="questioner.settings"
-    - export NAME
-    - export HOST
-    - export USER
-    - export PASSWORD
 
 
- ## Running the application:
+## Running the application:
   Open the directory of the application in the terminal and execute:
 
     python manage.py migrate
     python manage.py runserver
+    
+  In a browser type the Url: http//localhost:8000.
 
-   In a browser type the Url: http//localhost:8000.
 
-
- ## Endpoints
+## Endpoints
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
 | GET    | /        | Index       |
