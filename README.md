@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/kbjude/questioner.svg?branch=master)](https://travis-ci.org/kbjude/questioner)
-
-[![Coverage Status](https://coveralls.io/repos/github/kbjude/questioner/badge.svg?branch=master)](https://coveralls.io/github/kbjude/questioner?branch=master)
+[![Build Status](https://travis-ci.org/kbjude/questioner.svg?branch=master)](https://travis-ci.org/kbjude/questioner) [![Coverage Status](https://coveralls.io/repos/github/kbjude/questioner/badge.svg?branch=develop)](https://coveralls.io/github/kbjude/questioner?branch=develop)
 
 # Questioner
 by The dojos
