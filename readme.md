@@ -43,7 +43,10 @@ Questioner is ...
   ```
 
  ## Endpoints
-| Method | Endpoint    | Description |
-| ------ | ----------- | ----------- |
-| GET    | /           | Index       |
-| POST   | /auth/login | login       |
+| Method | Endpoint      | Description     |
+| ------ | ------------- | --------------- |
+| GET    | /             | Index           |
+| POST   | /auth/login   | login           |
+| POST   | /questions    | Add a question  |
+| GET    | /questions    | Get questions   |
+| GET    | /questions/12 | Get question 12 |
