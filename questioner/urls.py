@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from question import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('meetup.urls')),
+    path('questions', views.questions),
+    path('questions/<question_id>', views.question)
 ]
