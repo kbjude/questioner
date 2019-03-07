@@ -1,0 +1,15 @@
+[report]
+omit =
+    */python?.?/*
+    */site-packages/nose/*
+    */__pycache__/*
+    *.pyc
+    */venv/*
+    */home/travis/virtualenv/*
+    */usr/lib/python3/*
+    */__init__.py
+    \Users\Bison\AppData\*
+    */meetup/tests/*
+    */wsgi.py
+    */travis_ci_settings.py
+    */manage.py
