@@ -24,6 +24,13 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path(r'^auth/login/$', obtain_auth_token, name='api_token_auth'),
     url(r'^meetups/', include('meetup.urls')),
+    url(r'^questions/', include('question.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+# urlpatterns = [
+    # path('questions', views.questions),
+    # path('questions/<question_id>', views.question)
+# ]
+

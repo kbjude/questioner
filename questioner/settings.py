@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'meetup.apps.MeetupConfig',
     'rest_framework',
     'rest_framework.authtoken',
+    'question',
 ]
 
 REST_FRAMEWORK = {

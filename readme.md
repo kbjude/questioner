@@ -1,11 +1,13 @@
 # Questioner
 by The dojos
 
+#### Application test badges
+##### [![Build Status](https://travis-ci.org/AtamaZack/questioner.svg?branch=develop)](https://travis-ci.org/AtamaZack/questioner)
 
- Questioner is ...
+Questioner is ...
 
 
- ## Installation:
+## Installation:
   - Clone this repository.
   - Setup a virtual environment and activate it.
   - Install the requirements.txt
@@ -41,7 +43,7 @@ by The dojos
   ```
 
  ## Endpoints
-| Method | Endpoint         | Description |
-| ------ | -----------------| ----------- |
-| GET    | /                | Index       |
-| POST   |/auth/login       | login
+| Method | Endpoint    | Description |
+| ------ | ----------- | ----------- |
+| GET    | /           | Index       |
+| POST   | /auth/login | login       |
