@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bisonlou/questioner.svg?branch=ft-164364453-create-user-login)](https://travis-ci.org/bisonlou/questioner) 
+[![Build Status](https://travis-ci.org/bisonlou/questioner.svg?branch=ft-164364453-create-user-login)](https://travis-ci.org/bisonlou/questioner) [![Coverage Status](https://coveralls.io/repos/github/bisonlou/questioner/badge.svg?branch=master)](https://coveralls.io/github/bisonlou/questioner?branch=ft-164364453-create-user-login)
 
 # Questioner
 by The dojos
