@@ -9,7 +9,11 @@ omit =
     */__init__.py
     tests/*
     *settings/*
+    *migrations/*
     */urls/*
-    manager.py
+    *travis_ci_settings.py
+    *wsgi.py
+    manage.py
+    tests.py
     */settings.py
     */tests/*
