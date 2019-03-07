@@ -16,12 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.authtoken.views import obtain_auth_token
 from . import views
 
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name="welcome"),
     url(r'^admin/', admin.site.urls),
-    path('', include('meetup.urls')),
+    path(r'^auth/login/$', obtain_auth_token, name='api_token_auth'),
+    url(r'^meetups/', include('meetup.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
