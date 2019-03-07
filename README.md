@@ -43,10 +43,17 @@ Questioner is ...
   ```
 
  ## Endpoints
-| Method | Endpoint      | Description     |
-| ------ | ------------- | --------------- |
-| GET    | /             | Index           |
-| POST   | /auth/login   | login           |
-| POST   | /questions    | Add a question  |
-| GET    | /questions    | Get questions   |
-| GET    | /questions/12 | Get question 12 |
+| Method        | Endpoint      | Description       |
+| ------------- | ------------- | ----------------- |
+| GET           | /             | Index             |
+| POST          | /auth/login   | login             |
+| __Questions__ |
+| POST          | /questions    | Add a question    |
+| GET           | /questions    | Get all questions |
+| GET           | /questions/12 | Get question 12   |
+| __Meetups__   |
+| POST          | /meetups      | Add a meetup      |
+| GET           | /meetups      | Get all meetups   |
+| GET           | /meetups/2    | Get meetup 2      |
+| PUT           | /meetups/2    | Update meetup 2   |
+| DELETE        | /meetups/2    | Delete meetup 2   |
