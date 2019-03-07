@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/bisonlou/questioner.svg?branch=ft-164364453-create-user-login)](https://travis-ci.org/bisonlou/questioner) [![Coverage Status](https://coveralls.io/repos/github/bisonlou/questioner/badge.svg?branch=master)](https://coveralls.io/github/bisonlou/questioner?branch=ft-164364453-create-user-login)
+[![Build Status](https://travis-ci.org/bisonlou/questioner.svg?branch=ft-164364453-create-user-login)](https://travis-ci.org/bisonlou/questioner) [![Coverage Status](https://coveralls.io/repos/github/bisonlou/questioner/badge.svg?branch=master)](https://coveralls.io/github/bisonlou/questioner?branch=ft-164364453-create-user-login) [![Maintainability](https://api.codeclimate.com/v1/badges/a41afe011f4784815a00/maintainability)](https://codeclimate.com/github/bisonlou/questioner/maintainability)
+
+
 
 # Questioner
 by The dojos
