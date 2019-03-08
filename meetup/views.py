@@ -12,11 +12,13 @@ from rest_framework.permissions import IsAuthenticated
 class MeetingList(APIView):
     # permission_classes = (IsAuthenticated,)
 
+    @classmethod
     def get(self, request):
         meetups = Meeting.objects.all()
         serializer = MeetingSerializer(meetups, many=True)
         return Response(serializer.data)
 
+    @classmethod
     def post(self, request):
 
         data = request.data
@@ -33,12 +35,14 @@ class MeetingList(APIView):
 # meetups/1
 class AMeeting(APIView):
 
-    def get(self, request, meeting_id):
+    @classmethod
+    def get(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, many=False)
         return Response(serializer.data)
 
-    def put(self, request, meeting_id):
+    @classmethod
+    def put(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
@@ -46,7 +50,8 @@ class AMeeting(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, meeting_id):
+    @classmethod
+    def delete(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
         return Response({"successfully deleted"}, status=status.HTTP_200_OK)
