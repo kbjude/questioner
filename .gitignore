@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.env
 venv/*
 .vscode/*
@@ -8,3 +9,14 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/*
+=======
+/venv
+.vscode/
+*.pyc
+.env
+.sqlite3
+.coverage
+__pycache__
+.idea/
+.pytest_cache
+>>>>>>> ch-164393776-setup-testing-environment

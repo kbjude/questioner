@@ -1,3 +1,4 @@
+
 language: python
 
 python:
@@ -8,20 +9,20 @@ services: postgresql
 env:
   global:
     - DJANGO_SETTINGS_MODULE="questioner.travis_ci_settings"
-    - PYTHONPATH="/home/travis/build/AtamaZack/questioner"
+    - PYTHONPATH="/home/travis/build/kbjude/questioner"
     - PIP_USE_MIRRORS=true
   matrix:
-    - DJANGO=1.7 DB=postgresql
+    - Django==2.0.13 DB=postgresql
 
 #commands to install dependencies
 install:
-  - pip install -q Django==$DJANGO
-  - pip install -q -r requirements.txt
+  - pip install -r requirements.txt
 
-before_script:
+before_script:questioner
   - psql -c 'create database travis_ci_db;' -U postgres
-  - python manage.py syncdb --noinput
 
 #command to run the test suite
 script:
-  - python manage.py test
+  - python manage.py makemigrations
+  - python manage.py migrate
+  - python -m pytest --cov
