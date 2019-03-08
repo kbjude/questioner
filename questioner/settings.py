@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'svcb)mw@gvm8tp&mc_%11vta(7ho3&7v0eh^wm)!8s)t9%@36t'
+SECRET_KEY = 'n%fg(03shlp=ipqb_u%_o@=&7bhcwq8hpedk-sn)+5tnx6#*kb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,14 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'meetup.apps.MeetupConfig',
-
     'rest_framework',
     'rest_framework.authtoken',
+    'question',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'meetup.models.BearerAuthentication'
+        'questioner.auth.auth_default.BearerAuthentication'
     ],
 }
 
