@@ -10,7 +10,7 @@ env:
   global:
     -
   matrix:
-    - Django==2.0.13 DB=postgresql
+    - DB=postgresql
 
 before_script:
   - psql -c 'create database travis_ci_db;' -U postgres
