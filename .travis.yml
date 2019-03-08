@@ -8,14 +8,11 @@ services:
 
 env:
   global:
-    - DJANGO_SETTINGS_MODULE="questioner.travis_ci_settings"
+    - DJANGO_SETTINGS_MODULE="questioner.settings"
     - PYTHONPATH="/home/travis/build/PatrickMugayaJoel/questioner"
     - PIP_USE_MIRRORS=true
   matrix:
     - Django==2.0.13 DB=postgresql
-
-before_script:
-  - psql -c 'create database travis_ci_db;' -U postgres
 
 install:
   - pip install -r requirements.txt
