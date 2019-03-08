@@ -5,16 +5,40 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
             required=True,
-            validators=[UniqueValidator(queryset=User.objects.all())]
+            validators=[
+                        UniqueValidator(
+                        queryset=User.objects.all()
+                    )
+                ]
             )
     username = serializers.CharField(
-            validators=[UniqueValidator(queryset=User.objects.all())]
+            validators=[
+                        UniqueValidator(
+                        queryset=User.objects.all()
+                        )
+                ]
             )
     password = serializers.CharField(min_length=8)
 
+    def validate_username(self, value):
+        ModelClass = self.Meta.model
+        if ModelClass.objects.filter(username=value).exists():
+            raise serializers.ValidationError('User already exists')
+        return value
+    
+    def validate_email(self, value):
+        ModelClass = self.Meta.model
+        if ModelClass.objects.filter(email=value).exists():
+            raise serializers.ValidationError('User already exists')
+        return value
+
     def create(self, validated_data):
-        user = User.objects.create_user(validated_data['username'], validated_data['email'],
-             validated_data['password'])
+        user = User.objects.create_user(
+                validated_data['username'],
+                validated_data['email'],
+                validated_data['password']
+                )
+
         return user
 
     class Meta:

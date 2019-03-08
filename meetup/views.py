@@ -25,13 +25,26 @@ class SignUp(APIView):
         if serializer.is_valid():
             user = serializer.save()
             if user:
-                return Response(serializer.data,
-                        status=status.HTTP_201_CREATED)
+                return Response({
+                    'status': status.HTTP_201_CREATED,
+                    'data': [{'user_id': user.pk,
+                              'username': user.username,
+                              'email': user.email,
+                              'is_admin': user.is_admin
+                              }]
+                })
+        else:
+            return Response({
+                'status': 400,
+                'errors': serializer.errors                            
+            })
+
 
 class Login(ObtainAuthToken):
     """ 
     login a user. 
     """
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
@@ -41,8 +54,7 @@ class Login(ObtainAuthToken):
         return Response({
             'status': 200,
             'token': token.key,
-            'data': [{'user_id':user.pk,
-                    'email': user.email
-                     }]      
+            'data': [{'user_id': user.pk,
+                      'email': user.email
+                      }]
         })
-        
