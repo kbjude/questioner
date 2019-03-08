@@ -1,6 +1,11 @@
 # Questioner
 by The dojos
 
+## badges
+[![Build Status](https://travis-ci.org/PatrickMugayaJoel/questioner.svg?branch=develop)](https://travis-ci.org/PatrickMugayaJoel/questioner)
+
+[![Coverage Status](https://coveralls.io/repos/github/PatrickMugayaJoel/questioner/badge.svg?branch=develop)](https://coveralls.io/github/PatrickMugayaJoel/questioner?branch=develop)
+
 ## Introduction
 Questioner is ...
 
