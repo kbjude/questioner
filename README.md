@@ -32,7 +32,7 @@ Questioner is ...
    In a browser type the Url: http//localhost:8000.
 
  ## Login
-  Using postman login with endpoint: http://127.0.0.1:8000/auth/login/
+  Using postman login with endpoint: http//localhost:8000/auth/login
   Provide your credentials under the body tab
   {
   	"username": "your-username",
