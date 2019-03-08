@@ -1,30 +1,27 @@
 # Questioner
 by The dojos
 
-
-## Introduction.
+## Introduction
 Questioner is ...
 
-
 ## Installation
-- Clone this repository.
+  - Clone this repository.
 
-- Setup a virtual environment and activate it.
+  - Setup a virtual environment and activate it.
 
-- Install the requirements.txt
+  - Install the requirements.txt
 
-- Add a ".env" file that has:
+  - Add a ".env" file that has:
 
-- export DJANGO_SETTINGS_MODULE="questioner.settings"
+  - export DJANGO_SETTINGS_MODULE="questioner.settings"
 
-- export DATABASE_NAME
+  - export DATABASE_NAME
 
-- export DATABASE_HOST
+  - export DATABASE_HOST
 
-- export DATABASE_USER
+  - export DATABASE_USER
 
-- export DATABASE_PASSWORD
-
+  - export DATABASE_PASSWORD
 
  ## Running the application
   Open the directory of the application in the terminal and execute:
@@ -35,19 +32,12 @@ Questioner is ...
    In a browser type the Url: http//localhost:8000.
 
  ## Login
-
-  Using postman login with endpoint
-    ```
-    http://127.0.0.1:8000/auth/login/
-    ```
+  Using postman login with endpoint: http://127.0.0.1:8000/auth/login/
   Provide your credentials under the body tab
-    ```
   {
   	"username": "your-username",
 	  "password": "your-password"
   }
-
-    ```
 
  ## Endpoints
 | Method        | Endpoint      | Description       |
