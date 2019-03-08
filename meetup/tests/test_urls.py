@@ -34,12 +34,9 @@ class TestUrls(TestCase):
         }
 
 
-    def tearDown(self):
-        self.client.delete
+    # def tearDown(self):
+    #     self.client.delete
 
-    def test_index_url(self):
-        path = reverse('meetings')
-        assert resolve(path).view_name == 'meetings'
 
     def test_post_meetup(self):
         response = self.client.post(
