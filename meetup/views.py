@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 # list all meetup or create a new meetup
 # meetups/
 class MeetingList(APIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         meetups = Meeting.objects.all()
@@ -18,7 +18,11 @@ class MeetingList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = MeetingSerializer(data=request.data)
+
+        data = request.data
+        # data["created_at"] = str(datetime.datetime.now())
+
+        serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -45,4 +49,4 @@ class AMeeting(APIView):
     def delete(self, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
