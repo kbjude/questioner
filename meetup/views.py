@@ -30,7 +30,7 @@ class SignUp(APIView):
                     'data': [{'user_id': user.pk,
                               'username': user.username,
                               'email': user.email,
-                              'is_admin': user.is_admin
+                              'is_admin': user.is_superuser
                               }]
                 })
         else:
