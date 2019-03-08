@@ -5,23 +5,23 @@ by The dojos
 Questioner is ...
 
 ## Installation
-  - Clone this repository.
+    - Clone this repository.
 
-  - Setup a virtual environment and activate it.
+    - Setup a virtual environment and activate it.
 
-  - Install the requirements.txt
+    - Install the requirements.txt
 
-  - Add a ".env" file that has:
+    - Add a ".env" file that has:
 
-  - export DJANGO_SETTINGS_MODULE="questioner.settings"
+        - export DJANGO_SETTINGS_MODULE="questioner.settings"
 
-  - export DATABASE_NAME
+        - export DATABASE_NAME
 
-  - export DATABASE_HOST
+        - export DATABASE_HOST
 
-  - export DATABASE_USER
+        - export DATABASE_USER
 
-  - export DATABASE_PASSWORD
+        - export DATABASE_PASSWORD
 
  ## Running the application
   Open the directory of the application in the terminal and execute:
