@@ -47,7 +47,6 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'meetup.models.BearerAuthentication'
-        # 'rest_framework.authentication.TokenAuthentication', 
     ],
 }
 
