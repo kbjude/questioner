@@ -1,8 +1,11 @@
 # Questioner
 by The dojos
 
-#### Application test badges
-##### [![Build Status](https://travis-ci.org/AtamaZack/questioner.svg?branch=develop)](https://travis-ci.org/AtamaZack/questioner)
+#### badges
+[![Build Status](https://travis-ci.org/PatrickMugayaJoel/questioner.svg?branch=develop)](https://travis-ci.org/PatrickMugayaJoel/questioner)
+
+[![Coverage Status](https://coveralls.io/repos/github/PatrickMugayaJoel/questioner/badge.svg?branch=develop)](https://coveralls.io/github/PatrickMugayaJoel/questioner?branch=develop)
+
 
 Questioner is ...
 
