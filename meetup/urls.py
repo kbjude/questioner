@@ -1,10 +1,9 @@
 from django.urls import path
-from rest_framework.authtoken.views import obtain_auth_token
-from .views import Index, SignUp
+from .views import Index, SignUp, Login
 
 
 urlpatterns = [
     path('', Index.as_view()),
-    path('auth/login/', obtain_auth_token, name='login'),
+    path('auth/login/', Login.as_view(), name='login'),
     path('auth/signup/', SignUp.as_view(), name='signup'),
 ]
