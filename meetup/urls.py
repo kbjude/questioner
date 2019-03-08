@@ -1,9 +1,12 @@
-from django.urls import path
-from rest_framework.authtoken.views import obtain_auth_token
-from .views import Index
+from django.conf.urls import url
+from . import views
 
 
 urlpatterns = [
-    path('', Index.as_view()),
-    path('auth/login/', obtain_auth_token, name='api_token_auth'),
+    # /meetups/
+    url(r'^$', views.MeetingList.as_view(), name='meetings'),
+
+    # /meetups/234/
+    url(r'^(?P<meeting_id>[0-9]+)$',
+        views.AMeeting.as_view(), name='meeting'),
 ]
