@@ -3,7 +3,8 @@ language: python
 python:
   - 3.6
 
-services: postgresql
+addons:
+  postgresql: "9.6"
 
 #commands to install dependencies
 install:
@@ -12,11 +13,10 @@ install:
 before_script:
   - psql -c 'create database questioner;' -U postgres
 
-#command to run the test suite
 script:
   - python manage.py test
+  - python manage.py makemigrations
+  - python manage.py migrate
 
 after_success:
   - coveralls
-
-

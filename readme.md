@@ -5,9 +5,13 @@
 # Questioner
 by The dojos
 
+## Introduction
+Questioner is ...
 
- Questioner is ...
+## Installation
+    - Clone this repository.
 
+    - Setup a virtual environment and activate it.
 
  ## Installation:
   - Clone this repository.
@@ -15,20 +19,25 @@ by The dojos
   - Install the requirements.txt
   - Add a ".env" file that has:
     - export DJANGO_SETTINGS_MODULE="questioner.settings"
-<<<<<<< HEAD
-    - export DATABASE_NAME
-    - export DATABASE_HOST
-    - export DATABASE_USER
-    - export DATABASE_PASSWORD
-=======
     - export Database
     - export Host
     - export User
     - export Password
->>>>>>> ft-164364453-create-user-login
+    - Install the requirements.txt
 
+    - Add a ".env" file that has:
 
- ## Running the application:
+        - export DJANGO_SETTINGS_MODULE="questioner.settings"
+
+        - export Database
+
+        - export Host
+
+        - export User
+
+        - export Password
+
+ ## Running the application
   Open the directory of the application in the terminal and execute:
 
     python manage.py migrate
@@ -60,17 +69,25 @@ by The dojos
     http://127.0.0.1:8000/auth/login/
   ```
   Provide your credentials under the body tab
-  ```
   {
   	"username": "your-username",
 	  "password": "your-password"
   }
 
-  ```
-
  ## Endpoints
-| Method | Endpoint         | Description |
-| ------ | -----------------| ----------- |
-| GET    | /                | Index       |
-| POST   |/auth/signup      | Sign up     |
-| POST   |/auth/login       | login       |
+ 
+| Method        | Endpoint      | Description       |
+| ------------- | ------------- | ----------------- |
+| GET           | /             | Index             |
+| POST          | /auth/login/  | login             |
+| POST          | /auth/signup/ | Sign up           |
+| __Questions__ |
+| POST          | /questions    | Add a question    |
+| GET           | /questions    | Get all questions |
+| GET           | /questions/12 | Get question 12   |
+| __Meetups__   |
+| POST          | /meetups      | Add a meetup      |
+| GET           | /meetups      | Get all meetups   |
+| GET           | /meetups/2    | Get meetup 2      |
+| PUT           | /meetups/2    | Update meetup 2   |
+| DELETE        | /meetups/2    | Delete meetup 2   |

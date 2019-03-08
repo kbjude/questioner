@@ -1,4 +1,5 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 
@@ -44,3 +45,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password')
+=======
+from .models import Meeting
+
+
+class MeetingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Meeting
+        #fields = ('title', 'date', 'start', 'end', 'created_by')
+        fields = '__all__'
+>>>>>>> upstream/develop
