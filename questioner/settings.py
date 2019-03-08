@@ -26,7 +26,8 @@ SECRET_KEY = 'svcb)mw@gvm8tp&mc_%11vta(7ho3&7v0eh^wm)!8s)t9%@36t'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'snaketech.herokuapp.com'
+    '127.0.0.1',
+    'snaketech.herokuapp.com',
 ]
 
 
