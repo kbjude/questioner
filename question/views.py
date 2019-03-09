@@ -1,9 +1,11 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 import json
+
+from django.http import HttpResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
 from question.models import Question
+
 
 @csrf_exempt
 def questions(request):
@@ -17,13 +19,14 @@ def questions(request):
         title = payload['title']
         body = payload['body']
         created_by = payload['created_by']
-        question = Question(title=title, body=body, created_by=created_by, date_created=timezone.now(), date_modified=timezone.now())
+        question = Question(title=title, body=body, created_by=created_by, date_created=timezone.now(),
+                            date_modified=timezone.now())
         try:
             # if not Question.objects.get(title=title) or not Question.objects.get(title=title):
             question.save()
-            response = json.dumps([{'message': 'question successfully added'}])            
+            response = json.dumps([{'message': 'question successfully added'}])
             # response = json.dumps([{'error': 'question already exists'}])
-        except:
+        except Exception:
             response = json.dumps([{'error': 'question could not be added'}])
 
     if request.method == 'GET':
@@ -42,6 +45,7 @@ def questions(request):
         if all_questions != []:
             response = json.dumps(all_questions)
     return HttpResponse(response, content_type='text/json')
+
 
 @csrf_exempt
 def question(request, question_id):
@@ -66,7 +70,7 @@ def question(request, question_id):
                     }
                 ]
             )
-        except:
+        except Exception:
             response = json.dumps([{'error': 'no question available by the id: {}'.format(question_id)}])
 
     if request.method == 'PUT':
@@ -80,14 +84,16 @@ def question(request, question_id):
             question.date_modified = timezone.now()
             question.save()
             response = json.dumps([{'message': 'question successfully updated'}])
-        except:
-            response = json.dumps([{'error': 'no question available by the id: {}, update failed!'.format(question_id)}])
+        except Exception:
+            response = json.dumps(
+                [{'error': 'no question available by the id: {}, update failed!'.format(question_id)}])
 
     if request.method == 'DELETE':
         try:
             question = Question.objects.get(id=question_id)
             question.delete()
             response = json.dumps([{'message': 'question successfully deleted'}])
-        except:
-            response = json.dumps([{'error': 'no question available by the id: {}, deletion failed!'.format(question_id)}])        
+        except Exception:
+            response = json.dumps(
+                [{'error': 'no question available by the id: {}, deletion failed!'.format(question_id)}])
     return HttpResponse(response, content_type='text/json')
