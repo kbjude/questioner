@@ -1,4 +1,4 @@
-from django.urls import reverse, resolve
+from django.urls import reverse
 from django.test import TestCase
 import json
 
