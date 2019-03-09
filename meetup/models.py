@@ -8,3 +8,13 @@ class Meeting(models.Model):
     end = models.TimeField()
     created_at = models.DateTimeField()
     created_by = models.IntegerField()
+
+
+class Tag(models.Model):
+    title = models.CharField(max_length=50)
+    created_by = models.IntegerField()
+
+
+class MeetingTag(models.Model):
+    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
