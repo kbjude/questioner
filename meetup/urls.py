@@ -1,12 +1,20 @@
-from django.conf.urls import url
+from django.urls import path
 from . import views
 
 
 urlpatterns = [
     # /meetups/
-    url(r'^$', views.MeetingList.as_view(), name='meetings'),
+    path('', views.MeetingList.as_view(), name='meetings'),
 
     # /meetups/234/
-    url(r'^(?P<meeting_id>[0-9]+)$',
-        views.AMeeting.as_view(), name='meeting'),
+    path('<int:meeting_id>',
+         views.AMeeting.as_view(), name='meeting'),
+
+    # /meetups/tags/
+    path('tags', views.AddMeetupTag.as_view(), name='meetingtags'),
+
+    # /meetups/234/tags/432
+    path('<int:meeting_id>/tags/<int:tag_id>',
+         views.AmeetupTag.as_view(), name='meetingtag'),
+
 ]
