@@ -28,7 +28,6 @@ class BearerAuthentication(authentication.TokenAuthentication):
     Clients should authenticate by passing the token key in the 'Authorization'
     HTTP header, prependefrom rest_framework import authentication
 
-
 class BearerAuthentication(authentication.TokenAuthentication):
     '''
     Simple token based authentication using utvsapitoken.
