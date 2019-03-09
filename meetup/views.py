@@ -15,15 +15,6 @@ from .serializers import TagSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
-# list all meetup or create a new meetup
-# meetups/
-class Index(APIView):
-
-    @classmethod
-    def get(self, request):
-        return Response({"The Dojos": "Welcome to Questioner."})
-
-
 class SignUp(APIView):
     """
     Register a user.
