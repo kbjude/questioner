@@ -1,12 +1,12 @@
-from django.urls import reverse, resolve
-from django.test import TestCase
 import json
+
+from django.test import TestCase
+from django.urls import reverse
 
 
 class TestUrls(TestCase):
 
     def setUp(self):
-
         self.meetup = {
             "title": "Meetup title",
             "date": "2019-03-07",
@@ -33,10 +33,8 @@ class TestUrls(TestCase):
             "created_at": "2019-03-07 12:21:39"
         }
 
-
     # def tearDown(self):
     #     self.client.delete
-
 
     def test_post_meetup(self):
         response = self.client.post(
@@ -56,7 +54,6 @@ class TestUrls(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_get_meetups(self):
-
         self.client.post(
             reverse('meetings'),
             content_type='application/json',
@@ -99,7 +96,6 @@ class TestUrls(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_get_meetup(self):
-
         resp = self.client.post(
             reverse('meetings'),
             content_type='application/json',
@@ -112,7 +108,6 @@ class TestUrls(TestCase):
         self.assertTrue('Meetup title' in str(response.data))
 
     def test_delete_meetup(self):
-
         resp = self.client.post(
             reverse('meetings'),
             content_type='application/json',
