@@ -14,17 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.conf.urls import include, url
+from django.conf.urls import include
+from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken.views import obtain_auth_token
+from meetup import views as tag_views
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.Index.as_view(), name="welcome"),
-    url(r'^admin/', admin.site.urls),
-    url(r'^auth/login/$', obtain_auth_token, name='api_token_auth'),
-    url(r'^meetups/', include('meetup.urls')),
-    url(r'^questions/', include('question.urls')),
+    path('', views.Index.as_view(), name="welcome"),
+    path('admin/', admin.site.urls),
+    path('auth/login/', obtain_auth_token, name='api_token_auth'),
+    path('meetups/', include('meetup.urls')),
+    path('questions/', include('question.urls')),
+    path('tags/', tag_views.TagList.as_view(), name='tags'),
+    path('tags/<int:tag_id>', tag_views.ATag.as_view(), name='tag'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
