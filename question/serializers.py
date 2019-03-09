@@ -26,7 +26,7 @@ class CommentSerializer(serializers.ModelSerializer):
                   'date_created',
                   'date_modified')
         read_only_fields = ('date_created', 'date_modified')
-    
+
 
 class QuestionSerializer(serializers.ModelSerializer):
     """Map the question model instance into JSON format."""
