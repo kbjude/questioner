@@ -19,17 +19,18 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.urlpatterns import format_suffix_patterns
 from django.conf.urls import include
 from django.urls import path
-from meetup import views as tag_views
+from meetup import views as meetup_views
 from . import views
 
 urlpatterns = [
     path('', views.Index.as_view(), name="welcome"),
     path('admin/', admin.site.urls),
-    path('auth/login/', obtain_auth_token, name='api_token_auth'),
+    path('auth/login/', meetup_views.Login.as_view(), name='login'),
+    path('auth/signup/', meetup_views.SignUp.as_view(), name='signup'),
     path('meetups/', include('meetup.urls')),
     path('questions/', include('question.urls')),
-    path('tags/', tag_views.TagList.as_view(), name='tags'),
-    path('tags/<int:tag_id>', tag_views.ATag.as_view(), name='tag'),
+    path('tags/', meetup_views.TagList.as_view(), name='tags'),
+    path('tags/<int:tag_id>', meetup_views.ATag.as_view(), name='tag'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
