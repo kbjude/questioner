@@ -13,7 +13,6 @@ Questioner is ...
     - Setup a virtual environment and activate it.
 from rest_framework import authentication
 
-
 class BearerAuthentication(authentication.TokenAuthentication):
     '''
     Simple token based authentication using utvsapitoken.
