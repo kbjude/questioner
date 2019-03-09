@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 
+
 class TestLogin(APITestCase):
     def test_login(self):
         """
@@ -10,8 +11,8 @@ class TestLogin(APITestCase):
         """
         self.create_user()
         data = {
-	            'username': 'bison',
-	            'password': 'Pa$$word123',
+                'username': 'bison',
+                'password': 'Pa$$word123',
                }
         response = self.login(data)
         self.assertEqual(response.status_code, 200)        
@@ -22,8 +23,8 @@ class TestLogin(APITestCase):
         """
         self.create_user()
         data = {
-	            'username': 'bison',
-	            'password': '',
+                'username': 'bison',
+                'password': '',
                }
         response = self.login(data)
         self.assertEqual(response.status_code, 400)
@@ -31,12 +32,11 @@ class TestLogin(APITestCase):
     def test_login_with_wrong_password(self):
         """
         Ensure we cannot login with a wrong password.
-        """   
-        
+        """
         self.create_user()
         data = {
-	            'username': 'bison',
-	            'password': '12345',
+                'username': 'bison',
+                'password': '12345',
                }
         response = self.login(data)
         self.assertEqual(response.status_code, 400)
@@ -47,8 +47,8 @@ class TestLogin(APITestCase):
         """
         self.create_user()
         data = {
-	            'username': 'bisonlou',
-	            'password': 'Pa$$word123',
+                'username': 'bisonlou',
+                'password': 'Pa$$word123',
                }
         response = self.login(data)
         self.assertEqual(response.status_code, 400)
@@ -65,7 +65,7 @@ class TestLogin(APITestCase):
 
         url = reverse('login')
         data = {
-	            'username': self.username,
+                'username': self.username,
                 'password': self.password
                }
         return self.client.post(url, data, format='json')

@@ -14,8 +14,7 @@ from rest_framework import status
 
 # list all meetup or create a new meetup
 # meetups/
-class MeetingList(APIView):
-    # permission_classes = (IsAuthenticated,)
+class Index(APIView):
 
     @classmethod
     def get(self, request):
@@ -23,8 +22,8 @@ class MeetingList(APIView):
 
 
 class SignUp(APIView):
-    """ 
-    Register a user. 
+    """
+    Register a user.
     """
 
     def post(self, request, format='json'):
@@ -43,13 +42,13 @@ class SignUp(APIView):
         else:
             return Response({
                 'status': 400,
-                'errors': serializer.errors                            
+                'errors': serializer.errors
             })
 
 
 class Login(ObtainAuthToken):
-    """ 
-    login a user. 
+    """
+    login a user.
     """
 
     def post(self, request, *args, **kwargs):
@@ -65,6 +64,19 @@ class Login(ObtainAuthToken):
                       'email': user.email
                       }]
         })
+        meetups = Meeting.objects.all()
+        serializer = MeetingSerializer(meetups, many=True)
+        return Response(serializer.data)
+
+# list all meetup or create a new meetup
+# meetups/
+
+
+class MeetingList(APIView):
+    # permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(self, request):
         meetups = Meeting.objects.all()
         serializer = MeetingSerializer(meetups, many=True)
         return Response(serializer.data)

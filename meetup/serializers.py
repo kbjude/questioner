@@ -1,21 +1,22 @@
 from rest_framework import serializers
-<<<<<<< HEAD
 from rest_framework.validators import UniqueValidator
+from .models import Meeting
 from django.contrib.auth.models import User
+
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
             required=True,
             validators=[
                         UniqueValidator(
-                        queryset=User.objects.all()
+                            queryset=User.objects.all()
                     )
                 ]
             )
     username = serializers.CharField(
             validators=[
                         UniqueValidator(
-                        queryset=User.objects.all()
+                            queryset=User.objects.all()
                         )
                 ]
             )
@@ -26,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         if ModelClass.objects.filter(username=value).exists():
             raise serializers.ValidationError('User already exists')
         return value
-    
+
     def validate_email(self, value):
         ModelClass = self.Meta.model
         if ModelClass.objects.filter(email=value).exists():
@@ -45,14 +46,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'password')
-=======
-from .models import Meeting
 
 
 class MeetingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        #fields = ('title', 'date', 'start', 'end', 'created_by')
         fields = '__all__'
->>>>>>> upstream/develop

@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+
 ]
 
 ROOT_URLCONF = 'questioner.urls'
@@ -91,10 +91,10 @@ WSGI_APPLICATION = 'questioner.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('Database'),
-        'HOST':  os.environ.get('Host'),
-        'USER': os.environ.get('User'),
-        'PASSWORD': os.environ.get('Password')
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'HOST':  os.environ.get('DATABASE_HOST'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
     }
 }
 
@@ -145,4 +145,3 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
