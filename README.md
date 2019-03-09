@@ -1,6 +1,9 @@
 # Questioner
 by The dojos
 
+[![Build Status](https://travis-ci.com/kbjude/questioner.svg?branch=develop)](https://travis-ci.com/kbjude/questioner)
+[![Coverage Status](https://coveralls.io/repos/github/kbjude/questioner/badge.svg?branch=develop)](https://coveralls.io/github/kbjude/questioner?branch=develop)
+
 ## Introduction
 Questioner is ...
 
