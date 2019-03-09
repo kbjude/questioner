@@ -53,6 +53,7 @@ Provide your credentials under the body tab
 | ------------- | ----------------- | -------------------------- |
 | GET           | /                 | Index                      |
 | POST          | /auth/login       | login                      |
+| POST          | /auth/signup      | signup                     |
 | **Questions** |
 | POST          | /questions        | Add a question             |
 | GET           | /questions        | Get all questions          |
@@ -67,5 +68,5 @@ Provide your credentials under the body tab
 | POST          | /tags             | create a tag               |
 | GET           | /tags             | Get all tags               |
 | DELETE        | /tags/2           | Delete tag 2               |
-| POST          | /meetups/2/tags/2 | Add tag 2 to meetup 2      |
+| POST          | /meetups/tags     | Add tag 2 to meetup 2      |
 | DELETE        | /meetups/2/tags/2 | remove tag 2 from meetup 2 |
