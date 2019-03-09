@@ -4,8 +4,8 @@
 # import json
 from rest_framework import generics
 from rest_framework import permissions
-from .models import Question
-from .serializers import QuestionSerializer
+from .models import Question, Comment
+from .serializers import QuestionSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # @csrf_exempt
@@ -96,12 +96,13 @@ from .permissions import IsOwnerOrReadOnly
 #     return HttpResponse(response, content_type='text/json')
 
 
-class QuestionView(generics.ListCreateAPIView):
-    """This class handles the  question HTTP GET(all) and POST methods."""
+class QuestionsView(generics.ListCreateAPIView):
+    """This class handles the question HTTP GET(all) and POST methods."""
 
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
 
     def perform_create(self, serializer):
         """Save question data on post."""
@@ -114,3 +115,31 @@ class QuestionDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+
+
+class CommentsView(generics.ListCreateAPIView):
+    """This class handles the comment HTTP GET(all) and POST methods."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
+
+    def perform_create(self, serializer):
+        """Save comment data on post."""
+        serializer.save(
+            created_by=self.request.user,
+            question_id=self.kwargs['pk'])
+
+
+class CommentDetails(generics.RetrieveUpdateDestroyAPIView):
+    """This class handles the comment HTTP GET(one), PUT and DELETE."""
+
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly)
+    lookup_url_kwarg = 'comment_id'
+
+    def get_queryset(self):
+        comment = self.kwargs['comment_id']
+        return Comment.objects.filter(id=comment)
