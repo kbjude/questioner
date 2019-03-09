@@ -19,23 +19,19 @@ Questioner is ...
   - Install the requirements.txt
   - Add a ".env" file that has:
     - export DJANGO_SETTINGS_MODULE="questioner.settings"
-    - export Database
-    - export Host
-    - export User
-    - export Password
+    - export DATABASE_NAME
+    - export DATABASE_HOST
+    - export DATABASE_USER
+    - export DATABASE_PASSWORD
     - Install the requirements.txt
 
     - Add a ".env" file that has:
 
         - export DJANGO_SETTINGS_MODULE="questioner.settings"
-
-        - export Database
-
-        - export Host
-
-        - export User
-
-        - export Password
+        - export DATABASE_NAME
+        - export DATABASE_HOST
+        - export DATABASE_USER
+        - export DATABASE_PASSWORD
 
  ## Running the application
   Open the directory of the application in the terminal and execute:
