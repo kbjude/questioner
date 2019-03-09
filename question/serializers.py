@@ -1,5 +1,5 @@
 """
-The Serializer classes convert data from django complex database querysets 
+The Serializer classes convert data from django complex database querysets
 to JSON format.
 
 The ModelSerializer class automatically creates a Serializer class with
