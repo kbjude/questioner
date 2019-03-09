@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'meetup.apps.MeetupConfig',
-
+    'users.apps.UsersConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
