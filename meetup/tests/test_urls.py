@@ -1,12 +1,12 @@
-from django.urls import reverse, resolve
-from django.test import TestCase
 import json
+
+from django.test import TestCase
+from django.urls import reverse
 
 
 class TestUrls(TestCase):
 
     def setUp(self):
-
         self.meetup = {
             "title": "Meetup title",
             "date": "2019-03-07",

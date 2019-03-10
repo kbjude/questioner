@@ -1,15 +1,13 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Meeting
 from .serializers import MeetingSerializer
-from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
-from django.contrib.auth.models import User
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework import status
 
 
 # list all meetup or create a new meetup
@@ -64,6 +62,7 @@ class Login(ObtainAuthToken):
                       'email': user.email
                       }]
         })
+
 
 # list all meetup or create a new meetup
 # meetups/
