@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.permissions import IsAuthenticated
 from .models import Meeting
 from .serializers import MeetingSerializer
 from .serializers import UserSerializer
@@ -91,23 +91,21 @@ class MeetingList(APIView):
 # Get, update or delete a meetup
 # meetups/1
 class AMeeting(APIView):
+    permission_classes = (IsAuthenticated,)
 
-    @classmethod
     def get(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, many=False)
         return Response(serializer.data)
 
-    @classmethod
     def put(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=self.request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @classmethod
     def delete(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()

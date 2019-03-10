@@ -19,10 +19,12 @@ def questions(request):
         title = payload['title']
         body = payload['body']
         created_by = payload['created_by']
-        question = Question(title=title, body=body, created_by=created_by, date_created=timezone.now(),
+        question = Question(title=title, body=body, created_by=created_by,
+                            date_created=timezone.now(),
                             date_modified=timezone.now())
         try:
-            # if not Question.objects.get(title=title) or not Question.objects.get(title=title):
+            # if not Question.objects.get(title=title)
+            #  or not Question.objects.get(title=title):
             question.save()
             response = json.dumps([{'message': 'question successfully added'}])
             # response = json.dumps([{'error': 'question already exists'}])
