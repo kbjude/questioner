@@ -1,27 +1,18 @@
 language: python
 
 python:
-  - "3.4"
+  - "3.6"
 
-services: postgresql
+addons:
+  postgresql: "9.6"
 
-env:
-  global:
-    - DJANGO_SETTINGS_MODULE="questioner.travis_ci_settings"
-    - PYTHONPATH="/home/travis/build/AtamaZack/questioner"
-    - PIP_USE_MIRRORS=true
-  matrix:
-    - Django==2.0.13 DB=postgresql
-
-#commands to install dependencies
-install: 
+install:
   - pip install -r requirements.txt
 
-before_script:
-  - psql -c 'create database travis_ci_db;' -U postgres
-
-#command to run the test suite
 script:
   - python manage.py makemigrations
   - python manage.py migrate
-  - python manage.py test questioner
+  - py.test
+
+after_success:
+  - coveralls

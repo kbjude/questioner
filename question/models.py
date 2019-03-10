@@ -6,6 +6,10 @@ class Question(models.Model):
     created_by = models.IntegerField()
     date_created = models.DateTimeField(editable=False)
     date_modified = models.DateTimeField()
+    meetup_id = models.IntegerField()
+    delete_status = models.BooleanField()
     def __str__(self):
         return (self.title, self.body)
+    
+
 
