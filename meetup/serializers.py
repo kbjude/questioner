@@ -10,16 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
             validators=[
                         UniqueValidator(
                             queryset=User.objects.all()
-                    )
-                ]
-            )
+                        )
+                    ]
+                )
     username = serializers.CharField(
             validators=[
                         UniqueValidator(
                             queryset=User.objects.all()
                         )
-                ]
-            )
+                    ]
+                )
     password = serializers.CharField(min_length=8)
 
     def validate_username(self, value):
@@ -49,7 +49,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MeetingSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = Meeting
-        fields = '__all__'
+        fields = ('title', 'date', 'start', 'end', 'created_at', 'user')

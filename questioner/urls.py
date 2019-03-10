@@ -22,7 +22,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name="welcome"),
     url(r'^admin/', admin.site.urls),
-    url(r'^auth/login/$', obtain_auth_token, name='api_token_auth'),
+    url(r'^auth/', include('meetup.urls')),
     url(r'^meetups/', include('meetup.urls')),
     url(r'^questions/', include('question.urls')),
 ]

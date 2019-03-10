@@ -64,34 +64,29 @@ class Login(ObtainAuthToken):
                       'email': user.email
                       }]
         })
-        meetups = Meeting.objects.all()
-        serializer = MeetingSerializer(meetups, many=True)
-        return Response(serializer.data)
 
 # list all meetup or create a new meetup
 # meetups/
 
 
 class MeetingList(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
-    @classmethod
     def get(self, request):
         meetups = Meeting.objects.all()
         serializer = MeetingSerializer(meetups, many=True)
         return Response(serializer.data)
 
-    @classmethod
     def post(self, request):
-
         data = request.data
-        # data["created_at"] = str(datetime.datetime.now())
 
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(user=self.request.user)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 # Get, update or delete a meetup
