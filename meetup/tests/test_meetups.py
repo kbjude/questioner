@@ -1,4 +1,4 @@
-import json
+""" import json
 
 from django.test import TestCase
 from django.urls import reverse
@@ -115,3 +115,4 @@ class TestUrls(TestCase):
             reverse('meeting', kwargs={'meeting_id': resp.data['id']}))
         self.assertEqual(response.status_code, 200)
         self.assertTrue('deleted' in str(response.data))
+ """
