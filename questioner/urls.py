@@ -25,7 +25,7 @@ urlpatterns = [
     path("auth/signup/", views.SignUp.as_view(), name="signup"),
     path("admin/", admin.site.urls),
     path("meetups/", include("meetup.urls")),
-    path("meetups/meetings/", include("question.urls")),
+    path("meetups/", include("question.urls")),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 
 from question.models import Question
 from question.serializers import QuestionSerializer
+from rest_framework.permissions import IsAuthenticated
+
 
 
 class Questions(APIView):
@@ -15,7 +17,7 @@ class Questions(APIView):
         - getting all questions of a particular meeting
     """
 
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def get(self, request, meetup_id):
@@ -31,8 +33,19 @@ class Questions(APIView):
         """
             method is for adding a new question to a meeting
         """
+        current_user = request.user
+        if current_user.is_superuser:
+            return Response(
+                data = {
+                    "error": "Admin is not allowed to add questions",
+                    "status": 401
+                },
+                status = status.HTTP_401_UNAUTHORIZED
+            )
         data = request.data
         data["meetup_id"] = meetup_id
+        data["created_by"] = current_user.id
+
         serializer = QuestionSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
