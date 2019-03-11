@@ -35,6 +35,7 @@ class Questions(APIView):
         """
         current_user = request.user
         if current_user.is_superuser:
+
             return Response(
                 data = {
                     "error": "Admin is not allowed to add questions",
@@ -49,7 +50,21 @@ class Questions(APIView):
         serializer = QuestionSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                data ={
+
+                    "status" : status.HTTP_201_CREATED,
+                    "data": [
+                        {
+
+                            "question":  serializer.data,
+                            "success": "Question successfully added to meetup"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

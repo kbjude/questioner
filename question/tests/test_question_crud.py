@@ -1,19 +1,22 @@
 import json
-
 from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth.models import User
 from meetup.models import Meeting
-from question.models import Question
 
-from rest_framework.test import APIClient, APIRequestFactory
-from rest_framework.test import APITestCase, force_authenticate, APIRequestFactory
-# from api.views.users import SignUpUserView
+from rest_framework.test import APIClient
+import pytest
+
+
+
+
 class TestQuestionViews(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user1 = User.objects.create_superuser(
-                "user1", "kalulearthur@gmail.com", "Pa$$word123"
+
+        self.user1 = User.objects.create(
+            username="user1",
+            email="user1@questioner.com",
+            is_superuser=False,
         )
         self.admin = User.objects.create(
             username="admin",
@@ -22,17 +25,16 @@ class TestQuestionViews(TestCase):
             is_superuser=True,
         )
         self.meetup = Meeting.objects.create(
-            title= "Meetup title",
-            date ="2019-03-07",
-            start= "10:21:39",
-            end = "12:21:39",
-            created_by =  self.admin.id,
-            created_at = "2019-03-07 12:21:39",
+            title="Meetup title",
+            date="2019-03-07",
+            start="10:21:39",
+            end="12:21:39",
+            created_by=self.admin.id,
+            created_at="2019-03-07 12:21:39",
         )
         self.question = {
             "title": "Question 1 title",
             "body": "this is the body of question 1",
-            "created_by": 1,
         }
         self.question_edited = {
             "title": "Question 1 title - edited",
@@ -45,12 +47,11 @@ class TestQuestionViews(TestCase):
         }
         self.question_missing_title = {
             "body": "this is the body of question 1",
-            "created_by": 1,
         }
         self.question_missing_body = {
             "title": "Question 1 title",
-            "created_by": 1,
         }
+
     def test_admin_cannot_add_a_question(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -61,7 +62,60 @@ class TestQuestionViews(TestCase):
             data=json.dumps(self.question),
         )
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.data['error'],  'Admin is not allowed to add questions')
+        self.assertEqual(response.data['error'], 'Admin is not allowed to add questions')
+
+    def test_anonymous_user_cannot_add_a_question(self):
+        # self.client.force_authenticate(user=AnonymousUser)
+
+        url = f"/meetups/{self.meetup.id}/questions/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.question),
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data['detail'], "Authentication credentials were not provided.")
+    #
+
+
+    def test_user_can_add_a_question_with_missing_data(self):
+
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{self.meetup.id}/questions/"
+        response1 = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.question_missing_title),
+        )
+
+        response2 = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.question_missing_body),
+        )
+
+        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response1.data['title'][0],"This field is required.")
+
+        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response2.data['body'][0],"This field is required.")
+
+    def test_user_can_add_a_question(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{self.meetup.id}/questions/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.question),
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['data'][0]['success'], "Question successfully added to meetup")
+        self.assertEqual(response.data['data'][0]['question']['meetup_id'], self.meetup.id)
+        self.assertEqual(response.data['data'][0]['question']['created_by'], self.user1.id)
+        self.assertEqual(response.data['data'][0]['question']['title'], self.question['title'])
+        self.assertEqual(response.data['data'][0]['question']['body'], self.question['body'])
 
     #
     # def test_add_a_question(self):
