@@ -1,4 +1,4 @@
-import json
+""" import json
 
 from django.test import TestCase
 from django.urls import reverse
@@ -32,9 +32,6 @@ class TestUrls(TestCase):
             "created_at": "2019-03-07 12:21:39",
         }
 
-    # def tearDown(self):
-    #     self.client.delete
-
     def test_post_meetup(self):
         response = self.client.post(
             reverse("meetings"),
@@ -44,7 +41,7 @@ class TestUrls(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue("Meetup title" in str(response.data))
 
-    def test_post_meetup_wrong(self):
+    def test_post_wrong_meetup(self):
         response = self.client.post(
             reverse("meetings"),
             content_type="application/json",
@@ -118,4 +115,5 @@ class TestUrls(TestCase):
             reverse("meeting", kwargs={"meeting_id": resp.data["id"]})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue("deleted" in str(response.data))
+        self.assertTrue('deleted' in str(response.data))
+ """
