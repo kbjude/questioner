@@ -8,7 +8,8 @@ from .serializers import UserSerializer
 
 
 class Index(APIView):
-    def get(self, request):
+    @classmethod
+    def get(self,request):
         return Response({"The Dojos": "Welcome to Questioner."})
 
 
@@ -16,7 +17,7 @@ class SignUp(APIView):
     """
     Register a user.
     """
-
+    @classmethod
     def post(self, request, format="json"):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -47,7 +48,7 @@ class Login(ObtainAuthToken):
     """
     login a user.
     """
-
+    @classmethod
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
