@@ -7,7 +7,7 @@ class Meeting(models.Model):
     start = models.TimeField()
     end = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(
+    created_by = models.ForeignKey(
                         'auth.User',
                         related_name='meeting',
                         on_delete=models.CASCADE)

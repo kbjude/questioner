@@ -5,6 +5,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 from .models import Meeting
 from .serializers import MeetingSerializer
 from .serializers import UserSerializer
@@ -80,7 +81,7 @@ class MeetingList(APIView):
 
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
-            serializer.save(user=self.request.user)
+            serializer.save(created_by=self.request.user)
             return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
         return Response(serializer.errors,
@@ -92,12 +93,14 @@ class MeetingList(APIView):
 class AMeeting(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(cls, request, meeting_id):
+    def get(self, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, many=False)
         return Response(serializer.data)
 
-    def put(cls, request, meeting_id):
+    def put(self, request, meeting_id):
+        permission_classes = (IsOwner, )
+
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
@@ -105,7 +108,7 @@ class AMeeting(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(cls, request, meeting_id):
+    def delete(self, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
         return Response({"successfully deleted"}, status=status.HTTP_200_OK)

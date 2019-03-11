@@ -10,6 +10,6 @@ urlpatterns = [
     path('meetings/', views.MeetingList.as_view(), name='meetings'),
 
     # /meetups/234/
-    path('meentings/<meeting_id>/',
+    path('meetings/<meeting_id>/',
          views.AMeeting.as_view(), name='meeting'),
 ]
