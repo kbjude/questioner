@@ -1,4 +1,5 @@
 import datetime
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -59,11 +60,10 @@ class MeetingList(APIView):
                 data={
 
                     "status": status.HTTP_401_UNAUTHORIZED,
-                    "error":  "Action restricted to Admins!"
+                    "error": "Action restricted to Admins!"
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
 
         data = request.data
         data["created_by"] = request.user.id
@@ -95,7 +95,6 @@ class MeetingList(APIView):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
-
 
 
 # Get, update or delete a meetup
@@ -139,21 +138,18 @@ class AMeeting(APIView):
     def put(cls, request, meeting_id):
 
         if not request.user.is_superuser:
-
             return Response(
                 data={
 
                     "status": status.HTTP_401_UNAUTHORIZED,
-                    "error":  "Action restricted to Admins!"
+                    "error": "Action restricted to Admins!"
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         data = request.data
         data["created_by"] = request.user.id
-
 
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
@@ -182,7 +178,6 @@ class AMeeting(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-
     @classmethod
     def delete(cls, request, meeting_id):
 
@@ -191,7 +186,7 @@ class AMeeting(APIView):
                 data={
 
                     "status": status.HTTP_401_UNAUTHORIZED,
-                    "error":  "Action restricted to Admins!"
+                    "error": "Action restricted to Admins!"
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
@@ -212,6 +207,7 @@ class AMeeting(APIView):
             },
             status=status.HTTP_200_OK
         )
+
 
 # list all tags or create a tag
 # tags/
