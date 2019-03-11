@@ -13,19 +13,26 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
-
+from django.conf.urls import include
+from django.urls import path
+from meetup import views as meetup_views
 from . import views
 
 urlpatterns = [
     path("", views.Index.as_view(), name="welcome"),
     path("auth/login/", views.Login.as_view(), name="login"),
     path("auth/signup/", views.SignUp.as_view(), name="signup"),
-    path("admin/", admin.site.urls),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
+    path('admin/', admin.site.urls),
+    path('tags/', meetup_views.TagList.as_view(), name='tags'),
+    path('tags/<int:tag_id>', meetup_views.ATag.as_view(), name='tag'),
+    path("admin/", admin.site.urls),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
