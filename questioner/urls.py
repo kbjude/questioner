@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^auth/login/$', obtain_auth_token, name='api_token_auth'),
     url(r'^meetups/', include('meetup.urls')),
-    url(r'^meetups/', include('question.urls')),
+    url(r'^meetups/meetings/', include('question.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -48,9 +48,11 @@ Questioner is ...
 | GET           | /             | Index             |
 | POST          | /auth/login   | login             |
 | __Questions__ |
-| POST          | /meetups/2/questions    | Add a question to meetup 2    |
-| GET           | /meetups/2//questions    | Get all questions for meetup 2 |
-| GET           | /meetups/2//questions/12 | Get question 12   |
+| POST          | meetups/meeting/2/questions    | Add a question    |
+| GET           | meetups/meeting/2/questions    | Get all questions |
+| GET           | meetups/meeting/2/questions/12 | Get question 12   |
+| PUT           | meetups/meeting/2/questions/12 | Update question 12   |
+| DELETE        | meetups/meeting/2/questions/12 | Delete question 12   |
 | __Meetups__   |
 | POST          | /meetups      | Add a meetup      |
 | GET           | /meetups      | Get all meetups   |
