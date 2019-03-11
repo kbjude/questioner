@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Meeting
 from .models import MeetingTag
@@ -12,7 +13,7 @@ from .serializers import MeetingSerializer
 from .serializers import UserSerializer
 from .serializers import MeetingTagSerializer
 from .serializers import TagSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 class SignUp(APIView):
@@ -65,10 +66,8 @@ class Login(ObtainAuthToken):
 
 # list all meetup or create a new meetup
 # meetups/
-
-
 class MeetingList(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def get(cls, request):
@@ -94,7 +93,11 @@ class MeetingList(APIView):
     @classmethod
     def post(cls, request):
 
+        if not request.user.is_superuser:
+            return Response({"message":"Action restricted to Admins!", "status":401}, status=status.HTTP_401_UNAUTHORIZED)
+        
         data = request.data
+        data["created_by"] = request.user.id
         # data["created_at"] = str(datetime.datetime.now())
 
         serializer = MeetingSerializer(data=data)
@@ -107,6 +110,7 @@ class MeetingList(APIView):
 # Get, update or delete a meetup
 # meetups/1
 class AMeeting(APIView):
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def get(cls, request, meeting_id):
@@ -129,6 +133,10 @@ class AMeeting(APIView):
 
     @classmethod
     def put(cls, request, meeting_id):
+
+        if not request.user.is_superuser:
+            return Response({"message":"Action restricted to Admins!", "status":401}, status=status.HTTP_401_UNAUTHORIZED)
+
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
@@ -138,6 +146,10 @@ class AMeeting(APIView):
 
     @classmethod
     def delete(cls, request, meeting_id):
+
+        if not request.user.is_superuser:
+            return Response({"message":"Action restricted to Admins!", "status":401}, status=status.HTTP_401_UNAUTHORIZED)
+
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
         return Response({"successfully deleted"}, status=status.HTTP_200_OK)
@@ -146,6 +158,7 @@ class AMeeting(APIView):
 # list all tags or create a tag
 # tags/
 class TagList(APIView):
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def get(cls, request):
@@ -156,7 +169,13 @@ class TagList(APIView):
     @classmethod
     def post(cls, request):
 
-        serializer = TagSerializer(data=request.data)
+        if not request.user.is_superuser:
+            return Response({"message":"Action restricted to Admins!", "status":401}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        data = request.data
+        data["created_by"] = request.user.id
+
+        serializer = TagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -166,24 +185,38 @@ class TagList(APIView):
 # delete a tag object
 # tags/1
 class ATag(APIView):
+    permission_classes = (IsAdminUser,)
 
     @classmethod
     def delete(cls, request, tag_id):
         tag = get_object_or_404(Tag, pk=tag_id)
-        tag.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+        serial_tag = TagSerializer(tag, many=False)
+
+        data = serial_tag.data
+        data["active"] = False
+
+        serializer = TagSerializer(tag, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # remove tag from meetup object
 # meetups/1/tags/1
 class AmeetupTag(APIView):
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def delete(cls, request, tag_id, meeting_id):
 
         meetingtags = MeetingTag.objects.filter(meeting=meeting_id, tag=tag_id)
         serial_tags = MeetingTagSerializer(meetingtags, many=True)
+        serial_tag = serial_tags.data[0]
 
+        if not (request.user.is_superuser or (request.user.id == serial_tag["created_by"])):
+            return Response({"message":"Sorry. Permission denied!", "status":401}, status=status.HTTP_401_UNAUTHORIZED)
+        
         meetingtagid = serial_tags.data[0]['id']
 
         meetingtag = get_object_or_404(MeetingTag, pk=meetingtagid)
@@ -194,11 +227,20 @@ class AmeetupTag(APIView):
 # Add a tag to a meetup
 # /meetups/tags/
 class AddMeetupTag(APIView):
+    permission_classes = (IsAuthenticated,)
 
     @classmethod
     def post(cls, request):
+        
+        data = request.data
+        data["created_by"] = request.user.id
 
-        serializer = MeetingTagSerializer(data=request.data)
+        tag = get_object_or_404(Tag, pk=data["tag"])
+        serial_tag = TagSerializer(tag, many=False)
+        if not serial_tag.data["active"]:
+            return Response({"message":"This Tag is disabled", "status":403}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = MeetingTagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
