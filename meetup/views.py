@@ -9,6 +9,8 @@ from .serializers import MeetingSerializer
 
 # list all meetup or create a new meetup
 # meetups/
+
+
 class MeetingList(APIView):
     # permission_classes = (IsAuthenticated,)
 
@@ -33,7 +35,6 @@ class MeetingList(APIView):
 # Get, update or delete a meetup
 # meetups/1
 class AMeeting(APIView):
-
     @classmethod
     def get(cls, request, meeting_id):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
