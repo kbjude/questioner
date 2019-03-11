@@ -13,8 +13,10 @@ class Meeting(models.Model):
 class Tag(models.Model):
     title = models.CharField(max_length=50)
     created_by = models.IntegerField()
+    active = models.BooleanField(default=True)
 
 
 class MeetingTag(models.Model):
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    created_by = models.IntegerField()
