@@ -106,7 +106,7 @@ class TestQuestionViews(TestCase):
         self.assertEqual(response1.status_code, 400)
         self.assertEqual(response1.data['title'][0], "This field is required.")
 
-        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response2.status_code, 400)
         self.assertEqual(response2.data['body'][0], "This field is required.")
 
     def test_user_can_add_a_question(self):
