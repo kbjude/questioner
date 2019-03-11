@@ -24,22 +24,35 @@ class Questions(APIView):
         '''
             method is for getting all questions of a meeting
         '''
-        questions = Question.objects.filter(meetup_id=meetup_id)
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        if Meeting.objects.filter(id=meetup_id):
+            questions = Question.objects.filter(meetup_id=meetup_id)
+            serializer = QuestionSerializer(questions, many=True)
+            results = serializer.data
+            all_questions = []
+            for result in results:
+                votes = [{'up votes': 0, 'down votes': 0}]
+                result['votes'] = votes
+                all_questions.append(result)
+            return Response(all_questions)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def post(self, request, meetup_id):
         '''
             method is for adding a new question to a meeting
         '''
-        data = request.data
-        data['meetup_id'] = meetup_id
-        serializer = QuestionSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if Meeting.objects.filter(id=meetup_id):
+            data = request.data
+            data['meetup_id'] = meetup_id
+            serializer = QuestionSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                votes = [{'up votes': 0, 'down votes': 0}]
+                result = serializer.data
+                result['votes'] = votes
+                return Response(result, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
 class OneQuestion(APIView):
     '''
@@ -49,25 +62,37 @@ class OneQuestion(APIView):
     '''
     @classmethod
     def get(cls, request, meetup_id, question_id):
-        question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
-        serializer = QuestionSerializer(question, many=False)
-        return Response(serializer.data)
+        if Meeting.objects.filter(id=meetup_id):
+            question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
+            serializer = QuestionSerializer(question, many=False)
+            votes = [{'up votes': 0, 'down votes': 0}]
+            result = serializer.data
+            result['votes'] = votes
+            return Response(result)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def put(cls, request, meetup_id, question_id):
-        data = request.data
-        data['meetup_id'] = meetup_id
-        data['date_modified'] = timezone.now()
-        question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
-        serializer = QuestionSerializer(question, data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if Meeting.objects.filter(id=meetup_id):
+            data = request.data
+            data['meetup_id'] = meetup_id
+            data['date_modified'] = timezone.now()
+            question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
+            serializer = QuestionSerializer(question, data)
+            if serializer.is_valid():
+                serializer.save()
+                votes = [{'up votes': 0, 'down votes': 0}]
+                result = serializer.data
+                result['votes'] = votes
+                return Response(result)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def delete(cls, request, meetup_id, question_id):
-        question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
-        question.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+        if Meeting.objects.filter(id=meetup_id):
+            question = get_object_or_404(Question, id=question_id, meetup_id=meetup_id)
+            question.delete()
+            return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
         

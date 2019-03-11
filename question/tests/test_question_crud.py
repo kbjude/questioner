@@ -47,7 +47,13 @@ class TestQuestionViews(TestCase):
         )
         self.assertEqual(response.status_code, 201)
 
-    def test_error_adding_a_question(self):
+    def test_add_a_question_wrong_meetup_id(self):
+        url = '/meetups/meetings/23/questions/'
+        response = self.client.post(url, content_type='application/json', data=json.dumps(self.question)
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_adding_a_question_missing_fields(self):
         resp = self.client.post(
             reverse('meetings'),
             content_type='application/json',
@@ -73,6 +79,13 @@ class TestQuestionViews(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_get_questions_wrong_meetup_id(self):
+        url = '/meetups/meetings/34/questions/'
+        self.client.post(url, content_type='application/json', data=json.dumps(self.question)
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+
     def test_get_a_question(self):
         resp_1 = self.client.post(
             reverse('meetings'),
@@ -85,6 +98,19 @@ class TestQuestionViews(TestCase):
         url_2 = '/meetups/meetings/{}/questions/{}/'.format(resp_1.data['id'], resp_2.data['id'])
         response = self.client.get(url_2)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_a_question_meetup_id(self):
+        resp_1 = self.client.post(
+            reverse('meetings'),
+            content_type='application/json',
+            data=json.dumps(self.meetup)
+        )
+        url_1 = '/meetups/meetings/{}/questions/'.format(resp_1.data['id'])
+        resp_2 = self.client.post(url_1, content_type='application/json', data=json.dumps(self.question)
+        )
+        url_2 = '/meetups/meetings/34/questions/{}/'.format(resp_2.data['id'])
+        response = self.client.get(url_2)
+        self.assertEqual(response.status_code, 400)
 
     def test_get_a_question_wrong_id(self):
         resp_1 = self.client.post(
@@ -108,6 +134,19 @@ class TestQuestionViews(TestCase):
         url_2 = '/meetups/meetings/{}/questions/{}/'.format(resp_1.data['id'], resp_2.data['id'])
         response = self.client.put(url_2, content_type='application/json', data=json.dumps(self.question_edited))
         self.assertEqual(response.status_code, 200)
+    
+    def test_editing_a_question_meetup_id(self):
+        resp_1 = self.client.post(
+            reverse('meetings'),
+            content_type='application/json',
+            data=json.dumps(self.meetup)
+        )
+        url_1 = '/meetups/meetings/{}/questions/'.format(resp_1.data['id'])
+        resp_2 = self.client.post(url_1, content_type='application/json', data=json.dumps(self.question)
+        )
+        url_2 = '/meetups/meetings/34/questions/{}/'.format(resp_2.data['id'])
+        response = self.client.put(url_2, content_type='application/json', data=json.dumps(self.question_edited))
+        self.assertEqual(response.status_code, 400)
     
     def test_editing_a_question_missing_title(self):
         resp_1 = self.client.post(
@@ -134,3 +173,16 @@ class TestQuestionViews(TestCase):
         url_2 = '/meetups/meetings/{}/questions/{}/'.format(resp_1.data['id'], resp_2.data['id'])
         response = self.client.delete(url_2, content_type='application/json')
         self.assertEqual(response.status_code, 200)
+    
+    def test_deleting_a_question_meetup_id(self):
+        resp_1 = self.client.post(
+            reverse('meetings'),
+            content_type='application/json',
+            data=json.dumps(self.meetup)
+        )
+        url_1 = '/meetups/meetings/{}/questions/'.format(resp_1.data['id'])
+        resp_2 = self.client.post(url_1, content_type='application/json', data=json.dumps(self.question)
+        )
+        url_2 = '/meetups/meetings/234/questions/{}/'.format(resp_2.data['id'])
+        response = self.client.delete(url_2, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
