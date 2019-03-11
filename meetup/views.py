@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -36,24 +37,65 @@ class MeetingList(APIView):
             meetup["tags"] = meetuptags
             meetupwithtags.append(meetup)
 
-        return Response(meetupwithtags)
+        return Response(
+            data={
+
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+
+                        "meetup": meetupwithtags,
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
 
     @classmethod
     def post(cls, request):
 
         if not request.user.is_superuser:
-            return Response({"message": "Action restricted to Admins!", "status": 401},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={
+
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error":  "Action restricted to Admins!"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
 
         data = request.data
         data["created_by"] = request.user.id
-        # data["created_at"] = str(datetime.datetime.now())
+        data["created_at"] = str(datetime.datetime.now())
 
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={
+
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+
+                            "meetup": serializer.data,
+                            "success": "Meet up created successfully"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            data={
+
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 
 # Get, update or delete a meetup
@@ -78,33 +120,98 @@ class AMeeting(APIView):
         result = serial_meeting.data
         result["tags"] = tags
 
-        return Response({"status": 200, "data": result})
+        return Response(
+            data={
+
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+
+                        "meetup": result,
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
 
     @classmethod
     def put(cls, request, meeting_id):
 
         if not request.user.is_superuser:
-            return Response({"message": "Action restricted to Admins!", "status": 401},
-                            status=status.HTTP_401_UNAUTHORIZED)
+
+            return Response(
+                data={
+
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error":  "Action restricted to Admins!"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
+        data = request.data
+        data["created_by"] = request.user.id
+
+
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={
+
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+
+                            "meetup": serializer.data,
+                            "success": "Meet updated successfully"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            data={
+
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
     @classmethod
     def delete(cls, request, meeting_id):
 
         if not request.user.is_superuser:
-            return Response({"message": "Action restricted to Admins!", "status": 401},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={
+
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error":  "Action restricted to Admins!"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
 
+        return Response(
+            data={
+
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+                        "success": "Meet deleted successfully"
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
 
 # list all tags or create a tag
 # tags/

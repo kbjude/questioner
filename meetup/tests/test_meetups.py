@@ -1,119 +1,169 @@
-""" import json
+import json
 
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework.test import APIClient
+from django.contrib.auth.models import User
+import pytest
 
 
-class TestUrls(TestCase):
-    def setUp(self):
-        self.meetup = {
+
+# class TestUrls(TestCase):
+#     def setUp(self):
+#         # self.client = APIClient()
+#         self.admin = User.objects.create(
+#             username="joel",
+#             email="joel@questioner.com",
+#             is_staff=True,
+#             is_superuser=True,
+#         )
+
+
+meetup = {
+    "title": "Meetup title",
+    "date": "2019-03-07",
+    "start": "10:21:39",
+    "end": "12:21:39",
+}
+
+        # self.meetup2 = {
+        #     "title": "Meetup2 title2",
+        #     "date": "2019-03-07",
+        #     "start": "10:21:39",
+        #     "end": "12:21:39",
+        #     "created_by": 1,
+        #     "created_at": "2019-03-07 12:21:39",
+        # }
+        #
+meetup_wrong = {
+    "date": "2019-03-07",
+    "start": "10:21:39",
+    "end": "12:21:39"
+}
+
+
+def test_non_admin_user_cannot_create_meetup(api_client,db, user1):
+    api_client.force_authenticate(user=user1)
+
+    response = api_client.post(
+        reverse("meetings"),
+        content_type="application/json",
+        data=json.dumps({
             "title": "Meetup title",
             "date": "2019-03-07",
             "start": "10:21:39",
             "end": "12:21:39",
-            "created_by": 1,
-            "created_at": "2019-03-07 12:21:39",
-        }
+        }),
+    )
+    assert response.data['status'] == 401
+    assert response.data['error'] == "Action restricted to Admins!"
 
-        self.meetup2 = {
-            "title": "Meetup2 title2",
+def test_post_meetup(api_client,db,admin_user):
+    api_client.force_authenticate(user=admin_user)
+    response = api_client.post(
+        reverse("meetings"),
+        content_type="application/json",
+        data=json.dumps({
+            "title": "Meetup title",
             "date": "2019-03-07",
             "start": "10:21:39",
             "end": "12:21:39",
-            "created_by": 1,
-            "created_at": "2019-03-07 12:21:39",
-        }
+        }),
+    )
+    assert response.status_code == 201
+    assert response.data['data'][0]['success'] == "Meet up created successfully"
+    assert response.data['data'][0]['meetup']['title'] == meetup["title"]
+    assert response.data['data'][0]['meetup']['start'] == meetup["start"]
+    assert response.data['data'][0]['meetup']['created_by'] == admin_user.id
 
-        self.meetup_wrong = {
-            "date": "2019-03-07",
-            "start": "10:21:39",
-            "end": "12:21:39",
-            "created_by": 1,
-            "created_at": "2019-03-07 12:21:39",
-        }
 
-    def test_post_meetup(self):
-        response = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
-        self.assertEqual(response.status_code, 201)
-        self.assertTrue("Meetup title" in str(response.data))
+def test_post_wrong_meetup(api_client,db, admin_user):
+    api_client.force_authenticate(user=admin_user)
 
-    def test_post_wrong_meetup(self):
-        response = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup_wrong),
-        )
-        self.assertEqual(response.status_code, 400)
+    response = api_client.post(
+        reverse("meetings"),
+        content_type="application/json",
+        data=json.dumps(meetup_wrong),
+    )
+    assert response.status_code == 400
+    assert response.data['error']['title'][0] == 'This field is required.'
 
-    def test_get_meetups(self):
-        self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
+def test_get_meetups(api_client,db, admin_user,meetup1):
+    api_client.force_authenticate(user=admin_user)
 
-        response = self.client.get(reverse("meetings"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue("Meetup title" in str(response.data))
 
-    def test_put_meetup(self):
-        resp = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
+    response = api_client.get(reverse("meetings"))
+    assert response.status_code == 200
+    assert len(response.data['data'][0]['meetup']) == 1
+    assert response.data['data'][0]['meetup'][0]['id'] == meetup1.id
+    assert response.data['data'][0]['meetup'][0]['title'] == meetup1.title
 
-        response = self.client.put(
-            reverse("meeting", kwargs={"meeting_id": resp.data["id"]}),
-            content_type="application/json",
-            data=json.dumps(self.meetup2),
-        )
+def test_non_amin_cannot_edit_meetup(api_client,db, user1,meetup1):
+    api_client.force_authenticate(user=user1)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue("Meetup2 title2" in str(response.data))
+    response = api_client.put(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps(meetup),
+    )
 
-    def test_put_wrong_meetup(self):
-        resp = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
+    assert response.status_code == 401
+    assert response.data['status'] == 401
+    assert response.data['error'] == "Action restricted to Admins!"
 
-        response = self.client.put(
-            reverse("meeting", kwargs={"meeting_id": resp.data["id"]}),
-            content_type="application/json",
-            data=json.dumps(self.meetup_wrong),
-        )
 
-        self.assertEqual(response.status_code, 400)
+def test_admin_can_edit_meetup(api_client,db, admin_user,meetup1):
+    api_client.force_authenticate(user=admin_user)
 
-    def test_get_meetup(self):
-        resp = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
+    response = api_client.put(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps(meetup),
+    )
 
-        response = self.client.get(
-            reverse("meeting", kwargs={"meeting_id": resp.data["id"]})
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue("Meetup title" in str(response.data))
+    assert response.status_code == 200
+    assert response.data['data'][0]['meetup']['title'] == meetup['title']
+    assert response.data['data'][0]['meetup']['start'] == meetup['start']
+    assert response.data['data'][0]['meetup']['end'] == meetup['end']
 
-    def test_delete_meetup(self):
-        resp = self.client.post(
-            reverse("meetings"),
-            content_type="application/json",
-            data=json.dumps(self.meetup),
-        )
 
-        response = self.client.delete(
-            reverse("meeting", kwargs={"meeting_id": resp.data["id"]})
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('deleted' in str(response.data))
- """
+
+def test_edit_meetup_with_missing_data(api_client,db, admin_user,meetup1):
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.put(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps(meetup_wrong),
+    )
+    assert response.status_code == 400
+    assert response.data['error']['title'][0] == "This field is required."
+
+def test_get_a_meetup(api_client,db, admin_user,meetup1):
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.get(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id})
+    )
+    assert response.status_code == 200
+    assert response.data['data'][0]['meetup']['id'] == meetup1.id
+    assert response.data['data'][0]['meetup']['title'] == meetup1.title
+
+def test_non_admin_user_cannot_delete_meetup(api_client,db, user1,meetup1):
+    api_client.force_authenticate(user=user1)
+
+    response = api_client.delete(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id})
+    )
+    assert response.data['status'] == 401
+    assert response.data['error'] == "Action restricted to Admins!"
+
+
+def test_admin_user_can_delete_meetup(api_client,db, admin_user,meetup1):
+    api_client.force_authenticate(user=admin_user)
+
+    response = api_client.delete(
+        reverse("meeting", kwargs={"meeting_id": meetup1.id})
+    )
+    assert response.data['status'] == 200
+    assert response.data['data'][0]['success'] == "Meet deleted successfully"
