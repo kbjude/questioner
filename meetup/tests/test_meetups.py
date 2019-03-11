@@ -2,16 +2,6 @@ import json
 
 from django.urls import reverse
 
-# class TestUrls(TestCase):
-#     def setUp(self):
-#         # self.client = APIClient()
-#         self.admin = User.objects.create(
-#             username="joel",
-#             email="joel@questioner.com",
-#             is_staff=True,
-#             is_superuser=True,
-#         )
-
 
 meetup = {
     "title": "Meetup title",
@@ -19,16 +9,6 @@ meetup = {
     "start": "10:21:39",
     "end": "12:21:39",
 }
-
-# self.meetup2 = {
-#     "title": "Meetup2 title2",
-#     "date": "2019-03-07",
-#     "start": "10:21:39",
-#     "end": "12:21:39",
-#     "created_by": 1,
-#     "created_at": "2019-03-07 12:21:39",
-# }
-#
 meetup_wrong = {
     "date": "2019-03-07",
     "start": "10:21:39",
@@ -94,7 +74,7 @@ def test_get_meetups(api_client, db, admin_user, meetup1):
     assert response.data['data'][0]['meetup'][0]['title'] == meetup1.title
 
 
-def test_non_amin_cannot_edit_meetup(api_client, db, user1, meetup1):
+def test_non_admin_cannot_edit_meetup(api_client, db, user1, meetup1):
     api_client.force_authenticate(user=user1)
 
     response = api_client.put(

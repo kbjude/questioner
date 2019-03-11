@@ -27,7 +27,7 @@ class MeetingList(APIView):
         meetupwithtags = []
         for meetup in serializer.data:
 
-            meetingtags = MeetingTag.objects.filter(meeting=meetup['id'])
+            meetingtags = MeetingTag.objects.filter(meetup=meetup['id'])
             serial_tags = MeetingTagSerializer(meetingtags, many=True)
 
             meetuptags = []
@@ -108,7 +108,7 @@ class AMeeting(APIView):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serial_meeting = MeetingSerializer(meetup, many=False)
 
-        meetingtags = MeetingTag.objects.filter(meeting=meeting_id)
+        meetingtags = MeetingTag.objects.filter(meetup=meeting_id)
         serial_tags = MeetingTagSerializer(meetingtags, many=True)
 
         tags = []
@@ -218,14 +218,31 @@ class TagList(APIView):
     def get(cls, request):
         tags = Tag.objects.all()
         serializer = TagSerializer(tags, many=True)
-        return Response(serializer.data)
+        return Response(
+            data={
 
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+                        "tags": serializer.data
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
     @classmethod
     def post(cls, request):
 
         if not request.user.is_superuser:
-            return Response({"message": "Action restricted to Admins!", "status": 401},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={
+
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Action restricted to Admins!"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
         data = request.data
         data["created_by"] = request.user.id
@@ -233,8 +250,30 @@ class TagList(APIView):
         serializer = TagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={
+
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+
+                            "tag": serializer.data,
+                            "success": "Tag created successfully"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            data={
+
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 
 # delete a tag object
@@ -279,24 +318,55 @@ class AmeetupTag(APIView):
         return Response({"successfully deleted"}, status=status.HTTP_200_OK)
 
 
+
 # Add a tag to a meetup
-# /meetups/tags/
+# /meetups/{meet_up_id}tags/
 class AddMeetupTag(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    def post(cls, request):
+    def post(cls, request,meeting_id):
 
         data = request.data
         data["created_by"] = request.user.id
+        data["meetup"] = meeting_id
 
         tag = get_object_or_404(Tag, pk=data["tag"])
+        
         serial_tag = TagSerializer(tag, many=False)
         if not serial_tag.data["active"]:
-            return Response({"message": "This Tag is disabled", "status": 403}, status=status.HTTP_403_FORBIDDEN)
 
+            return Response(
+                data={
+
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "error": "This Tag is disabled.",
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
         serializer = MeetingTagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={
+
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+
+                            "tag": serializer.data,
+                            "success": "Tag successfully added to meetup"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            data={
+
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )

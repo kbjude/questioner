@@ -1,9 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from meetup.models import Meeting
-# from question.models import Question
-# class TestUrls(TestCase):
+from meetup.models import Meeting,Tag, MeetingTag
 
 @pytest.mark.django_db
 @pytest.fixture
@@ -43,3 +41,23 @@ def meetup1(admin_user):
         created_by =  admin_user,
         created_at = "2019-03-07 12:21:39"
     )
+
+@pytest.mark.django_db
+@pytest.fixture
+def tag_objs(admin_user):
+    tags = []
+    for tag in ['sports','Django','API']:
+        tags.append(Tag.objects.create(
+            title=tag,
+            created_by =  admin_user
+        ))
+    return tags
+
+@pytest.mark.django_db
+@pytest.fixture
+def disabled_tag(admin_user):
+    return Tag.objects.create(
+        title = "Javascript",
+        created_by =  admin_user,
+        active = False
+     )
