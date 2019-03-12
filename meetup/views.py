@@ -231,6 +231,7 @@ class TagList(APIView):
             },
             status=status.HTTP_200_OK
         )
+
     @classmethod
     def post(cls, request):
 
@@ -275,7 +276,6 @@ class TagList(APIView):
         )
 
 
-
 # delete a tag object
 # tags/1
 class ATag(APIView):
@@ -316,7 +316,7 @@ class AmeetupTag(APIView):
     @classmethod
     def delete(cls, request, tag_id, meeting_id):
         try:
-            meetingtags = get_object_or_404(MeetingTag,meetup=meeting_id, tag=tag_id)
+            meetingtags = get_object_or_404(MeetingTag, meetup=meeting_id, tag=tag_id)
             serializer = MeetingTagSerializer(meetingtags, many=False)
 
         except:
@@ -335,7 +335,6 @@ class AmeetupTag(APIView):
             )
 
         serial_tag = serializer.data
-
 
         if not (request.user.is_superuser or (request.user.id == serial_tag["created_by"])):
             return Response(
@@ -362,14 +361,13 @@ class AmeetupTag(APIView):
         )
 
 
-
 # Add a tag to a meetup
 # /meetups/{meet_up_id}tags/
 class AddMeetupTag(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    def post(cls, request,meeting_id):
+    def post(cls, request, meeting_id):
 
         data = request.data
         data["created_by"] = request.user.id
@@ -379,7 +377,6 @@ class AddMeetupTag(APIView):
 
         serial_tag = TagSerializer(tag, many=False)
         if not serial_tag.data["active"]:
-
             return Response(
                 data={
 

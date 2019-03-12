@@ -51,6 +51,8 @@ class TestUrls(TestCase):
 tag1_data = {
     "title": "tag_title",
 }
+
+
 def test_non_admin_user_cannot_create_tags(api_client, db, user1):
     api_client.force_authenticate(user=user1)
 
@@ -62,6 +64,7 @@ def test_non_admin_user_cannot_create_tags(api_client, db, user1):
     assert response.data['status'] == 401
     assert response.data['error'] == "Action restricted to Admins!"
 
+
 def test_admin_user_cannot_create_tag_with_missing_title(api_client, db, admin_user):
     api_client.force_authenticate(user=admin_user)
 
@@ -72,6 +75,7 @@ def test_admin_user_cannot_create_tag_with_missing_title(api_client, db, admin_u
     )
     assert response.status_code == 400
     assert response.data['error']['title'][0] == "This field is required."
+
 
 def test_admin_user_can_create_tags(api_client, db, admin_user):
     api_client.force_authenticate(user=admin_user)
@@ -86,6 +90,7 @@ def test_admin_user_can_create_tags(api_client, db, admin_user):
     assert response.data['data'][0]['tag']['title'] == tag1_data["title"]
     assert response.data['data'][0]['tag']['created_by'] == admin_user.id
 
+
 def test_get_tags(api_client, db, admin_user, tag_objs):
     api_client.force_authenticate(user=admin_user)
 
@@ -95,45 +100,47 @@ def test_get_tags(api_client, db, admin_user, tag_objs):
     assert len(response.data['data'][0]['tags']) == 3
     assert isinstance(response.data['data'][0]['tags'], list)
 
-def test_cannot_add_disabled_tag_to_meetup(api_client,db,meetup1,admin_user, disabled_tag):
+
+def test_cannot_add_disabled_tag_to_meetup(api_client, db, meetup1, admin_user, disabled_tag):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
         reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
 
         content_type='application/json',
-        data=json.dumps({'meeting':meetup1.id, 'tag':disabled_tag.id})
+        data=json.dumps({'meeting': meetup1.id, 'tag': disabled_tag.id})
     )
 
     assert response.status_code == 403
     assert response.data['status'] == 403
     assert response.data['error'] == "This Tag is disabled."
 
-def test_cannot_add_invalid_tag_to_meetup(api_client,db,meetup1,admin_user):
+
+def test_cannot_add_invalid_tag_to_meetup(api_client, db, meetup1, admin_user):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
         reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
 
         content_type='application/json',
-        data=json.dumps({'meeting':meetup1.id, 'tag':75})
+        data=json.dumps({'meeting': meetup1.id, 'tag': 75})
     )
 
     assert response.status_code == 404
     assert response.data['detail'] == 'Not found.'
 
-def test_add_tag_to_meetup(api_client,db,meetup1,admin_user, tag_objs):
+
+def test_add_tag_to_meetup(api_client, db, meetup1, admin_user, tag_objs):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
         reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
 
         content_type='application/json',
-        data=json.dumps({'meeting':meetup1.id, 'tag':tag_objs[0].id})
+        data=json.dumps({'meeting': meetup1.id, 'tag': tag_objs[0].id})
     )
 
     assert response.status_code == 201
     assert response.data['data'][0]['success'] == "Tag successfully added to meetup"
     assert response.data['data'][0]['tag']['meetup'] == meetup1.id
     assert response.data['data'][0]['tag']['created_by'] == admin_user.id
-
 
 
 """

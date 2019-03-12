@@ -2,7 +2,6 @@ import json
 
 from django.urls import reverse
 
-
 meetup = {
     "title": "Meetup title",
     "date": "2019-03-07",
