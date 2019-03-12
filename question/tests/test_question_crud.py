@@ -1,5 +1,4 @@
 import json
-
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
@@ -33,7 +32,7 @@ class TestQuestionViews(TestCase):
             date="2019-03-07",
             start="10:21:39",
             end="12:21:39",
-            created_by=self.admin.id,
+            created_by=self.admin,
             created_at="2019-03-07 12:21:39",
         )
         self.qn_db = Question.objects.create(
