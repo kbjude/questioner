@@ -48,7 +48,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'questioner.auth.auth_default.BearerAuthentication'
     ],
+    'EXCEPTION_HANDLER': 'questioner.utils.exception_handler.custom_exception_handler'
+
 }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
