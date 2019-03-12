@@ -23,8 +23,8 @@ from . import views
 
 urlpatterns = [
     path("", views.Index.as_view(), name="welcome"),
-    path("auth/login/", views.Login.as_view(), name="login"),
-    path("auth/signup/", views.SignUp.as_view(), name="signup"),
+    path("auth/login", views.Login.as_view(), name="login"),
+    path("auth/signup", views.SignUp.as_view(), name="signup"),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
     path('tags/', meetup_views.TagList.as_view(), name='tags'),
