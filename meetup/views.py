@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 from .models import Meeting
 from .models import MeetingTag
 from .models import Tag
@@ -51,9 +52,11 @@ class MeetingList(APIView):
 
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(created_by=self.request.user)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 # Get, update or delete a meetup
@@ -90,7 +93,7 @@ class AMeeting(APIView):
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=self.request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
