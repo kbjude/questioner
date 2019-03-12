@@ -292,7 +292,19 @@ class ATag(APIView):
         serializer = TagSerializer(tag, data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+            return Response(
+                data={
+
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+                            "success": "Tag deleted successfully"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -303,19 +315,51 @@ class AmeetupTag(APIView):
 
     @classmethod
     def delete(cls, request, tag_id, meeting_id):
-        meetingtags = MeetingTag.objects.filter(meeting=meeting_id, tag=tag_id)
-        serial_tags = MeetingTagSerializer(meetingtags, many=True)
-        serial_tag = serial_tags.data[0]
+        try:
+            meetingtags = get_object_or_404(MeetingTag,meetup=meeting_id, tag=tag_id)
+            serializer = MeetingTagSerializer(meetingtags, many=False)
+
+        except:
+            return Response(
+                data={
+
+                    "status": status.HTTP_404_NOT_FOUND,
+                    "data": [
+                        {
+                            "success": f"Tag with id {tag_id} is not attached to Meet up with id {meeting_id}."
+
+                        }
+                    ],
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serial_tag = serializer.data
+
 
         if not (request.user.is_superuser or (request.user.id == serial_tag["created_by"])):
-            return Response({"message": "Sorry. Permission denied!", "status": 401},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={
 
-        meetingtagid = serial_tags.data[0]['id']
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Sorry. Permission denied!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        meetingtags.delete()
+        return Response(
+            data={
 
-        meetingtag = get_object_or_404(MeetingTag, pk=meetingtagid)
-        meetingtag.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+                        "success": "Tag successfully removed from Meet up."
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 
@@ -332,7 +376,7 @@ class AddMeetupTag(APIView):
         data["meetup"] = meeting_id
 
         tag = get_object_or_404(Tag, pk=data["tag"])
-        
+
         serial_tag = TagSerializer(tag, many=False)
         if not serial_tag.data["active"]:
 
