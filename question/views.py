@@ -1,101 +1,181 @@
-import json
-
-from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from question.models import Question
+from question.serializers import QuestionSerializer
 
 
-@csrf_exempt
-def questions(request):
-    '''
-        this views method is responsible for the following;
-        - creating new questions
-        - getting all questions from the database
-    '''
-    if request.method == 'POST':
-        payload = json.loads(request.body)
-        title = payload['title']
-        body = payload['body']
-        created_by = payload['created_by']
-        question = Question(title=title, body=body, created_by=created_by,
-                            date_created=timezone.now(),
-                            date_modified=timezone.now())
-        try:
-            # if not Question.objects.get(title=title)
-            #  or not Question.objects.get(title=title):
-            question.save()
-            response = json.dumps([{'message': 'question successfully added'}])
-            # response = json.dumps([{'error': 'question already exists'}])
-        except Exception:
-            response = json.dumps([{'error': 'question could not be added'}])
+class Questions(APIView):
+    """
+        this class helps with the following features;
+        - adding a new question to a meeting
+        - getting all questions of a particular meeting
+    """
 
-    if request.method == 'GET':
-        questions = Question.objects.all().order_by('date_modified').reverse()
-        response = json.dumps([{"Message": "No questions available"}])
-        all_questions = []
-        for question in questions:
-            qus_details = {}
-            qus_details['id'] = question.id
-            qus_details['title'] = question.title
-            qus_details['body'] = question.body
-            qus_details['created_by'] = question.created_by
-            qus_details['date_created'] = str(question.date_created)
-            qus_details['date_modified'] = str(question.date_modified)
-            all_questions.append(qus_details)
-        if all_questions != []:
-            response = json.dumps(all_questions)
-    return HttpResponse(response, content_type='text/json')
+    permission_classes = (IsAuthenticated,)
 
+    @classmethod
+    def get(self, request, meetup_id):
+        """
+            method is for getting all questions of a meeting
+        """
+        questions = Question.objects.filter(meetup_id=meetup_id)
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data)
 
-@csrf_exempt
-def question(request, question_id):
-    '''
-        this views method is responsible for the following;
-        - getting a question by id
-        - updating a question's fields (title, body) by id
-        - deleting a question by id
-    '''
-    question_id = int(question_id)
-    if request.method == 'GET':
-        try:
-            question = Question.objects.get(id=question_id)
-            response = json.dumps(
-                [
-                    {
-                        'title': question.title,
-                        'body': question.body,
-                        'created_by': question.created_by,
-                        'date_created': str(question.date_created),
-                        'date_modified': str(question.date_modified)
-                    }
-                ]
+    @classmethod
+    def post(self, request, meetup_id):
+        """
+            method is for adding a new question to a meeting
+        """
+        current_user = request.user
+        if current_user.is_superuser:
+            return Response(
+                data={
+                    "error": "Admin is not allowed to add questions",
+                    "status": 401
+                },
+                status=status.HTTP_401_UNAUTHORIZED
             )
-        except Exception:
-            response = json.dumps([{'error': 'no question available by the id: {}'.format(question_id)}])
+        data = request.data
+        data["meetup_id"] = meetup_id
+        data["created_by"] = current_user.id
 
-    if request.method == 'PUT':
-        payload = json.loads(request.body)
-        title = payload['title']
-        body = payload['body']
-        try:
-            question = Question.objects.get(id=question_id)
-            question.title = title
-            question.body = body
-            question.date_modified = timezone.now()
+        serializer = QuestionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data={
+
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+
+                            "question": serializer.data,
+                            "success": "Question successfully added to meetup"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OneQuestion(APIView):
+    """
+        this class helps with the following features;
+        - adding a new question to a meeting
+        - getting all questions of a particular meeting
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(cls, request, meetup_id, question_id):
+        question = get_object_or_404(
+            Question, id=question_id, meetup_id=meetup_id
+        )
+        serializer = QuestionSerializer(question, many=False)
+        return Response(
+            data={
+
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+
+                        "question": serializer.data,
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @classmethod
+    def put(cls, request, meetup_id, question_id):
+        current_user = request.user
+        if current_user.is_superuser:
+            return Response(
+                data={
+                    "error": "Admin is not allowed to update a question",
+                    "status": 401
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        data = request.data
+        data["meetup_id"] = meetup_id
+        data["created_by"] = current_user.id
+        data["date_modified"] = timezone.now()
+        question = get_object_or_404(
+            Question, id=question_id, meetup_id=meetup_id, delete_status=False
+        )
+        serializer = QuestionSerializer(question, data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data={
+
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+
+                            "question": serializer.data,
+                            "success": "Question successfully edited"
+
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @classmethod
+    def delete(cls, request, meetup_id, question_id):
+        question = get_object_or_404(
+            Question, id=question_id, meetup_id=meetup_id, delete_status=False
+        )
+        current_user = request.user
+        if current_user.is_superuser:
+            question.delete_status = True
             question.save()
-            response = json.dumps([{'message': 'question successfully updated'}])
-        except Exception:
-            response = json.dumps(
-                [{'error': 'no question available by the id: {}, update failed!'.format(question_id)}])
+            return Response(
+                data={
 
-    if request.method == 'DELETE':
-        try:
-            question = Question.objects.get(id=question_id)
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+                            "success": "Question has been soft deleted",
+                            "status": status.HTTP_200_OK,
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
+        elif str(question.created_by) != str(current_user.username):
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "You cannot delete question created by another user"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        else:
             question.delete()
-            response = json.dumps([{'message': 'question successfully deleted'}])
-        except Exception:
-            response = json.dumps(
-                [{'error': 'no question available by the id: {}, deletion failed!'.format(question_id)}])
-    return HttpResponse(response, content_type='text/json')
+            return Response(
+                data={
+
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+                            "success": "Question has been deleted",
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
