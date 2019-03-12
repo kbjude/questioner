@@ -2,11 +2,11 @@ import datetime
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwner
+
 from .models import Meeting
 from .models import MeetingTag
 from .models import Tag
@@ -316,24 +316,9 @@ class AmeetupTag(APIView):
 
     @classmethod
     def delete(cls, request, tag_id, meeting_id):
-        try:
-            meetingtags = get_object_or_404(MeetingTag, meetup=meeting_id, tag=tag_id)
-            serializer = MeetingTagSerializer(meetingtags, many=False)
-
-        except:
-            return Response(
-                data={
-
-                    "status": status.HTTP_404_NOT_FOUND,
-                    "data": [
-                        {
-                            "success": f"Tag with id {tag_id} is not attached to Meet up with id {meeting_id}."
-
-                        }
-                    ],
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
+        # try:
+        meetingtags = get_object_or_404(MeetingTag, meetup=meeting_id, tag=tag_id)
+        serializer = MeetingTagSerializer(meetingtags, many=False)
 
         serial_tag = serializer.data
 
