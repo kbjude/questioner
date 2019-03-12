@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 from .models import Meeting
 from .models import MeetingTag
 from .models import Tag
