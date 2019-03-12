@@ -143,6 +143,15 @@ def test_add_tag_to_meetup(api_client, db, meetup1, admin_user, tag_objs):
     assert response.data['data'][0]['tag']['created_by'] == admin_user.id
 
 
+def test_delete_tag(api_client, db, meetup1, admin_user, tag_objs):
+    api_client.force_authenticate(user=admin_user)
+    response = api_client.delete(
+        reverse('tag', kwargs={'tag_id': tag_objs[0].id}))
+
+    assert response.status_code == 200
+    assert response.data['data'][0]['success'] == "Tag deleted successfully"
+
+
 """
     def test_delete_tag(self):
 
