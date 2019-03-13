@@ -228,6 +228,8 @@ class CommentDetail(APIView):
     Retrieve, update or delete a comment instance.
     """
 
+    permission_classes = (IsAuthenticated,)
+
     def get_object(self, pk):
         try:
             return Comment.objects.get(pk=pk)
