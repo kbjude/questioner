@@ -102,37 +102,3 @@ def test_admin_user_can_remove_any_tag_from_a_meetup(api_client, db, meetup1, ad
         reverse('meetingtag', kwargs={'meeting_id': tagged_meetup.meetup.id, 'tag_id': tagged_meetup.tag.id}))
     assert response.status_code == 200
     assert response.data['data'][0]['success'] == "Tag successfully removed from Meet up."
-
-
-from meetup.models import MeetingTag
-
-
-def test_user_Cannot_add_a_duplicate_tag_to_a_meetup(api_client, db, meetup1, admin_user, tagged_meetup, user1, a_tag):
-    MeetingTag.objects.create(
-        tag=a_tag,
-        meetup=meetup1,
-        created_by=user1
-    ).save()
-
-    # with pytest.raises(IntegrityError):
-
-    api_client.force_authenticate(user=user1)
-    response = api_client.post(
-        reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
-
-        content_type='application/json',
-        data=json.dumps({'meeting': meetup1.id, 'tag': a_tag.id})
-    )
-
-    assert response.status_code == 201
-    # assert response.data['data'][0]['success'] == "Tag successfully added to meetup"
-    # assert response.data['data'][0]['tag']['meetup'] == meetup1.id
-    # assert response.data['data'][0]['tag']['created_by'] == user1.id
-    # foo = Foo.objects.create(title='foo')
-    # request.addfinalizer(foo.delete)
-    # try:
-    #     with pytest.raises(IntegrityError):
-    #         new_foo = Foo.objects.create(title='foo')
-    # finally:
-    #     if 'new_foo' in locals():
-    #         request.addfinalizer(new_foo.delete)

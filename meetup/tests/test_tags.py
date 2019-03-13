@@ -2,52 +2,6 @@ import json
 
 from django.urls import reverse
 
-""" from django.urls import reverse
-from django.test import TestCase
-import json
-
-
-class TestUrls(TestCase):
-
-    def setUp(self):
-
-        self.tag = {
-            "title": "tag_title",
-            "created_by": 1
-        }
-
-        self.wrong_tag = {
-            "created_by": 1
-        }
-
-        self.meetuptag = {
-            "tag": 1,
-            "meeting": 1
-        }
-
-        self.wrong_meetuptag = {
-            "meeting": 1
-        }
-
-        self.meetup = {
-            "title": "Meetup title",
-            "date": "2019-03-07",
-            "start": "10:21:39",
-            "end": "12:21:39",
-            "created_by": 1,
-            "created_at": "2019-03-07 12:21:39"
-        }
-
-        self.client.post(
-            reverse('meetings'),
-            content_type='application/json',
-            data=json.dumps(self.meetup)
-        )
-
-    # def tearDown(self):
-    #     self.client.delete
-
-"""
 tag1_data = {
     "title": "tag_title",
 }
