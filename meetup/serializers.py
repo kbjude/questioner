@@ -55,4 +55,3 @@ class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
         fields = ('title', 'date', 'start', 'end', 'created_at', 'created_by')
-        

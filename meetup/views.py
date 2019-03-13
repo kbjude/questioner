@@ -5,7 +5,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwner
+from .permissions import IsOwnerOrReadOnly
 from .models import Meeting
 from .serializers import MeetingSerializer
 from .serializers import UserSerializer
@@ -99,10 +99,9 @@ class AMeeting(APIView):
         return Response(serializer.data)
 
     def put(self, request, meeting_id):
-        permission_classes = (IsOwner, )
-
-        meetup = get_object_or_404(Meeting, pk=meeting_id)
-        serializer = MeetingSerializer(meetup, data=request.data)
+        permission_classes = (IsOwnerOrReadOnly, )
+        obj = get_object_or_404(Meeting, pk=meeting_id)
+        serializer = MeetingSerializer(obj, data=request.data)
         if serializer.is_valid():
             serializer.save(user=self.request.user)
             return Response(serializer.data)
