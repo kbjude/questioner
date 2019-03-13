@@ -20,6 +20,7 @@ class Question(models.Model):
     def __str__(self):
         return (self.title, self.body)  # pragma: no cover
 
+
 class Vote(models.Model):
     question_id = models.ForeignKey(
         Question, on_delete=models.CASCADE

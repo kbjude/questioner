@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from meetup.models import Meeting, Tag,MeetingTag
+from meetup.models import Meeting, Tag, MeetingTag
 
 
 @pytest.mark.django_db
@@ -30,6 +30,7 @@ def user1():
         email="user1@questioner.com",
         is_superuser=False
     )
+
 
 @pytest.mark.django_db
 @pytest.fixture
@@ -74,6 +75,8 @@ def disabled_tag(admin_user):
         created_by=admin_user,
         active=False
     )
+
+
 @pytest.mark.django_db
 @pytest.fixture
 def a_tag(admin_user):
@@ -83,23 +86,23 @@ def a_tag(admin_user):
 
     )
 
+
 @pytest.mark.django_db
 @pytest.fixture
 def tagged_meetup(user1, meetup1, a_tag):
     return MeetingTag.objects.create(
-        tag = a_tag,
-        meetup = meetup1,
-        created_by = user1
+        tag=a_tag,
+        meetup=meetup1,
+        created_by=user1
     )
-
 
 
 @pytest.mark.django_db
 @pytest.fixture
-def meetup_tag(user1,a_tag,meetup1):
+def meetup_tag(user1, a_tag, meetup1):
     return MeetingTag.objects.create(
-        meetup = meetup1,
-        tag = a_tag,
-        created_by = user1
+        meetup=meetup1,
+        tag=a_tag,
+        created_by=user1
     )
     return a_tag

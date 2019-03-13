@@ -1,8 +1,7 @@
 import datetime
 
-from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
-
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
@@ -329,6 +328,8 @@ class ATag(APIView):
                 status=status.HTTP_200_OK
             )
         return response
+
+
 #
 # # remove tag from meetup object
 # # meetups/1/tags/1
@@ -401,7 +402,7 @@ class AddMeetupTag(APIView):
         response = None
 
         if not tag.active:
-            response =  Response(
+            response = Response(
                 data={
 
                     "status": status.HTTP_403_FORBIDDEN,
@@ -439,7 +440,7 @@ class AddMeetupTag(APIView):
                     status=status.HTTP_409_CONFLICT
                 )
         else:
-            response = Response (
+            response = Response(
                 data={
 
                     "status": status.HTTP_404_NOT_FOUND,

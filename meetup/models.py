@@ -21,4 +21,3 @@ class MeetingTag(models.Model):
     meetup = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
-  

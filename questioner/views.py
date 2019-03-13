@@ -9,7 +9,7 @@ from .serializers import UserSerializer
 
 class Index(APIView):
     @classmethod
-    def get(self,request):
+    def get(self, request):
         return Response({"The Dojos": "Welcome to Questioner."})
 
 
@@ -17,6 +17,7 @@ class SignUp(APIView):
     """
     Register a user.
     """
+
     @classmethod
     def post(self, request, format="json"):
         serializer = UserSerializer(data=request.data)
@@ -35,19 +36,20 @@ class SignUp(APIView):
                         }
                     ],
                 },
-                status = status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED
 
             )
         return Response(
-            data = {"status": 400, "errors": serializer.errors},
-            status = status.HTTP_400_BAD_REQUEST
-            )
+            data={"status": 400, "errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class Login(ObtainAuthToken):
     """
     login a user.
     """
+
     @classmethod
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
@@ -62,6 +64,6 @@ class Login(ObtainAuthToken):
                 "token": token.key,
                 "data": [{"user_id": user.pk, "email": user.email}],
             },
-            status = status.HTTP_200_OK
+            status=status.HTTP_200_OK
 
         )

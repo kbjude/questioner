@@ -37,6 +37,7 @@ class Questions(APIView):
                 all_questions.append(result)
             return Response(all_questions)
         return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
+
     @classmethod
     def post(self, request, meetup_id):
         """
@@ -203,8 +204,8 @@ class OneQuestion(APIView):
                 )
         return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
-class Votes(APIView):
 
+class Votes(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
@@ -238,8 +239,11 @@ class Votes(APIView):
                             status=status.HTTP_201_CREATED
                         )
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                return Response({'error': 'vote rejected', 'message': 'either you already voted or question belongs to you'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'invalid url (either wrong meetup id or question id)'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': 'vote rejected', 'message': 'either you already voted or question belongs to you'},
+                    status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid url (either wrong meetup id or question id)'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def put(self, request, meetup_id, question_id):
@@ -254,8 +258,8 @@ class Votes(APIView):
                 voter_check_2 = Vote.objects.filter(question_id=question_id, voter_id=current_user.id)
                 if not voter_check_1 and voter_check_2:
                     vote = get_object_or_404(
-                    Vote, question_id=question_id, voter_id=current_user.id
-                )
+                        Vote, question_id=question_id, voter_id=current_user.id
+                    )
                     serializer = VoteSerializer(vote, data)
                     if serializer.is_valid():
                         serializer.save()
@@ -275,5 +279,8 @@ class Votes(APIView):
                             status=status.HTTP_200_OK
                         )
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                return Response({'error': 'vote edit rejected', 'message': 'either you have not voted yet or question belongs to you'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'invalid url (either wrong meetup id or question id)'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'vote edit rejected',
+                                 'message': 'either you have not voted yet or question belongs to you'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid url (either wrong meetup id or question id)'},
+                        status=status.HTTP_400_BAD_REQUEST)

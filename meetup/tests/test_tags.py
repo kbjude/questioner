@@ -125,7 +125,7 @@ def test_cannot_add_invalid_tag_to_meetup(api_client, db, meetup1, admin_user):
     )
 
     assert response.status_code == 404
-    assert response.data=={
+    assert response.data == {
 
         "status": 404,
         "error": "Tag with specified id does not exist.",
@@ -154,6 +154,7 @@ def test_delete_tag(api_client, db, meetup1, admin_user, tag_objs):
 
     assert response.status_code == 200
     assert response.data['data'][0]['success'] == "Tag permantely deleted successfully"
+
 
 def test_soft_a_delete_tag_attached_to_a_meetup(api_client, db, meetup1, admin_user, a_tag, meetup_tag):
     api_client.force_authenticate(user=admin_user)
