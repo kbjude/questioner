@@ -8,9 +8,6 @@ from rest_framework.views import APIView
 from question.models import Question, Comment
 from question.serializers import QuestionSerializer, CommentSerializer
 from question.permissions import IsOwnerOrReadOnly
-from meetup.models import Meeting
-from question.models import Question, Vote
-from question.serializers import QuestionSerializer, VoteSerializer
 
 
 class Questions(APIView):
