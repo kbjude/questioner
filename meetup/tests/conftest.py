@@ -105,4 +105,3 @@ def meetup_tag(user1, a_tag, meetup1):
         tag=a_tag,
         created_by=user1
     )
-    return a_tag

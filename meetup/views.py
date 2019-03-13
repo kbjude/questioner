@@ -30,8 +30,6 @@ class MeetingList(APIView):
         for meetup in serializer.data:
 
             meetingtags = MeetingTag.objects.filter(meetup=meetup['id'])
-            serial_tags = MeetingTagSerializer(meetingtags, many=True)
-
             meetuptags = []
             for meetuptag in serial_tags.data:
                 tag = Tag.objects.get(id=meetuptag['tag'])
