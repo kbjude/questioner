@@ -5,16 +5,12 @@ from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-<<<<<<< HEAD
 from question.models import Question, Comment
 from question.serializers import QuestionSerializer, CommentSerializer
 from question.permissions import IsOwnerOrReadOnly
-=======
 from meetup.models import Meeting
 from question.models import Question, Vote
 from question.serializers import QuestionSerializer, VoteSerializer
->>>>>>> 54e3da93010e1083a4b17abf2b76bcfc556c02a8
 
 
 class Questions(APIView):
