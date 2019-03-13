@@ -6,9 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+<<<<<<< HEAD
 from question.models import Question, Comment
 from question.serializers import QuestionSerializer, CommentSerializer
 from question.permissions import IsOwnerOrReadOnly
+=======
+from meetup.models import Meeting
+from question.models import Question, Vote
+from question.serializers import QuestionSerializer, VoteSerializer
+>>>>>>> 54e3da93010e1083a4b17abf2b76bcfc556c02a8
 
 
 class Questions(APIView):
@@ -25,47 +31,58 @@ class Questions(APIView):
         """
             method is for getting all questions of a meeting
         """
-        questions = Question.objects.filter(meetup_id=meetup_id)
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
-
+        if Meeting.objects.filter(id=meetup_id):
+            questions = Question.objects.filter(meetup_id=meetup_id)
+            serializer = QuestionSerializer(questions, many=True)
+            results = serializer.data
+            all_questions = []
+            for result in results:
+                up_votes = len([vote for vote in Vote.objects.filter(question_id=result['id'], vote=1)])
+                dwn_votes = len([vote for vote in Vote.objects.filter(question_id=result['id'], vote=-1)])
+                votes = [{'up votes': up_votes, 'down votes': dwn_votes}]
+                result['votes'] = votes
+                all_questions.append(result)
+            return Response(all_questions)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
     @classmethod
     def post(self, request, meetup_id):
         """
             method is for adding a new question to a meeting
         """
-        current_user = request.user
-        if current_user.is_superuser:
-            return Response(
-                data={
-                    "error": "Admin is not allowed to add questions",
-                    "status": 401
-                },
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        data = request.data
-        data["meetup_id"] = meetup_id
-        data["created_by"] = current_user.id
+        if Meeting.objects.filter(id=meetup_id):
+            current_user = request.user
+            if current_user.is_superuser:
+                return Response(
+                    data={
+                        "error": "Admin is not allowed to add questions",
+                        "status": 401
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            data = request.data
+            data["meetup_id"] = meetup_id
+            data["created_by"] = current_user.id
 
-        serializer = QuestionSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                data={
+            serializer = QuestionSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    data={
 
-                    "status": status.HTTP_201_CREATED,
-                    "data": [
-                        {
+                        "status": status.HTTP_201_CREATED,
+                        "data": [
+                            {
 
-                            "question": serializer.data,
-                            "success": "Question successfully added to meetup"
+                                "question": serializer.data,
+                                "success": "Question successfully added to meetup"
 
-                        }
-                    ],
-                },
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                            }
+                        ],
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OneQuestion(APIView):
@@ -79,98 +96,85 @@ class OneQuestion(APIView):
 
     @classmethod
     def get(cls, request, meetup_id, question_id):
-        question = get_object_or_404(
-            Question, id=question_id, meetup_id=meetup_id
-        )
-        serializer = QuestionSerializer(question, many=False)
-        return Response(
-            data={
+        if Meeting.objects.filter(id=meetup_id):
+            question = get_object_or_404(
+                Question, id=question_id, meetup_id=meetup_id
+            )
+            serializer = QuestionSerializer(question, many=False)
+            result = serializer.data
+            up_votes = len([votes for votes in Vote.objects.filter(question_id_id=result['id'], vote=1)])
+            dwn_votes = len([votes for votes in Vote.objects.filter(question_id=result['id'], vote=-1)])
+            votes = [{'up votes': up_votes, 'down votes': dwn_votes}]
+            result['votes'] = votes
+            return Response(
+                data={
 
-                "status": status.HTTP_200_OK,
-                "data": [
-                    {
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
 
-                        "question": serializer.data,
+                            "question": result,
 
-                    }
-                ],
-            },
-            status=status.HTTP_200_OK
-        )
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def put(cls, request, meetup_id, question_id):
-        current_user = request.user
-        if current_user.is_superuser:
-            return Response(
-                data={
-                    "error": "Admin is not allowed to update a question",
-                    "status": 401
-                },
-                status=status.HTTP_401_UNAUTHORIZED
+        if Meeting.objects.filter(id=meetup_id):
+            current_user = request.user
+            if current_user.is_superuser:
+                return Response(
+                    data={
+                        "error": "Admin is not allowed to update a question",
+                        "status": 401
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            data = request.data
+            data["meetup_id"] = meetup_id
+            data["created_by"] = current_user.id
+            data["date_modified"] = timezone.now()
+            question = get_object_or_404(
+                Question, id=question_id, meetup_id=meetup_id, delete_status=False
             )
-        data = request.data
-        data["meetup_id"] = meetup_id
-        data["created_by"] = current_user.id
-        data["date_modified"] = timezone.now()
-        question = get_object_or_404(
-            Question, id=question_id, meetup_id=meetup_id, delete_status=False
-        )
-        serializer = QuestionSerializer(question, data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                data={
+            serializer = QuestionSerializer(question, data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    data={
 
-                    "status": status.HTTP_200_OK,
-                    "data": [
-                        {
+                        "status": status.HTTP_200_OK,
+                        "data": [
+                            {
 
-                            "question": serializer.data,
-                            "success": "Question successfully edited"
+                                "question": serializer.data,
+                                "success": "Question successfully edited"
 
-                        }
-                    ],
-                },
-                status=status.HTTP_200_OK
-            )
+                            }
+                        ],
+                    },
+                    status=status.HTTP_200_OK
+                )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
     @classmethod
     def delete(cls, request, meetup_id, question_id):
-        question = get_object_or_404(
-            Question, id=question_id, meetup_id=meetup_id, delete_status=False
-        )
-        current_user = request.user
-        if current_user.is_superuser:
-            question.delete_status = True
-            question.save()
-            return Response(
-                data={
-
-                    "status": status.HTTP_200_OK,
-                    "data": [
-                        {
-                            "success": "Question has been soft deleted",
-                            "status": status.HTTP_200_OK,
-                        }
-                    ],
-                },
-                status=status.HTTP_200_OK
+        if Meeting.objects.filter(id=meetup_id):
+            question = get_object_or_404(
+                Question, id=question_id, meetup_id=meetup_id, delete_status=False
             )
-        elif str(question.created_by) != str(current_user.username):
-            return Response(
-                data={
-                    "status": status.HTTP_401_UNAUTHORIZED,
-                    "error": "You cannot delete question created by another user"
-                },
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        else:
-            question.delete()
-            return Response(
-                data={
+            current_user = request.user
+            if current_user.is_superuser:
+                question.delete_status = True
+                question.save()
+                return Response(
+                    data={
 
                     "status": status.HTTP_200_OK,
                     "data": [
