@@ -267,7 +267,7 @@ class TestQuestionViews(TestCase):
     def test_user_cannot_delete_question_with_invalid_meetup(self):
         self.client.force_authenticate(user=self.user1)
         url = f"/meetups/1234/questions/{int(self.qn_db.id)}/"
-
+        
         response = self.client.delete(url)        
         self.assertEqual(response.status_code, 400)
 
