@@ -4,14 +4,12 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ('meetup', '0001_initial'),
-    ]
+    dependencies = [("meetup", "0001_initial")]
 
     operations = [
         migrations.AlterField(
-            model_name='tag',
-            name='title',
+            model_name="tag",
+            name="title",
             field=models.CharField(max_length=50, unique=True),
-        ),
+        )
     ]

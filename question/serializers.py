@@ -12,4 +12,4 @@ class QuestionSerializer(serializers.ModelSerializer):
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = "__all__"

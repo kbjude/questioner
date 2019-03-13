@@ -9,34 +9,72 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('meetup', '0001_initial'),
+        ("meetup", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Question',
+            name="Question",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('body', models.TextField()),
-                ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('date_modified', models.DateTimeField(auto_now_add=True)),
-                ('delete_status', models.BooleanField(default=False)),
-                ('created_by',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('meetup_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='meetup.Meeting')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("body", models.TextField()),
+                ("date_created", models.DateTimeField(auto_now_add=True)),
+                ("date_modified", models.DateTimeField(auto_now_add=True)),
+                ("delete_status", models.BooleanField(default=False)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "meetup_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="meetup.Meeting",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Vote',
+            name="Vote",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vote', models.IntegerField()),
-                ('date_voted', models.DateTimeField(auto_now_add=True)),
-                ('question_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='question.Question')),
-                ('voter_id',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("vote", models.IntegerField()),
+                ("date_voted", models.DateTimeField(auto_now_add=True)),
+                (
+                    "question_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="question.Question",
+                    ),
+                ),
+                (
+                    "voter_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -8,7 +8,7 @@ from .models import Tag
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
-        fields = '__all__'
+        fields = "__all__"
         # fields = ('title', 'date', 'start', 'end', 'created_by')
 
 
@@ -17,10 +17,10 @@ class MeetingTagSerializer(serializers.ModelSerializer):
         unique_together = (("tag", "meetup"),)
 
         model = MeetingTag
-        fields = '__all__'
+        fields = "__all__"
 
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = "__all__"
