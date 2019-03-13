@@ -11,8 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         """Map serializer fields to comment model fields."""
         model = Comment
-        fields = ('id', 'comment', 'created_by', 'date_created', 'date_modified')
-        read_only_fields = ('date_created', 'date_modified')
+        fields = '__all__'
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -21,9 +20,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'title', 'body', 'created_by', 'date_created', 
-                  'date_modified', 'comments')
-        read_only_fields = ('date_created', 'date_modified')
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):

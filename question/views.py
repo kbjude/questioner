@@ -1,12 +1,14 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import status
+from django.http import Http404
+from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from question.models import Question
-from question.serializers import QuestionSerializer
+from question.models import Question, Comment
+from question.serializers import QuestionSerializer, CommentSerializer
+from question.permissions import IsOwnerOrReadOnly
 
 
 class Questions(APIView):
@@ -179,3 +181,82 @@ class OneQuestion(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+
+
+class CommentList(APIView):
+    """
+    List all comments, or create a new comment.
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, **kwargs):
+        """Return a list of comments."""
+        question =  Question.objects.filter(id=self.kwargs['question_id'])
+        if not question:
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question Not Found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        queryset = Comment.objects.filter(question=self.kwargs['question_id'])
+        serializer = CommentSerializer(queryset, many=True)
+        return Response({
+            "status": status.HTTP_200_OK,
+            "comments":serializer.data
+        })
+
+    def post(self, request, **kwargs):
+        """Add a comment to a particular question."""
+        question = Question.objects.filter(id=self.kwargs['question_id'])
+        if not question:
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question Not Found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        queryset = Comment.objects.all()
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(
+                created_by=self.request.user,
+                question_id=self.kwargs['question_id'])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentDetail(APIView):
+    """
+    Retrieve, update or delete a comment instance.
+    """
+
+    def get_object(self, pk):
+        try:
+            return Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, **kwargs):
+        comment = self.get_object(pk)
+        serializer = CommentSerializer(comment)
+        return Response({
+            "status": status.HTTP_200_OK,
+            "comment":serializer.data
+        })
+
+    def put(self, request, pk, **kwargs):
+        comment = self.get_object(pk)
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response({
+            "status": status.HTTP_204_NO_CONTENT,
+            "message": "Comment successfully updated."
+        }, serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, **kwargs):
+        comment = self.get_object(pk)
+        comment.delete()
+        return Response({
+            "status": status.HTTP_204_NO_CONTENT,
+            "message": "Comment successfully deleted."
+        }, status=status.HTTP_204_NO_CONTENT)
