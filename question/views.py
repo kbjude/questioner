@@ -37,7 +37,6 @@ class Questions(APIView):
                 all_questions.append(result)
             return Response(all_questions)
         return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
-    
     @classmethod
     def post(self, request, meetup_id):
         """
