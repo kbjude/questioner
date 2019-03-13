@@ -65,5 +65,4 @@ class Login(ObtainAuthToken):
                 "data": [{"user_id": user.pk, "email": user.email}],
             },
             status=status.HTTP_200_OK
-
         )

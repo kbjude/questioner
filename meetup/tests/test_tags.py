@@ -2,9 +2,7 @@ import json
 
 from django.urls import reverse
 
-tag1_data = {
-    "title": "tag_title",
-}
+tag1_data = {"title": "tag_title"}
 
 
 def test_non_admin_user_cannot_create_tags(api_client, db, user1):
@@ -15,20 +13,32 @@ def test_non_admin_user_cannot_create_tags(api_client, db, user1):
         content_type="application/json",
         data=json.dumps(tag1_data),
     )
-    assert response.data['status'] == 401
-    assert response.data['error'] == "Action restricted to Admins!"
+    if not response.status_code == 401:
+        raise AssertionError()
+
+    if not response.data == {
+        "status": 401,
+        "error": "Action restricted to Admins!",
+    }:
+        raise AssertionError()
 
 
-def test_admin_user_cannot_create_tag_with_missing_title(api_client, db, admin_user):
+def test_admin_user_cannot_create_tag_with_missing_title(
+        api_client, db, admin_user
+):
     api_client.force_authenticate(user=admin_user)
 
     response = api_client.post(
-        reverse("tags"),
-        content_type="application/json",
-        data=json.dumps({}),
+        reverse("tags"), content_type="application/json", data=json.dumps({})
     )
-    assert response.status_code == 400
-    assert response.data['error']['title'][0] == "This field is required."
+    if not response.status_code == 400:
+        raise AssertionError()
+
+    if not response.data == {
+        "status": 400,
+        "error": {"title": ["This field is required."]},
+    }:
+        raise AssertionError()
 
 
 def test_admin_user_can_create_tags(api_client, db, admin_user):
@@ -39,10 +49,15 @@ def test_admin_user_can_create_tags(api_client, db, admin_user):
         content_type="application/json",
         data=json.dumps(tag1_data),
     )
-    assert response.status_code == 201
-    assert response.data['data'][0]['success'] == "Tag created successfully"
-    assert response.data['data'][0]['tag']['title'] == tag1_data["title"]
-    assert response.data['data'][0]['tag']['created_by'] == admin_user.id
+    if not response.status_code == 201:
+        raise AssertionError()
+
+    if (
+            response.data["data"][0]["success"] != "Tag created successfully"
+            or response.data["data"][0]["tag"]["title"] != tag1_data["title"]
+            or response.data['data'][0]['tag']['created_by'] != admin_user.id
+    ):
+        raise AssertionError()
 
 
 def test_get_tags(api_client, db, admin_user, tag_objs):
@@ -50,9 +65,17 @@ def test_get_tags(api_client, db, admin_user, tag_objs):
 
     response = api_client.get(reverse('tags'))
 
-    assert response.status_code == 200
-    assert len(response.data['data'][0]['tags']) == 3
-    assert isinstance(response.data['data'][0]['tags'], list)
+    if not response.status_code == 200:
+        raise AssertionError()
+
+    if (
+        not len(response.data['data'][0]['tags']) == len(tag_objs)
+        or response.data["data"][0]["tags"][0]["title"] != tag_objs[0].title
+        or not isinstance(response.data['data'][0]['tags'], list)
+    ):
+        raise AssertionError()
+
+
 
 
 def test_cannot_add_disabled_tag_to_meetup(api_client, db, meetup1, admin_user, disabled_tag):
@@ -63,10 +86,13 @@ def test_cannot_add_disabled_tag_to_meetup(api_client, db, meetup1, admin_user, 
         content_type='application/json',
         data=json.dumps({'meeting': meetup1.id, 'tag': disabled_tag.id})
     )
-
-    assert response.status_code == 403
-    assert response.data['status'] == 403
-    assert response.data['error'] == "This Tag is disabled."
+    if not response.status_code == 403:
+        raise AssertionError()
+    if not response.data == {
+        "status": 403,
+        "error": "This Tag is disabled."
+    }:
+        raise AssertionError()
 
 
 def test_cannot_add_invalid_tag_to_meetup(api_client, db, meetup1, admin_user):

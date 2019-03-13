@@ -330,45 +330,6 @@ class ATag(APIView):
         return response
 
 
-#
-# # remove tag from meetup object
-# # meetups/1/tags/1
-# class AmeetupTag(APIView):
-#     permission_classes = (IsAuthenticated,)
-#
-#     @classmethod
-#     def delete(cls, request, tag_id, meeting_id):
-#         # try:
-#         meetingtags = get_object_or_404(MeetingTag, meetup=meeting_id, tag=tag_id)
-#         serializer = MeetingTagSerializer(meetingtags, many=False)
-#
-#         serial_tag = serializer.data
-#
-#         if not (request.user.is_superuser or (request.user.id == serial_tag["created_by"])):
-#             return Response(
-#                 data={
-#
-#                     "status": status.HTTP_401_UNAUTHORIZED,
-#                     "error": "Sorry. Permission denied!",
-#                 },
-#                 status=status.HTTP_401_UNAUTHORIZED
-#             )
-#         meetingtags.delete()
-#         return Response(
-#             data={
-#
-#                 "status": status.HTTP_200_OK,
-#                 "data": [
-#                     {
-#                         "success": "Tag successfully removed from Meet up."
-#
-#                     }
-#                 ],
-#             },
-#             status=status.HTTP_200_OK
-#         )
-#
-
 # Add a tag to a meetup
 # /meetups/{meet_up_id}tags/
 class AddMeetupTag(APIView):
@@ -386,7 +347,6 @@ class AddMeetupTag(APIView):
         data["meetup"] = meeting_id
         try:
             tag = Tag.objects.get(pk=data["tag"])
-            serial_tag = TagSerializer(tag, many=False)
             serializer = MeetingTagSerializer(data=data)
 
 
