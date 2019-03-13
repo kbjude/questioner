@@ -14,8 +14,12 @@ class MeetingSerializer(serializers.ModelSerializer):
 
 class MeetingTagSerializer(serializers.ModelSerializer):
     class Meta:
+        unique_together = (("tag", "meetup"),)
+
+
         model = MeetingTag
         fields = '__all__'
+
 
 
 class TagSerializer(serializers.ModelSerializer):

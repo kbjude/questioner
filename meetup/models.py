@@ -12,7 +12,7 @@ class Meeting(models.Model):
 
 
 class Tag(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
@@ -21,3 +21,4 @@ class MeetingTag(models.Model):
     meetup = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+  

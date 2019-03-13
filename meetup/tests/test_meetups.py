@@ -63,7 +63,7 @@ def test_post_wrong_meetup(api_client, db, admin_user):
     assert response.data['error']['title'][0] == 'This field is required.'
 
 
-def test_get_meetups(api_client, db, admin_user, meetup1):
+def test_get_meetups(api_client, db, admin_user, meetup1,tagged_meetup):
     api_client.force_authenticate(user=admin_user)
 
     response = api_client.get(reverse("meetings"))
@@ -114,7 +114,7 @@ def test_edit_meetup_with_missing_data(api_client, db, admin_user, meetup1):
     assert response.data['error']['title'][0] == "This field is required."
 
 
-def test_get_a_meetup(api_client, db, admin_user, meetup1):
+def test_get_a_meetup(api_client, db, admin_user, meetup1,tagged_meetup):
     api_client.force_authenticate(user=admin_user)
 
     response = api_client.get(

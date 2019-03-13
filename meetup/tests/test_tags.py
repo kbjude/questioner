@@ -125,7 +125,11 @@ def test_cannot_add_invalid_tag_to_meetup(api_client, db, meetup1, admin_user):
     )
 
     assert response.status_code == 404
-    assert response.data['detail'] == 'Not found.'
+    assert response.data=={
+
+        "status": 404,
+        "error": "Tag with specified id does not exist.",
+    }
 
 
 def test_add_tag_to_meetup(api_client, db, meetup1, admin_user, tag_objs):
@@ -149,76 +153,12 @@ def test_delete_tag(api_client, db, meetup1, admin_user, tag_objs):
         reverse('tag', kwargs={'tag_id': tag_objs[0].id}))
 
     assert response.status_code == 200
-    assert response.data['data'][0]['success'] == "Tag deleted successfully"
+    assert response.data['data'][0]['success'] == "Tag permantely deleted successfully"
 
+def test_soft_a_delete_tag_attached_to_a_meetup(api_client, db, meetup1, admin_user, a_tag, meetup_tag):
+    api_client.force_authenticate(user=admin_user)
+    response = api_client.delete(
+        reverse('tag', kwargs={'tag_id': a_tag.id}))
 
-"""
-    def test_delete_tag(self):
-
-        resp = self.client.post(
-            reverse('tags'),
-            content_type='application/json',
-            data=json.dumps(self.tag)
-        )
-
-        response = self.client.delete(
-            reverse('tag', kwargs={'tag_id': resp.data['id']}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('deleted' in str(response.data))
-
-    def test_add_tag_to_meetup(self):
-
-        respt = self.client.post(
-            reverse('tags'),
-            content_type='application/json',
-            data=json.dumps(self.tag)
-        )
-
-        respm = self.client.post(
-            reverse('meetings'),
-            content_type='application/json',
-            data=json.dumps(self.meetup)
-        )
-
-        response = self.client.post(
-            reverse('meetingtags'),
-            content_type='application/json',
-            data=json.dumps({'meeting':respm.data['id'], 'tag':respt.data['id']})
-        )
-
-        self.assertEqual(response.status_code, 201)
-        self.assertTrue('meeting' in str(response.data))
-
-    def test_add_wrong_tag_to_meetup(self):
-        response = self.client.post(
-            reverse('meetingtags'),
-            content_type='application/json',
-            data=json.dumps(self.wrong_meetuptag)
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_delete_meetuptag(self):
-
-        respt = self.client.post(
-            reverse('tags'),
-            content_type='application/json',
-            data=json.dumps(self.tag)
-        )
-
-        respm = self.client.post(
-            reverse('meetings'),
-            content_type='application/json',
-            data=json.dumps(self.meetup)
-        )
-
-        resp = self.client.post(
-            reverse('meetingtags'),
-            content_type='application/json',
-            data=json.dumps({'meeting':respm.data['id'], 'tag':respt.data['id']})
-        )
-
-        response = self.client.delete(
-            reverse('meetingtag', kwargs={'meeting_id': resp.data['meeting'], 'tag_id': resp.data['tag']}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('deleted' in str(response.data))
- """
+    assert response.status_code == 200
+    assert response.data['data'][0]['success'] == "Tag soft deleted successfully"
