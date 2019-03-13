@@ -41,14 +41,17 @@ INSTALLED_APPS = [
     'meetup.apps.MeetupConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'question',
+    'question.apps.QuestionConfig',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'questioner.auth.auth_default.BearerAuthentication'
     ],
+    'EXCEPTION_HANDLER': 'questioner.utils.exception_handler.custom_exception_handler'
+
 }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

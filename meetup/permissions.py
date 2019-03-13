@@ -1,5 +1,6 @@
-from .models import Meeting
 from rest_framework import permissions
+
+from .models import Meeting
 
 
 class IsOwner(permissions.BasePermission):
@@ -11,5 +12,5 @@ class IsOwner(permissions.BasePermission):
             return True
         else:
             meeting = Meeting.objects.get(
-                        pk=view.kwargs['pk'])
+                pk=view.kwargs['pk'])
             return meeting.created_by == request.user
