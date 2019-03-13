@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'question.apps.QuestionConfig',
+    'users.apps.UsersConfig',
 ]
 
 REST_FRAMEWORK = {
