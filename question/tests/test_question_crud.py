@@ -62,6 +62,14 @@ class TestQuestionViews(TestCase):
         self.question_missing_body = {
             "title": "Question 1 title",
         }
+        self.vote = {
+            "vote": 1
+        }
+        self.vote_edit = {
+            "vote": -1
+        }
+        self.vote_missing_field = {
+        }
 
     def test_admin_cannot_add_a_question(self):
         self.client.force_authenticate(user=self.admin)
@@ -76,8 +84,6 @@ class TestQuestionViews(TestCase):
         self.assertEqual(response.data['error'], 'Admin is not allowed to add questions')
 
     def test_anonymous_user_cannot_add_a_question(self):
-        # self.client.force_authenticate(user=AnonymousUser)
-
         url = f"/meetups/{self.meetup.id}/questions/"
         response = self.client.post(
             url,
@@ -87,7 +93,7 @@ class TestQuestionViews(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data['detail'], "Authentication credentials were not provided.")
 
-    def test_user_can_add_a_question_with_missing_data(self):
+    def test_user_cannot_add_a_question_with_missing_data(self):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{self.meetup.id}/questions/"
@@ -108,6 +114,17 @@ class TestQuestionViews(TestCase):
 
         self.assertEqual(response2.status_code, 400)
         self.assertEqual(response2.data['body'][0], "This field is required.")
+
+    def test_user_cannot_add_a_question_to_invalid_meetup(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/1212/questions/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.question),
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_user_can_add_a_question(self):
         self.client.force_authenticate(user=self.user1)
@@ -135,6 +152,14 @@ class TestQuestionViews(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data['detail'], 'Not found.')
 
+    def test_user_cannot_get_a_question_with_invalid_meetup(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/1234/questions/{int(self.qn_db.id)}/"
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+
     def test_user_can_get_a_question(self):
         self.client.force_authenticate(user=self.user1)
 
@@ -145,7 +170,16 @@ class TestQuestionViews(TestCase):
         self.assertEqual(response.data['data'][0]['question']['title'], self.qn_db.title)
         self.assertEqual(response.data['data'][0]['question']['body'], self.qn_db.body)
 
-    def test_user_can_get_meeetup_questions(self):
+    def test_user_cannot_get_invalid_meetup_questions(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/1232/questions/"
+        response = self.client.get(
+            url
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_can_get_meetup_questions(self):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{self.meetup.id}/questions/"
@@ -175,6 +209,16 @@ class TestQuestionViews(TestCase):
             "error": "Admin is not allowed to update a question",
             "status": 401
         })
+
+    def test_editing_a_question_invlid_meetup(self):
+        self.client.force_authenticate(user=self.user1)
+        url = f"/meetups/1234/questions/{int(self.qn_db.id)}/"
+        response = self.client.put(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.edit_qn_data),
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_editing_a_question(self):
         self.client.force_authenticate(user=self.user1)
@@ -219,8 +263,13 @@ class TestQuestionViews(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data['error'], "You cannot delete question created by another user")
+    def test_user_cannot_delete_question_with_invalid_meetup(self):
+        self.client.force_authenticate(user=self.user1)
+        url = f"/meetups/1234/questions/{int(self.qn_db.id)}/"
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 400)
 
-    def test_user_cannot_delete_question_created_by_them(self):
+    def test_user_can_delete_question_created_by_them(self):
         self.client.force_authenticate(user=self.user1)
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/"
 
@@ -250,3 +299,106 @@ class TestQuestionViews(TestCase):
         self.assertEqual(self.qn_details.id, self.qn_db.id)
         self.assertTrue(self.qn_details.delete_status)
         self.assertEqual(self.qn_details.title, self.qn_db.title)
+
+    def test_other_users_can_vote_on_a_question(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_user_question_vote_missing_vote_field(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote_missing_field),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_question_vote_invalid_question(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/votes/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_cannot_vote_on_their_question(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        response = self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_question_vote_edit_missing_field(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        response = self.client.put(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote_missing_field),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_question_vote_edit_invalid_question(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1232/votes/"
+        self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        response = self.client.put(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote_edit),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_question_vote_edit_none_existing_vote(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        response = self.client.put(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote_edit),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_question_vote_edit(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        self.client.post(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote),
+        )
+        response = self.client.put(
+            url,
+            content_type="application/json",
+            data=json.dumps(self.vote_edit),
+        )
+        self.assertEqual(response.status_code, 200)
