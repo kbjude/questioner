@@ -263,10 +263,11 @@ class TestQuestionViews(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data['error'], "You cannot delete question created by another user")
+    
     def test_user_cannot_delete_question_with_invalid_meetup(self):
         self.client.force_authenticate(user=self.user1)
         url = f"/meetups/1234/questions/{int(self.qn_db.id)}/"
-        response = self.client.delete(url)        
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, 400)
 
     def test_user_can_delete_question_created_by_them(self):
