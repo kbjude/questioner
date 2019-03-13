@@ -300,12 +300,9 @@ class ATag(APIView):
                 data={
 
                     "status": status.HTTP_200_OK,
-                    "data": [
-                        {
-                            "success": "Tag permantely deleted successfully"
-
-                        }
-                    ],
+                    "data": [{
+                        "success": "Tag permantely deleted successfully"
+                    }],
                 },
                 status=status.HTTP_200_OK
             )

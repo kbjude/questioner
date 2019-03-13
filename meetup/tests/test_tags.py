@@ -24,7 +24,7 @@ def test_non_admin_user_cannot_create_tags(api_client, db, user1):
 
 
 def test_admin_user_cannot_create_tag_with_missing_title(
-        api_client, db, admin_user
+    api_client, db, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
 
@@ -53,9 +53,9 @@ def test_admin_user_can_create_tags(api_client, db, admin_user):
         raise AssertionError()
 
     if (
-            response.data["data"][0]["success"] != "Tag created successfully"
-            or response.data["data"][0]["tag"]["title"] != tag1_data["title"]
-            or response.data['data'][0]['tag']['created_by'] != admin_user.id
+        response.data["data"][0]["success"] != "Tag created successfully"
+        or response.data["data"][0]["tag"]["title"] != tag1_data["title"]
+        or response.data["data"][0]["tag"]["created_by"] != admin_user.id
     ):
         raise AssertionError()
 
@@ -63,83 +63,96 @@ def test_admin_user_can_create_tags(api_client, db, admin_user):
 def test_get_tags(api_client, db, admin_user, tag_objs):
     api_client.force_authenticate(user=admin_user)
 
-    response = api_client.get(reverse('tags'))
+    response = api_client.get(reverse("tags"))
 
     if not response.status_code == 200:
         raise AssertionError()
 
     if (
-        not len(response.data['data'][0]['tags']) == len(tag_objs)
+        not len(response.data["data"][0]["tags"]) == len(tag_objs)
         or response.data["data"][0]["tags"][0]["title"] != tag_objs[0].title
-        or not isinstance(response.data['data'][0]['tags'], list)
+        or not isinstance(response.data["data"][0]["tags"], list)
     ):
         raise AssertionError()
 
 
-
-
-def test_cannot_add_disabled_tag_to_meetup(api_client, db, meetup1, admin_user, disabled_tag):
+def test_cannot_add_disabled_tag_to_meetup(
+    api_client, db, meetup1, admin_user, disabled_tag
+):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
-        reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
-
-        content_type='application/json',
-        data=json.dumps({'meeting': meetup1.id, 'tag': disabled_tag.id})
+        reverse("meetingtags", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps({"meeting": meetup1.id, "tag": disabled_tag.id}),
     )
     if not response.status_code == 403:
         raise AssertionError()
-    if not response.data == {
-        "status": 403,
-        "error": "This Tag is disabled."
-    }:
+    if not response.data == {"status": 403, "error": "This Tag is disabled."}:
         raise AssertionError()
 
 
 def test_cannot_add_invalid_tag_to_meetup(api_client, db, meetup1, admin_user):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
-        reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
-
-        content_type='application/json',
-        data=json.dumps({'meeting': meetup1.id, 'tag': 75})
+        reverse("meetingtags", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps({"meeting": meetup1.id, "tag": 75}),
     )
 
-    assert response.status_code == 404
-    assert response.data == {
+    if not response.status_code == 404:
+        raise AssertionError()
 
+    if not response.data == {
         "status": 404,
         "error": "Tag with specified id does not exist.",
-    }
+    }:
+        raise AssertionError()
 
 
 def test_add_tag_to_meetup(api_client, db, meetup1, admin_user, tag_objs):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
-        reverse('meetingtags', kwargs={"meeting_id": meetup1.id}),
-
-        content_type='application/json',
-        data=json.dumps({'meeting': meetup1.id, 'tag': tag_objs[0].id})
+        reverse("meetingtags", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps({"meeting": meetup1.id, "tag": tag_objs[0].id}),
     )
 
-    assert response.status_code == 201
-    assert response.data['data'][0]['success'] == "Tag successfully added to meetup"
-    assert response.data['data'][0]['tag']['meetup'] == meetup1.id
-    assert response.data['data'][0]['tag']['created_by'] == admin_user.id
+    if not response.status_code == 201:
+        raise AssertionError()
+
+    if (
+        response.data["data"][0]["success"]
+        != "Tag successfully added to meetup"
+        or response.data["data"][0]["tag"]["meetup"] != meetup1.id
+        or response.data["data"][0]["tag"]["created_by"] != admin_user.id
+    ):
+        raise AssertionError()
 
 
 def test_delete_tag(api_client, db, meetup1, admin_user, tag_objs):
     api_client.force_authenticate(user=admin_user)
     response = api_client.delete(
-        reverse('tag', kwargs={'tag_id': tag_objs[0].id}))
+        reverse("tag", kwargs={"tag_id": tag_objs[0].id})
+    )
 
-    assert response.status_code == 200
-    assert response.data['data'][0]['success'] == "Tag permantely deleted successfully"
+    if not response.status_code == 200:
+        raise AssertionError()
+
+    if (
+        response.data["data"][0]["success"]
+        != "Tag permantely deleted successfully"
+    ):
+        raise AssertionError()
 
 
-def test_soft_a_delete_tag_attached_to_a_meetup(api_client, db, meetup1, admin_user, a_tag, meetup_tag):
+def test_soft_a_delete_tag_attached_to_a_meetup(
+    api_client, db, meetup1, admin_user, a_tag, meetup_tag
+):
     api_client.force_authenticate(user=admin_user)
-    response = api_client.delete(
-        reverse('tag', kwargs={'tag_id': a_tag.id}))
+    response = api_client.delete(reverse("tag", kwargs={"tag_id": a_tag.id}))
 
-    assert response.status_code == 200
-    assert response.data['data'][0]['success'] == "Tag soft deleted successfully"
+    if not response.status_code == 200:
+        raise AssertionError()
+
+    if response.data["data"][0]["success"] != "Tag soft deleted successfully":
+        raise AssertionError()
