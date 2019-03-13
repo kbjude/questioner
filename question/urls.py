@@ -1,12 +1,16 @@
 from django.urls import path
-
-from question.views import Questions, OneQuestion
+from question.views import Questions, OneQuestion, Votes
 
 urlpatterns = [
-    path("<meetup_id>/questions/", Questions.as_view(), name="questions"),
+    path("<int:meetup_id>/questions/", Questions.as_view(), name="questions"),
     path(
-        "<meetup_id>/questions/<question_id>/",
+        "<int:meetup_id>/questions/<int:question_id>/",
         OneQuestion.as_view(),
         name="question",
+    ),
+    path(
+        "<int:meetup_id>/questions/<int:question_id>/votes/",
+        Votes.as_view(),
+        name="votes",
     ),
 ]
