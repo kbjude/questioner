@@ -24,13 +24,16 @@ from . import views
 urlpatterns = [
     path("", views.Index.as_view(), name="welcome"),
     path("auth/login/", views.Login.as_view(), name="login"),
+    path("auth/logout/", views.Logout.as_view(), name="logout"),
     path("auth/signup/", views.SignUp.as_view(), name="signup"),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
     path('tags/', meetup_views.TagList.as_view(), name='tags'),
     path('tags/<int:tag_id>', meetup_views.ATag.as_view(), name='tag'),
     path('admin/', admin.site.urls),
-
+    path('accounts/', include('rest_framework.urls', namespace='rest_framework')),
+    path("accounts/signup/", views.SignUp.as_view(), name="signup2"),
+    path("accounts/profile/", views.profile.as_view(), name="signup2"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
