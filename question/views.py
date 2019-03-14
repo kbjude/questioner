@@ -10,6 +10,7 @@ from meetup.models import Meeting
 from question.models import Question, Vote, Comment
 from question.serializers import (QuestionSerializer, VoteSerializer, 
                                   CommentSerializer)
+from question.permissions import IsOwnerOrReadOnly
 
 
 class Questions(APIView):
@@ -391,7 +392,7 @@ class CommentDetail(APIView):
     Retrieve, update or delete a comment instance.
     """
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
 
     def get_object(self, pk):
         try:
@@ -449,6 +450,7 @@ class CommentDetail(APIView):
         """Delete a single question."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
         question =  Question.objects.filter(id=self.kwargs['question_id'])
+
         if meetup:
             if question:
                 comment = self.get_object(pk)
