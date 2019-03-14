@@ -52,7 +52,8 @@ Provide your credentials under the body tab
 
 | Method        | Endpoint               | Description                |
 |:--------------|:-----------------------|:---------------------------|
-| GET           | /                      | Index                      |
+| GET           | /                      | Welcome route              |
+| GET           | /docs                  | API Documentation          |
 | POST          | /auth/login            | login                      |
 | POST          | /auth/signup           | signup                     |
 | **Questions** |                        |                            |
