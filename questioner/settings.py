@@ -27,6 +27,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'snaketech.herokuapp.com',
+    'questionerdojo.herokuapp.com'
 ]
 
 # Application definition

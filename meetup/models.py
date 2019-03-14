@@ -12,7 +12,7 @@ class Meeting(models.Model):
 
 
 class Tag(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
