@@ -5,7 +5,6 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from meetup.models import Meeting
 from question.models import Question, Vote, Comment
 from question.serializers import (QuestionSerializer, VoteSerializer, 
@@ -364,6 +363,7 @@ class CommentList(APIView):
             "error": "Meetup Not Found."
         }, status=status.HTTP_404_NOT_FOUND)
 
+
     def post(self, request, **kwargs):
         """Add a comment to a particular question."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
@@ -400,11 +400,11 @@ class CommentDetail(APIView):
         except Comment.DoesNotExist:
             raise Http404
 
+
     def get(self, request, pk, **kwargs):
         """Return a single comment to a question."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
         question =  Question.objects.filter(id=self.kwargs['question_id'])
-
         if meetup:
             if question:
                 comment = self.get_object(pk)
@@ -422,11 +422,11 @@ class CommentDetail(APIView):
             "error": "Meetup Not Found."
         }, status=status.HTTP_404_NOT_FOUND)
 
+
     def put(self, request, pk, **kwargs):
         """Update a single comment."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
         question =  Question.objects.filter(id=self.kwargs['question_id'])
-
         if meetup:
             if question:
                 comment = self.get_object(pk)
@@ -446,11 +446,11 @@ class CommentDetail(APIView):
             "error": "Meetup Not Found."
         }, status=status.HTTP_404_NOT_FOUND)
 
+
     def delete(self, request, pk, **kwargs):
         """Delete a single question."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
         question =  Question.objects.filter(id=self.kwargs['question_id'])
-
         if meetup:
             if question:
                 comment = self.get_object(pk)
