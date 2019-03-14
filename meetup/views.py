@@ -382,8 +382,8 @@ class AddMeetupTag(APIView):
             201: MeetingTagSerializer(many=False),
             401: "Unathorized Access",
             403: "Tag is disabled",
-            404: "Meetup or Tag Does not exist",
-            409: "Tag already exists on meetup",
+            404: "Tag Does not exist",
+            400: "Meet up does not exist or Tag already exists",
         },
     )
     def post(cls, request, meeting_id):
@@ -415,36 +415,27 @@ class AddMeetupTag(APIView):
             )
 
         elif serializer.is_valid():
-            try:
-                serializer.save()
-                response = Response(
-                    data={
-                        "status": status.HTTP_201_CREATED,
-                        "data": [
-                            {
-                                "tag": serializer.data,
-                                "success": "Tag successfully added to meetup",
-                            }
-                        ],
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-            except IntegrityError:
+            serializer.save()
+            response = Response(
+                data={
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+                            "tag": serializer.data,
+                            "success": "Tag successfully added to meetup",
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
-                response = Response(
-                    data={
-                        "status": status.HTTP_409_CONFLICT,
-                        "error": "Tag already exists on meetup",
-                    },
-                    status=status.HTTP_409_CONFLICT,
-                )
         else:
             response = Response(
                 data={
-                    "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Meetup with specified id does not exist.",
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "detail": serializer.errors,
                 },
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         return response
 
