@@ -19,6 +19,7 @@ from .serializers import TagSerializer
 # meetups/
 class MeetingList(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializer
 
     @classmethod
     def get(cls, request):
@@ -66,11 +67,15 @@ class MeetingList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        data = request.data
+        data = {}
         data["created_by"] = request.user.id
-        data["created_at"] = str(datetime.datetime.now())
+        data["title"] = request.data["title"]
+        data["date"] = request.data["date"]
+        data["start"] = request.data["start"]
+        data["end"] = request.data["end"]
 
         serializer = MeetingSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -102,6 +107,7 @@ class MeetingList(APIView):
 # meetups/1
 class AMeeting(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializer
 
     @classmethod
     def get(cls, request, meeting_id):
@@ -149,8 +155,6 @@ class AMeeting(APIView):
             )
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
-        data = request.data
-        data["created_by"] = request.user.id
 
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
@@ -214,6 +218,7 @@ class AMeeting(APIView):
 # tags/
 class TagList(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = TagSerializer
 
     @classmethod
     def get(cls, request):
@@ -246,7 +251,8 @@ class TagList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        data = request.data
+        data={}
+        data["title"] = request.data["title"]
         data["created_by"] = request.user.id
 
         serializer = TagSerializer(data=data)
@@ -281,13 +287,16 @@ class TagList(APIView):
 # tags/1
 class ATag(APIView):
     permission_classes = (IsAdminUser,)
+    serializer_class = TagSerializer
 
     @classmethod
     def delete(cls, request, tag_id):
         tag = get_object_or_404(Tag, pk=tag_id)
         serial_tag = TagSerializer(tag, many=False)
 
-        data = serial_tag.data
+        data={}
+        data["title"] = serial_tag.data["title"]
+        data["created_by"] = serial_tag.data["created_by"]
         data["active"] = False
 
         serializer = TagSerializer(tag, data=data)
@@ -313,6 +322,7 @@ class ATag(APIView):
 # meetups/1/tags/1
 class AmeetupTag(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializer
 
     @classmethod
     def delete(cls, request, tag_id, meeting_id):
@@ -351,11 +361,14 @@ class AmeetupTag(APIView):
 # /meetups/{meet_up_id}tags/
 class AddMeetupTag(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializer
 
     @classmethod
     def post(cls, request, meeting_id):
 
-        data = request.data
+
+        data={}
+        data["tag"] = request.data["tag"]
         data["created_by"] = request.user.id
         data["meetup"] = meeting_id
 
