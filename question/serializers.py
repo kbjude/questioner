@@ -28,11 +28,3 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = "__all__"
-        # fields = ('id', 'title', 'body', 'date_created', 'date_modified',
-        #           'created_by', 'meetup_id', 'votes', 'comments' )
-
-
-# class VoteSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Vote
-#         fields = "__all__"
