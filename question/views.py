@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,9 +21,15 @@ class Questions(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get all Questions for a meet up",
+        operation_id="GET /questions",
+        responses={200: QuestionSerializer(many=True), 400: "Invalid Meetup Id"},
+    )
     def get(self, request, meetup_id):
         """
-            method is for getting all questions of a meeting
+        get:
+        Get all Questions for a meet up
         """
         if Meeting.objects.filter(id=meetup_id):
             questions = Question.objects.filter(meetup_id=meetup_id)
@@ -55,9 +62,20 @@ class Questions(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Create a question for a specific meetup.",
+        operation_id="POST /questions",
+        request_body=QuestionSerializer,
+        responses={
+            201: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access"
+        },
+    )
     def post(self, request, meetup_id):
         """
-            method is for adding a new question to a meeting
+        post:
+        Create a question for a specific meetup."
         """
         if Meeting.objects.filter(id=meetup_id):
             current_user = request.user
@@ -98,14 +116,26 @@ class Questions(APIView):
 
 class OneQuestion(APIView):
     """
-        this class helps with the following features;
-        - adding a new question to a meeting
-        - getting all questions of a particular meeting
+    get:
+    Get a question for a specific meetup."
+    put:
+    Update a question for a specific meetup."
+    delete:
+    Delete a question for a specific meetup."
     """
 
     permission_classes = (IsAuthenticated,)
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get a question for a specific meetup.",
+        operation_id="GET /questions/<question_id>",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access"
+        },
+    )
     def get(cls, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             question = get_object_or_404(
@@ -143,6 +173,16 @@ class OneQuestion(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Update a question for a specific meetup.",
+        operation_id="PUT /questions/<question_id>",
+        request_body=QuestionSerializer,
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access"
+        },
+    )
     def put(cls, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             current_user = request.user
@@ -188,6 +228,16 @@ class OneQuestion(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Delete a question for a specific meetup.",
+        operation_id="DELETE /questions/<question_id>",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Meetup ID",
+            404: "Invalid Question ID",
+            401: "Unauthorized Access"
+        },
+    )
     def delete(cls, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             question = get_object_or_404(

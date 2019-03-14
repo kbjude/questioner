@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'question.apps.QuestionConfig',
+    'rest_framework_swagger',
+    'drf_yasg',
 ]
 
 REST_FRAMEWORK = {
@@ -52,6 +54,12 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'questioner.utils.exception_handler.custom_exception_handler'
 
 }
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+#     ],
+# }
 
 
 MIDDLEWARE = [
@@ -143,3 +151,19 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+SWAGGER_SETTINGS = {
+   'DEFAULT_INFO': 'questioner.urls.api_info',
+   'SECURITY_DEFINITIONS': {
+      'Basic': {
+            'type': 'basic'
+      },
+      'bearerAuth': {
+            'type': 'apiKey',
+            'name': 'Token Authorization',
+            'in': 'header',
+            'bearerFormat': 'JWT'
+      },
+
+
+   }
+}

@@ -14,4 +14,5 @@ urlpatterns = [
         Votes.as_view(),
         name="votes",
     ),
+
 ]

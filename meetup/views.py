@@ -2,6 +2,7 @@ import datetime
 
 from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
@@ -19,9 +20,11 @@ from .serializers import TagSerializer
 # list all meetup or create a new meetup
 # meetups/
 class MeetingList(APIView):
+
     permission_classes = (IsAuthenticated,)
 
     @classmethod
+    @swagger_auto_schema(responses={200: MeetingSerializer(many=True)})
     def get(cls, request):
         meetups = Meeting.objects.all()
         serializer = MeetingSerializer(meetups, many=True)
@@ -49,6 +52,7 @@ class MeetingList(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(request_body=MeetingSerializer)
     def post(cls, request):
 
         if not request.user.is_superuser:
@@ -196,6 +200,7 @@ class TagList(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(request_body=TagSerializer)
     def post(cls, request):
 
         if not request.user.is_superuser:
@@ -287,6 +292,7 @@ class AddMeetupTag(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
+    @swagger_auto_schema(request_body=MeetingTagSerializer)
     def post(cls, request, meeting_id):
 
         data = request.data
