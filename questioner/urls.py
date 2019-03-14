@@ -37,7 +37,6 @@ api_info = openapi.Info(
         "or bottom of the log. description"
     ),
     license=openapi.License(name="Andela License"),
-    base_path="locak",
 )
 schema_view = get_schema_view(
     public=True, permission_classes=(permissions.AllowAny,)
@@ -63,4 +62,4 @@ urlpatterns = [
     ),
 ]
 
-# urlpatterns = format_suffix_patterns(urlpatterns)
+format_suffix_patterns(urlpatterns, suffix_required=False, allowed=None)
