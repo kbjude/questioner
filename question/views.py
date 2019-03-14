@@ -72,8 +72,8 @@ class Questions(APIView):
                 )
 
             data={}
-            data["title"] = request.data["title"]
-            data["body"] = request.data["body"]
+            data["title"] = request.data.get("title", None)
+            data["body"] = request.data.get("body", None)
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
 
@@ -160,8 +160,8 @@ class OneQuestion(APIView):
                 )
 
             data={}
-            data["title"] = request.data["title"]
-            data["body"] = request.data["body"]
+            data["title"] = request.data.get("title", None)
+            data["body"] = request.data.get("body", None)
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
             data["date_modified"] = timezone.now()
@@ -252,7 +252,7 @@ class Votes(APIView):
                 current_user = request.user
 
                 data={}
-                data["vote"] = request.data["vote"]
+                data["vote"] = request.data.get("vote", None)
                 data["question_id"] = question_id
                 data["voter_id"] = current_user.id
                 data["date_modified"] = timezone.now()
