@@ -18,6 +18,7 @@ class Questions(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = QuestionSerializer
 
     @classmethod
     def get(self, request, meetup_id):
@@ -52,7 +53,10 @@ class Questions(APIView):
                     },
                     status=status.HTTP_401_UNAUTHORIZED
                 )
-            data = request.data
+
+            data={}
+            data["title"] = request.data["title"]
+            data["body"] = request.data["body"]
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
 
@@ -77,7 +81,6 @@ class Questions(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'invalid meetup id'}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class OneQuestion(APIView):
     """
         this class helps with the following features;
@@ -86,6 +89,7 @@ class OneQuestion(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = QuestionSerializer
 
     @classmethod
     def get(cls, request, meetup_id, question_id):
@@ -127,7 +131,10 @@ class OneQuestion(APIView):
                     },
                     status=status.HTTP_401_UNAUTHORIZED
                 )
-            data = request.data
+
+            data={}
+            data["title"] = request.data["title"]
+            data["body"] = request.data["body"]
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
             data["date_modified"] = timezone.now()
@@ -206,13 +213,16 @@ class OneQuestion(APIView):
 class Votes(APIView):
 
     permission_classes = (IsAuthenticated,)
+    # serializer_class = VoteSerializer
 
     @classmethod
     def post(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
-                data = request.data
+
+                data={}
+                data["vote"] = request.data["vote"]
                 data["question_id"] = question_id
                 data["voter_id"] = current_user.id
                 data["date_modified"] = timezone.now()
