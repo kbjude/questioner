@@ -1,6 +1,7 @@
 from django.urls import path
 
-from question.views import Questions, OneQuestion, Votes
+from question.views import (Questions, OneQuestion, Votes,
+                            CommentList, CommentDetail)
 
 urlpatterns = [
     path("<int:meetup_id>/questions/", Questions.as_view(), name="questions"),
@@ -14,4 +15,10 @@ urlpatterns = [
         Votes.as_view(),
         name="votes",
     ),
+    path("<int:meetup_id>/questions/<question_id>/comments",
+        CommentList.as_view(),
+    ),
+    path("<int:meetup_id>/questions/<question_id>/comments/<int:pk>",
+        CommentDetail.as_view(),
+    )
 ]

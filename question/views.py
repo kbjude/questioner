@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -6,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from meetup.models import Meeting
-from question.models import Question, Vote
-from question.serializers import QuestionSerializer, VoteSerializer
+from question.models import Question, Vote, Comment
+from question.serializers import (QuestionSerializer, VoteSerializer, 
+                                  CommentSerializer)
 
 
 class Questions(APIView):
@@ -331,3 +333,135 @@ class Votes(APIView):
             {"error": "invalid url (either wrong meetup id or question id)"},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class CommentList(APIView):
+    """
+    List all comments, or create a new comment.
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, **kwargs):
+        """Return a list of comments."""
+        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
+        question =  Question.objects.filter(id=self.kwargs['question_id'])
+        if meetup:
+            if not question:
+                return Response({
+                    "status": status.HTTP_404_NOT_FOUND,
+                    "error": "Question Not Found."
+                }, status=status.HTTP_404_NOT_FOUND)
+            queryset = Comment.objects.filter(question=self.kwargs['question_id'])
+            serializer = CommentSerializer(queryset, many=True)
+            return Response({
+                "status": status.HTTP_200_OK,
+                "comments":serializer.data
+            })
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meetup Not Found."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, **kwargs):
+        """Add a comment to a particular question."""
+        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
+        question = Question.objects.filter(id=self.kwargs['question_id'])
+        if meetup:
+            if not question:
+                return Response({
+                    "status": status.HTTP_404_NOT_FOUND,
+                    "error": "Question Not Found."
+                }, status=status.HTTP_404_NOT_FOUND)
+            serializer = CommentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    created_by=self.request.user,
+                    question_id=self.kwargs['question_id'])
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meetup Not Found."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+class CommentDetail(APIView):
+    """
+    Retrieve, update or delete a comment instance.
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, pk):
+        try:
+            return Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, **kwargs):
+        """Return a single comment to a question."""
+        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
+        question =  Question.objects.filter(id=self.kwargs['question_id'])
+
+        if meetup:
+            if question:
+                comment = self.get_object(pk)
+                serializer = CommentSerializer(comment)
+                return Response({
+                    "status": status.HTTP_200_OK,
+                    "comment":serializer.data
+                })
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question Not Found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meetup Not Found."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, pk, **kwargs):
+        """Update a single comment."""
+        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
+        question =  Question.objects.filter(id=self.kwargs['question_id'])
+
+        if meetup:
+            if question:
+                comment = self.get_object(pk)
+                serializer = CommentSerializer(comment, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({
+                        "status": status.HTTP_200_OK,
+                        "message": "Comment successfully updated."
+                    })
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question Not Found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meetup Not Found."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, pk, **kwargs):
+        """Delete a single question."""
+        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
+        question =  Question.objects.filter(id=self.kwargs['question_id'])
+        if meetup:
+            if question:
+                comment = self.get_object(pk)
+                comment.delete()
+                return Response({
+                    "status": status.HTTP_204_NO_CONTENT,
+                    "message": "Comment successfully deleted."
+                }, status=status.HTTP_204_NO_CONTENT)
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question Not Found."
+            }, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meetup Not Found."
+        }, status=status.HTTP_404_NOT_FOUND)
