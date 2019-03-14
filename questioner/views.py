@@ -1,15 +1,15 @@
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, LoginSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class Index(APIView):
     @classmethod
-    def get(self,request):
+    def get(self, request):
         return Response({"The Dojos": "Welcome to Questioner."})
 
 
@@ -17,6 +17,9 @@ class SignUp(APIView):
     """
     Register a user.
     """
+
+    serializer_class = UserSerializer
+
     @classmethod
     def post(self, request, format="json"):
         serializer = UserSerializer(data=request.data)
@@ -35,33 +38,62 @@ class SignUp(APIView):
                         }
                     ],
                 },
-                status = status.HTTP_201_CREATED
+                status=status.HTTP_201_CREATED
 
             )
         return Response(
-            data = {"status": 400, "errors": serializer.errors},
-            status = status.HTTP_400_BAD_REQUEST
-            )
+            data={"status": 400, "errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
-class Login(ObtainAuthToken):
+class Login(APIView):
     """
     login a user.
     """
+
+    serializer_class = LoginSerializer
+
     @classmethod
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
+
+        serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token = Token.objects.get_or_create(user=user)[0]
+
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK
+
+        )
+
+class Logout(APIView):
+    def get(self, request, format=None):
+        # simply delete the token to force a login
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
+# accounts/profile/
+class profile(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(cls, request):
+
+        user = request.user
+        serializer = UserSerializer(user, many=False)
+        serializer.is_valid
+
         return Response(
             data={
-                "status": 200,
-                "token": token.key,
-                "data": [{"user_id": user.pk, "email": user.email}],
-            },
-            status = status.HTTP_200_OK
 
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+
+                        "user": serializer.data,
+
+                    }
+                ],
+            },
+            status=status.HTTP_200_OK
         )
