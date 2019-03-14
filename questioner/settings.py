@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'questioner.auth.auth_default.BearerAuthentication'
+        'rest_framework.authentication.SessionAuthentication'
     ],
     'EXCEPTION_HANDLER': 'questioner.utils.exception_handler.custom_exception_handler'
 
