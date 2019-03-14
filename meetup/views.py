@@ -63,7 +63,7 @@ class MeetingList(APIView):
 
         data = {}
         data["created_by"] = request.user.id
-        data["title"] = request.data["title"]
+        data["title"] = request.data.get("title", None)
         data["date"] = request.data["date"]
         data["start"] = request.data["start"]
         data["end"] = request.data["end"]
@@ -213,7 +213,7 @@ class TagList(APIView):
             )
 
         data={}
-        data["title"] = request.data["title"]
+        data["title"] = request.data.get("title", None)
         data["created_by"] = request.user.id
 
         serializer = TagSerializer(data=data)
