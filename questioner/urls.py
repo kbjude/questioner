@@ -37,6 +37,7 @@ api_info = openapi.Info(
         "or bottom of the log. description"
     ),
     license=openapi.License(name="Andela License"),
+    base_path="locak",
 )
 schema_view = get_schema_view(
     public=True, permission_classes=(permissions.AllowAny,)
@@ -55,6 +56,11 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
+    path(
+        "redoc/",
+        schema_view.with_ui("redoc", cache_timeout=0),
+        name="schema-redoc",
+    ),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+# urlpatterns = format_suffix_patterns(urlpatterns)

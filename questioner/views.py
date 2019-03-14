@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import UserSerializer
+from rest_framework.decorators import api_view, renderer_classes
 
 
 class Index(APIView):
@@ -17,7 +18,7 @@ class Index(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Welcome to Questioner",
-        operation_id="welcome route",
+        operation_id="welcome To Questioner",
         security=None,
     )
     def get(self, request):
@@ -33,12 +34,11 @@ class SignUp(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Create a user account.",
-        operation_id="POST /auth/signup",
-        security=None,
+        operation_id="Sign up a user",
         request_body=UserSerializer,
         responses={201: UserSerializer(many=False), 400: "BAD REQUEST"},
     )
-    def post(self, request, format="json"):
+    def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -72,9 +72,7 @@ class Login(ObtainAuthToken):
     @classmethod
     @swagger_auto_schema(
         operation_description="Login a User",
-        operation_id="login",
-        tag="authentication",
-        security=None,
+        operation_id="Login a user",
         request_body=UserSerializer,
         responses={200: UserSerializer(many=False), 401: "Invalid Login"},
     )

@@ -23,8 +23,11 @@ class Questions(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Get all Questions for a meet up",
-        operation_id="GET /questions",
-        responses={200: QuestionSerializer(many=True), 400: "Invalid Meetup Id"},
+        operation_id="Get all questions for a meetup",
+        responses={
+            200: QuestionSerializer(many=True),
+            400: "Invalid Meetup Id",
+        },
     )
     def get(self, request, meetup_id):
         """
@@ -64,12 +67,12 @@ class Questions(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Create a question for a specific meetup.",
-        operation_id="POST /questions",
+        operation_id="Create a question for a specific meetup",
         request_body=QuestionSerializer,
         responses={
             201: QuestionSerializer(many=False),
             400: "Invalid Format Data",
-            401: "Unauthorized Access"
+            401: "Unauthorized Access",
         },
     )
     def post(self, request, meetup_id):
@@ -129,11 +132,11 @@ class OneQuestion(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Get a question for a specific meetup.",
-        operation_id="GET /questions/<question_id>",
+        operation_id="Get a question for a specific meetup.",
         responses={
             200: QuestionSerializer(many=False),
             400: "Invalid Format Data",
-            401: "Unauthorized Access"
+            401: "Unauthorized Access",
         },
     )
     def get(cls, request, meetup_id, question_id):
@@ -175,12 +178,12 @@ class OneQuestion(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Update a question for a specific meetup.",
-        operation_id="PUT /questions/<question_id>",
+        operation_id="Update a question for a specific meetup.",
         request_body=QuestionSerializer,
         responses={
             200: QuestionSerializer(many=False),
             400: "Invalid Format Data",
-            401: "Unauthorized Access"
+            401: "Unauthorized Access",
         },
     )
     def put(cls, request, meetup_id, question_id):
@@ -230,12 +233,12 @@ class OneQuestion(APIView):
     @classmethod
     @swagger_auto_schema(
         operation_description="Delete a question for a specific meetup.",
-        operation_id="DELETE /questions/<question_id>",
+        operation_id="Delete a question for a specific meetup.",
         responses={
             200: QuestionSerializer(many=False),
             400: "Invalid Meetup ID",
             404: "Invalid Question ID",
-            401: "Unauthorized Access"
+            401: "Unauthorized Access",
         },
     )
     def delete(cls, request, meetup_id, question_id):
@@ -285,9 +288,26 @@ class OneQuestion(APIView):
 
 
 class Votes(APIView):
+    """
+    post:
+    Upvote or Down vote on a question
+    put:
+    Edit Vote on a question
+    """
+
     permission_classes = (IsAuthenticated,)
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Upvote or Down vote",
+        operation_id="Upvote or Down vote on a Question",
+        request_body=VoteSerializer,
+        responses={
+            201: VoteSerializer(many=False),
+            401: "Unathorized Access",
+            400: "Bad Request",
+        },
+    )
     def post(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
@@ -334,6 +354,16 @@ class Votes(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Update vote",
+        operation_id="Update vote on a question.",
+        request_body=VoteSerializer,
+        responses={
+            200: VoteSerializer(many=False),
+            401: "Unathorized Access",
+            400: "Bad Request",
+        },
+    )
     def put(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
