@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.db.models import ProtectedError, Q
+from django.db.models import ProtectedError
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -252,7 +252,7 @@ class OneQuestion(APIView):
                 serializer.save()
 
                 Mserializer = MeetingSerializer(meeting, many=True)
-                
+
                 qn_dict = dict(serializer.data)
                 qn_dict["created_by_name"] = current_user.username
                 qn_dict["meetup_name"] = Mserializer.data[0]["title"]
