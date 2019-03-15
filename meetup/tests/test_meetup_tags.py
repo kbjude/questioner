@@ -69,12 +69,16 @@ def test_cannot_add_tag_to_meetup_with_invalid_meetup_id(
         data=json.dumps({"tag": a_tag.id}),
     )
 
-    if not response.status_code == 404:
+    if not response.status_code == 400:
         raise AssertionError()
 
     if not response.data == {
-        "status": 404,
-        "error": "Meetup with specified id does not exist.",
+        "status": 400,
+        "detail": {
+            "meetup": [
+                "Invalid pk \"1\" - object does not exist."
+            ]
+        }
     }:
         raise AssertionError()
 
@@ -98,6 +102,25 @@ def test_user_can_add_tag_to_meetup(api_client, db, meetup1, user1, a_tag):
     ):
         raise AssertionError()
 
+
+def test_user_cannot_add_duplicate_tag_to_meetup(api_client, db, meetup1, user1, a_tag,tagged_meetup):
+    api_client.force_authenticate(user=user1)
+    response = api_client.post(
+        reverse("meetingtags", kwargs={"meeting_id": meetup1.id}),
+        content_type="application/json",
+        data=json.dumps({"meeting": meetup1.id, "tag": a_tag.id}),
+    )
+
+    if not response.status_code == 400:
+        raise AssertionError()
+
+    # if (
+    #     response.data["data"][0]["success"]
+    #     != "Tag successfully added to meetup"
+    #     or response.data["data"][0]["tag"]["meetup"] != meetup1.id
+    #     or response.data["data"][0]["tag"]["created_by"] != user1.id
+    # ):
+    #     raise AssertionError()
 
 def test_user_cannot_remove_a_tag_not_added_by_them_to_a_meetup(
     api_client, db, meetup1, user2, tagged_meetup
