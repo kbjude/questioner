@@ -26,3 +26,9 @@ omit =
   */tests/*
   */static/*
   */staticfiles/*
+  */serializers.py
+  */apps.py
+  */models.py
+  */urls.py
+  */admin.py
+  */questioner/auth/auth_default.py

@@ -1,99 +1,452 @@
-import json
-
-from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from question.models import Question
-
-
-@csrf_exempt
-def questions(request):
-    '''
-        this views method is responsible for the following;
-        - creating new questions
-        - getting all questions from the database
-    '''
-    if request.method == 'POST':
-        payload = json.loads(request.body)
-        title = payload['title']
-        body = payload['body']
-        created_by = payload['created_by']
-        question = Question(title=title, body=body, created_by=created_by, date_created=timezone.now(),
-                            date_modified=timezone.now())
-        try:
-            # if not Question.objects.get(title=title) or not Question.objects.get(title=title):
-            question.save()
-            response = json.dumps([{'message': 'question successfully added'}])
-            # response = json.dumps([{'error': 'question already exists'}])
-        except Exception:
-            response = json.dumps([{'error': 'question could not be added'}])
-
-    if request.method == 'GET':
-        questions = Question.objects.all().order_by('date_modified').reverse()
-        response = json.dumps([{"Message": "No questions available"}])
-        all_questions = []
-        for question in questions:
-            qus_details = {}
-            qus_details['id'] = question.id
-            qus_details['title'] = question.title
-            qus_details['body'] = question.body
-            qus_details['created_by'] = question.created_by
-            qus_details['date_created'] = str(question.date_created)
-            qus_details['date_modified'] = str(question.date_modified)
-            all_questions.append(qus_details)
-        if all_questions != []:
-            response = json.dumps(all_questions)
-    return HttpResponse(response, content_type='text/json')
+from meetup.models import Meeting
+from question.models import Question, Vote
+from question.serializers import QuestionSerializer, QuestionSerializerClass, VoteSerializer
+from meetup.serializers import MeetingSerializer
 
 
-@csrf_exempt
-def question(request, question_id):
-    '''
-        this views method is responsible for the following;
-        - getting a question by id
-        - updating a question's fields (title, body) by id
-        - deleting a question by id
-    '''
-    question_id = int(question_id)
-    if request.method == 'GET':
-        try:
-            question = Question.objects.get(id=question_id)
-            response = json.dumps(
+class Questions(APIView):
+    """
+        this class helps with the following features;
+        - adding a new question to a meeting
+        - getting all questions of a particular meeting
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = QuestionSerializerClass
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Get all Questions for a meet up",
+        operation_id="Get all questions for a meetup",
+        responses={
+            200: QuestionSerializer(many=True),
+            400: "Invalid Meetup Id",
+        },
+    )
+    def get(self, request, meetup_id):
+        """
+        get:
+        Get all Questions for a meet up
+        """
+
+        mymeeting = Meeting.objects.filter(id=meetup_id)
+        if mymeeting.exists():
+            questions = Question.objects.filter(meetup_id=meetup_id)
+            serializer = QuestionSerializer(questions, many=True)
+            results = serializer.data
+            all_questions = []
+            for result in results:
+                up_votes = len(
+                    [
+                        vote
+                        for vote in Vote.objects.filter(
+                            question_id=result["id"], vote=1
+                        )
+                    ]
+                )
+                dwn_votes = len(
+                    [
+                        vote
+                        for vote in Vote.objects.filter(
+                            question_id=result["id"], vote=-1
+                        )
+                    ]
+                )
+                votes = [{"up votes": up_votes, "down votes": dwn_votes}]
+
+                Mserializer = MeetingSerializer(mymeeting, many=True)
+                
+                user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+                result["created_by_name"] = user.username
+                           
+                result["meetup_name"] = Mserializer.data[0]["title"]
+                result["votes"] = votes
+
+                all_questions.append(result)
+            return Response(all_questions)
+        return Response(
+            {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Create a question for a specific meetup.",
+        operation_id="Create a question for a specific meetup",
+        request_body=QuestionSerializer,
+        responses={
+            201: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
+    def post(self, request, meetup_id):
+        """
+        post:
+        Create a question for a specific meetup."
+        """
+
+        meeting = Meeting.objects.filter(id=meetup_id)
+        if meeting.exists():
+            current_user = request.user
+            if current_user.is_superuser:
+                return Response(
+                    data={
+                        "error": "Admin is not allowed to add questions",
+                        "status": 401,
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            data = {}
+            for key in request.data:
+                data[key] = request.data[key]
+            data["meetup_id"] = meetup_id
+            data["created_by"] = current_user.id
+
+            Mserializer = MeetingSerializer(meeting, many=True)
+
+            serializer = QuestionSerializer(data=data)
+            if serializer.is_valid():
+
+                serializer.save()
+                qn_dict = dict(serializer.data)
+                qn_dict["created_by_name"] = current_user.username
+                qn_dict["meetup"] = Mserializer.data[0]["title"]
+                return Response(
+                    data={
+                        "status": status.HTTP_201_CREATED,
+                        "data": [
+                            {
+                                "question": qn_dict,
+                                "success": "Question successfully added to meetup",
+                            }
+                        ],
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+class OneQuestion(APIView):
+    """
+    get:
+    Get a question for a specific meetup."
+    put:
+    Update a question for a specific meetup."
+    delete:
+    Delete a question for a specific meetup."
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = QuestionSerializerClass
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Get a question for a specific meetup.",
+        operation_id="Get a question for a specific meetup.",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
+    def get(cls, request, meetup_id, question_id):
+
+        meeting = Meeting.objects.filter(id=meetup_id)
+        if meeting.exists():
+            question = get_object_or_404(
+                Question, id=question_id, meetup_id=meetup_id
+            )
+            serializer = QuestionSerializer(question, many=False)
+            result = serializer.data
+            up_votes = len(
                 [
-                    {
-                        'title': question.title,
-                        'body': question.body,
-                        'created_by': question.created_by,
-                        'date_created': str(question.date_created),
-                        'date_modified': str(question.date_modified)
-                    }
+                    votes
+                    for votes in Vote.objects.filter(
+                        question_id_id=result["id"], vote=1
+                    )
                 ]
             )
-        except Exception:
-            response = json.dumps([{'error': 'no question available by the id: {}'.format(question_id)}])
+            dwn_votes = len(
+                [
+                    votes
+                    for votes in Vote.objects.filter(
+                        question_id=result["id"], vote=-1
+                    )
+                ]
+            )
+            votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
-    if request.method == 'PUT':
-        payload = json.loads(request.body)
-        title = payload['title']
-        body = payload['body']
-        try:
-            question = Question.objects.get(id=question_id)
-            question.title = title
-            question.body = body
-            question.date_modified = timezone.now()
-            question.save()
-            response = json.dumps([{'message': 'question successfully updated'}])
-        except Exception:
-            response = json.dumps(
-                [{'error': 'no question available by the id: {}, update failed!'.format(question_id)}])
+            Mserializer = MeetingSerializer(meeting, many=True)
 
-    if request.method == 'DELETE':
-        try:
-            question = Question.objects.get(id=question_id)
-            question.delete()
-            response = json.dumps([{'message': 'question successfully deleted'}])
-        except Exception:
-            response = json.dumps(
-                [{'error': 'no question available by the id: {}, deletion failed!'.format(question_id)}])
-    return HttpResponse(response, content_type='text/json')
+            user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+            result["created_by_name"] = user.username
+            result["meetup_name"] = Mserializer.data[0]["title"]
+            result["votes"] = votes
+
+            return Response(
+                data={
+                    "status": status.HTTP_200_OK,
+                    "data": [{"question": result}],
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Update a question for a specific meetup.",
+        operation_id="Update a question for a specific meetup.",
+        request_body=QuestionSerializer,
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
+    def put(cls, request, meetup_id, question_id):
+        meeting = Meeting.objects.filter(id=meetup_id)
+        if meeting.exists():
+            current_user = request.user
+            if current_user.is_superuser:
+                return Response(
+                    data={
+                        "error": "Admin is not allowed to update a question",
+                        "status": 401,
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            question = get_object_or_404(
+                Question,
+                id=question_id,
+                meetup_id=meetup_id,
+                delete_status=False,
+            )
+            serializer = QuestionSerializer(question, many=False)
+
+            data=dict(serializer.data)
+            data["date_modified"] = timezone.now()
+            data["title"] = request.data.get("title", None)
+            data["body"] = request.data.get("body", None)
+
+            serializer = QuestionSerializer(question, data)
+            if serializer.is_valid():
+                serializer.save()
+
+                Mserializer = MeetingSerializer(meeting, many=True)
+
+                qn_dict = dict(serializer.data)
+                qn_dict["created_by_name"] = current_user.username
+                qn_dict["meetup_name"] = Mserializer.data[0]["title"]
+                return Response(
+                    data={
+                        "status": status.HTTP_200_OK,
+                        "data": [
+                            {
+                                "question": qn_dict,
+                                "success": "Question successfully edited",
+                            }
+                        ],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(
+            {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Delete a question for a specific meetup.",
+        operation_id="Delete a question for a specific meetup.",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Meetup ID",
+            404: "Invalid Question ID",
+            401: "Unauthorized Access",
+        },
+    )
+    def delete(cls, request, meetup_id, question_id):
+        if Meeting.objects.filter(id=meetup_id):
+            question = get_object_or_404(
+                Question,
+                id=question_id,
+                meetup_id=meetup_id,
+                delete_status=False,
+            )
+            current_user = request.user
+            if current_user.is_superuser:
+                question.delete_status = True
+                question.save()
+                return Response(
+                    data={
+                        "status": status.HTTP_200_OK,
+                        "data": [
+                            {
+                                "success": "Question has been soft deleted",
+                                "status": status.HTTP_200_OK,
+                            }
+                        ],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            elif str(question.created_by) != str(current_user.username):
+                return Response(
+                    data={
+                        "status": status.HTTP_401_UNAUTHORIZED,
+                        "error": "You cannot delete question created by another user",
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            else:
+                question.delete()
+                return Response(
+                    data={
+                        "status": status.HTTP_200_OK,
+                        "data": [{"success": "Question has been deleted"}],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return Response(
+            {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+class UpVote(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(self, request, meetup_id, question_id):
+        if Meeting.objects.filter(id=meetup_id):
+            if Question.objects.filter(id=question_id):
+                current_user = request.user
+
+                data={}
+                data["vote"] = request.data.get("vote", None)
+                data["question_id"] = question_id
+                data["voter_id"] = current_user.id
+                data["date_modified"] = timezone.now()
+                data['vote'] = 1
+                serializer = VoteSerializer(data=data)
+                if not Question.objects.filter(id=question_id, created_by=current_user.id):
+                    my_vote = Vote.objects.filter(question_id=question_id, voter_id=current_user.id)
+                    my_vote_is_up = Vote.objects.filter(question_id=question_id, voter_id=current_user.id, vote=1)
+                    if my_vote:
+                        if my_vote_is_up:
+                            my_vote.delete()
+                            return Response(
+                                data={
+                                    "status": status.HTTP_200_OK,
+                                    "data": [{"success": "your up-vote has been cancelled"}],
+                                    },
+                                    status=status.HTTP_200_OK,
+                            )
+                        my_vote = get_object_or_404(Vote, question_id=question_id, voter_id=current_user.id, vote=-1)
+                        serializer = VoteSerializer(my_vote, data)
+                    if serializer.is_valid():
+                        serializer.save()
+
+                        data = dict(serializer.data)
+                        data["voter"] = request.user.username
+
+                        return Response(
+                            data={
+                                "status": status.HTTP_200_OK,
+                                "data": [
+                                    {
+                                        "vote": data,
+                                        "success": "you have up-voted this question",
+                                    }
+                                ],
+                            },
+                            status=status.HTTP_200_OK,
+                        )
+                return Response(
+                    {
+                        "error": "vote rejected",
+                        "message": "question belongs to you",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(
+            {"error": "invalid url (either wrong meetup id or question id)"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+class DownVote(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(self, request, meetup_id, question_id):
+        if Meeting.objects.filter(id=meetup_id):
+            if Question.objects.filter(id=question_id):
+                current_user = request.user
+                data = request.data
+                data["question_id"] = question_id
+                data["voter_id"] = current_user.id
+                data["date_modified"] = timezone.now()
+                data['vote'] = -1
+                serializer = VoteSerializer(data=data)
+                if not Question.objects.filter(id=question_id, created_by=current_user.id):
+                    my_vote = Vote.objects.filter(question_id=question_id, voter_id=current_user.id)
+                    my_vote_is_down = Vote.objects.filter(question_id=question_id, voter_id=current_user.id, vote=-1)
+                    if my_vote:
+                        if my_vote_is_down:
+                            my_vote.delete()
+                            return Response(
+                                data={
+                                    "status": status.HTTP_200_OK,
+                                    "data": [{"success": "your up-vote has been cancelled"}],
+                                    },
+                                    status=status.HTTP_200_OK,
+                            )
+                        my_vote = get_object_or_404(Vote, question_id=question_id, voter_id=current_user.id, vote=1)
+                        serializer = VoteSerializer(my_vote, data)
+                    if serializer.is_valid():
+                        serializer.save()
+
+                        data = dict(serializer.data)
+                        data["voter"] = request.user.username
+
+                        return Response(
+                            data={
+                                "status": status.HTTP_200_OK,
+                                "data": [
+                                    {
+                                        "vote": data,
+                                        "success": "you have up-voted this question",
+                                    }
+                                ],
+                            },
+                            status=status.HTTP_200_OK,
+                        )
+                return Response(
+                    {
+                        "error": "vote rejected",
+                        "message": "question belongs to you",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(
+            {"error": "invalid url (either wrong meetup id or question id)"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

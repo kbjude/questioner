@@ -1,76 +1,41 @@
+
+from django.contrib.auth.models import User
+from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Meeting
 from .models import MeetingTag
 from .models import Tag
-from .serializers import MeetingSerializer
-from .serializers import UserSerializer
-from .serializers import MeetingTagSerializer
-from .serializers import TagSerializer
-from rest_framework.permissions import IsAuthenticated
-
-
-class SignUp(APIView):
-    """
-    Register a user.
-    """
-
-    def post(self, request, format='json'):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                return Response({
-                    'status': status.HTTP_201_CREATED,
-                    'data': [{'user_id': user.pk,
-                              'username': user.username,
-                              'email': user.email,
-                              'is_admin': user.is_superuser
-                              }]
-                })
-        else:
-            return Response({
-                'status': 400,
-                'errors': serializer.errors
-            })
-
-
-class Login(ObtainAuthToken):
-    """
-    login a user.
-    """
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'status': 200,
-            'token': token.key,
-            'data': [{'user_id': user.pk,
-                      'email': user.email
-                      }]
-        })
-        meetups = Meeting.objects.all()
-        serializer = MeetingSerializer(meetups, many=True)
-        return Response(serializer.data)
+from .serializers import MeetingSerializer, MeetingSerializerClass
+from .serializers import MeetingTagSerializer, MeetingTagSerializerClass
+from .serializers import TagSerializer, TagSerializerClass
 
 
 # list all meetup or create a new meetup
 # meetups/
-
-
 class MeetingList(APIView):
-    # permission_classes = (IsAuthenticated,)
+    """
+    get:
+    Get all meetups
+    post:
+    Create a meetup
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializerClass
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get all meetups.",
+        operation_id="Get all meetups",
+        responses={200: MeetingSerializer(many=True)},
+    )
     def get(cls, request):
         meetups = Meeting.objects.all()
         serializer = MeetingSerializer(meetups, many=True)
@@ -78,128 +43,492 @@ class MeetingList(APIView):
         meetupwithtags = []
         for meetup in serializer.data:
 
-            meetingtags = MeetingTag.objects.filter(meeting=meetup['id'])
+            user = User.objects.filter(Q(id=meetup["created_by"])).distinct().first()
+            meetup["created_by_name"] = user.username
+
+            meetingtags = MeetingTag.objects.filter(meetup=meetup["id"])
             serial_tags = MeetingTagSerializer(meetingtags, many=True)
 
             meetuptags = []
             for meetuptag in serial_tags.data:
-                tag = Tag.objects.get(id=meetuptag['tag'])
+                tag = Tag.objects.get(id=meetuptag["tag"])
                 meetuptags.append(tag.title)
 
             meetup["tags"] = meetuptags
             meetupwithtags.append(meetup)
 
-        return Response(meetupwithtags)
+        return Response(
+            data={
+                "status": status.HTTP_200_OK,
+                "data": [{"meetup": meetupwithtags}],
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Create a meetup",
+        operation_id="Create a meetup",
+        request_body=MeetingSerializer,
+        responses={
+            201: MeetingSerializer(many=False),
+            400: "Bad Format Data",
+            401: "Unathorized Access",
+        },
+    )
     def post(cls, request):
 
-        data = request.data
-        # data["created_at"] = str(datetime.datetime.now())
+        if not request.user.is_superuser:
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Action restricted to Admins!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        data = {}
+        for key in request.data:
+            data[key] = request.data[key]
+        data["created_by_name"] = request.user.id
 
         serializer = MeetingSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
+            return Response(
+                data={
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+                            "meetup": data,
+                            "success": "Meet up created successfully",
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            data={
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 # Get, update or delete a meetup
 # meetups/1
 class AMeeting(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializerClass
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get a meetup",
+        operation_id="Get  specific meetup.",
+        responses={
+            200: MeetingSerializer(many=False),
+            401: "Unathorized Access",
+            404: "Meeting Does not Exist",
+        },
+    )
     def get(cls, request, meeting_id):
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         serial_meeting = MeetingSerializer(meetup, many=False)
 
-        meetingtags = MeetingTag.objects.filter(meeting=meeting_id)
+        meetingtags = MeetingTag.objects.filter(meetup=meeting_id)
         serial_tags = MeetingTagSerializer(meetingtags, many=True)
 
         tags = []
         for item in serial_tags.data:
-            tag = Tag.objects.get(id=item['tag'])
+            tag = Tag.objects.get(id=item["tag"])
             tags.append(tag.title)
 
         result = serial_meeting.data
         result["tags"] = tags
 
-        return Response({"status":200, "data":result})
+        user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+        result["created_by_name"] = user.username
+
+        return Response(
+            data={"status": status.HTTP_200_OK, "data": [{"meetup": result}]},
+            status=status.HTTP_200_OK,
+        )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Edit a meetup",
+        operation_id="Edit a specific",
+        request_body=MeetingSerializer(many=False),
+        responses={
+            200: MeetingSerializer(many=False),
+            401: "Unathorized Access",
+            404: "Meeting Does not Exist",
+        },
+    )
     def put(cls, request, meeting_id):
+
+        if not request.user.is_superuser:
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Action restricted to Admins!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         meetup = get_object_or_404(Meeting, pk=meeting_id)
+
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            result = dict(serializer.data)
+
+            user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+            result["created_by_name"] = user.username
+
+            return Response(
+                data={
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {
+                            "meetup": result,
+                            "success": "Meet updated successfully",
+                        }
+                    ],
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            data={
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Delete a meetup",
+        operation_id="Delete a specific meetup",
+        responses={
+            200: MeetingSerializer(many=False),
+            401: "Unathorized Access",
+            404: "Meeting Does not Exist",
+        },
+    )
     def delete(cls, request, meeting_id):
+
+        if not request.user.is_superuser:
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Action restricted to Admins!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         meetup = get_object_or_404(Meeting, pk=meeting_id)
         meetup.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+
+        return Response(
+            data={
+                "status": status.HTTP_200_OK,
+                "data": [{"success": "Meet deleted successfully"}],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 # list all tags or create a tag
 # tags/
 class TagList(APIView):
+    """
+    get:
+    Get all tags
+    post:
+    Create a tag
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TagSerializerClass
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get all tags",
+        operation_id="Get all tags",
+        responses={
+            200: TagSerializer(many=False),
+            401: "Unathorized Access",
+            400: "Meeting Does not Exist",
+        },
+    )
     def get(cls, request):
         tags = Tag.objects.all()
         serializer = TagSerializer(tags, many=True)
-        return Response(serializer.data)
+
+        tags = []
+        for tag in serializer.data:
+
+            user = User.objects.filter(Q(id=tag["created_by"])).distinct().first()
+            tag["created_by_name"] = user.username
+            tags.append(tag)
+
+        return Response(
+            data={
+                "status": status.HTTP_200_OK,
+                "data": [{"tags": tags}],
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Create a tags",
+        operation_id="Create a Tag.",
+        request_body=TagSerializer,
+        responses={
+            201: TagSerializer(many=False),
+            401: "Unathorized Access",
+            400: "Missing title or tag already exists",
+        },
+    )
     def post(cls, request):
 
-        serializer = TagSerializer(data=request.data)
+        if not request.user.is_superuser:
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Action restricted to Admins!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        data={}
+        data["title"] = request.data.get("title", None)
+        data["created_by"] = request.user.id
+
+        serializer = TagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
+            return Response(
+                data={
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+                            "tag": data,
+                            "success": "Tag created successfully",
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            data={
+                "status": status.HTTP_400_BAD_REQUEST,
+                "error": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 # delete a tag object
 # tags/1
 class ATag(APIView):
+    """
+    delete:
+    Delete a specific tag.
+    """
+
+    permission_classes = (IsAdminUser,)
+    serializer_class = TagSerializerClass
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Delete a tag",
+        operation_id="Delete a tag",
+        responses={
+            200: TagSerializer(many=False),
+            401: "Unathorized Access",
+            404: "Tag Does not exist",
+        },
+    )
     def delete(cls, request, tag_id):
+        """
+        delete:
+        Delete a Tag
+        """
         tag = get_object_or_404(Tag, pk=tag_id)
-        tag.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
+        response = None
+        try:
+            tag.delete()
+            response = Response(
+                data={
+                    "status": status.HTTP_200_OK,
+                    "data": [
+                        {"success": "Tag permantely deleted successfully"}
+                    ],
+                },
+                status=status.HTTP_200_OK,
+            )
+        except ProtectedError:
+            tag.is_active = False
+            tag.save()
+            response = Response(
+                data={
+                    "status": status.HTTP_200_OK,
+                    "data": [{"success": "Tag soft deleted successfully"}],
+                },
+                status=status.HTTP_200_OK,
+            )
+        return response
+
+
+# Add a tag to a meetup
+# /meetups/{meet_up_id}tags/
+class AddMeetupTag(APIView):
+    """
+    post:
+    A tag to a meet up
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializerClass
+
+    @classmethod
+    @swagger_auto_schema(
+        operation_description="Add a tag to a meetup",
+        operation_id="Add a tag to a meetup.",
+        request_body=MeetingTagSerializer,
+        responses={
+            201: MeetingTagSerializer(many=False),
+            401: "Unathorized Access",
+            403: "Tag is disabled",
+            404: "Tag Does not exist",
+            400: "Meet up does not exist or Tag already exists",
+        },
+    )
+    def post(cls, request, meeting_id):
+
+
+        data={}
+        data["tag"] = request.data["tag"]
+        data["created_by"] = request.user.id
+        data["meetup"] = meeting_id
+        try:
+            tag = Tag.objects.get(pk=data["tag"])
+            serializer = MeetingTagSerializer(data=data)
+
+        except Tag.DoesNotExist:
+            return Response(
+                data={
+                    "status": status.HTTP_404_NOT_FOUND,
+                    "error": "Tag with specified id does not exist.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        response = None
+
+        if not tag.active:
+            response = Response(
+                data={
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "error": "This Tag is disabled.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        elif serializer.is_valid():
+            serializer.save()
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
+            response = Response(
+                data={
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+                            "tag": data,
+                            "success": "Tag successfully added to meetup",
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        else:
+            response = Response(
+                data={
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "detail": serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return response
 
 
 # remove tag from meetup object
 # meetups/1/tags/1
 class AmeetupTag(APIView):
+    """
+    delete:
+    Remove tag from meetup.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializerClass
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Remove a tag from a meetup",
+        operation_id="Remove a tag from a meetup.",
+        request_body=MeetingTagSerializer,
+        responses={
+            200: MeetingTagSerializer(many=False),
+            401: "Unathorized Access",
+            403: "Tag is disabled",
+            404: "Meetup or Tag Does not exist",
+        },
+    )
     def delete(cls, request, tag_id, meeting_id):
+        meetingtags = get_object_or_404(
+            MeetingTag, meetup=meeting_id, tag=tag_id
+        )
+        serializer = MeetingTagSerializer(meetingtags, many=False)
 
-        meetingtags = MeetingTag.objects.filter(meeting=meeting_id, tag=tag_id)
-        serial_tags = MeetingTagSerializer(meetingtags, many=True)
+        serial_tag = serializer.data
 
-        meetingtagid = serial_tags.data[0]['id']
+        if not (
+            request.user.is_superuser
+            or (request.user.id == serial_tag["created_by"])
+        ):
+            return Response(
+                data={
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "error": "Sorry. Permission denied!",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
-        meetingtag = get_object_or_404(MeetingTag, pk=meetingtagid)
-        meetingtag.delete()
-        return Response({"successfully deleted"}, status=status.HTTP_200_OK)
-
-
-# Add a tag to a meetup
-# /meetups/tags/
-class AddMeetupTag(APIView):
-
-    @classmethod
-    def post(cls, request):
-
-        serializer = MeetingTagSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        meetingtags.delete()
+        return Response(
+            data={
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {"success": "Tag successfully removed from Meet up."}
+                ],
+            },
+            status=status.HTTP_200_OK,
+        )
