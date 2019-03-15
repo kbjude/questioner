@@ -44,10 +44,11 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False, allow_blank=True)
     token = serializers.CharField(allow_blank=True, read_only=True)
+    email = serializers.CharField(allow_blank=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ["username", "token", "password"]
+        fields = ["username", "token", "password", "email"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, data):
@@ -56,11 +57,11 @@ class LoginSerializer(serializers.ModelSerializer):
         password = data.get("password", None)
 
         if not username:
-            raise serializers.ValidationError("Username or email is required to login")
+            raise serializers.ValidationError(
+                "Username or email is required to login")
 
-        user = User.objects.filter(Q(email=username) | Q(username=username)).distinct()
-        # user = User.objects.filter(Q(username=username)).distinct()
-        # if user.exists() and user.count==1:
+        user = User.objects.filter(
+            Q(email=username) | Q(username=username)).distinct()
         if user.exists():
             user_obj = user.first()
         else:
@@ -68,8 +69,10 @@ class LoginSerializer(serializers.ModelSerializer):
 
         if user_obj:
             if not user_obj.check_password(password):
-                raise serializers.ValidationError("Incorrect credentials please try again")
-        
+                raise serializers.ValidationError(
+                    "Incorrect credentials please try again")
+
         data["token"] = Token.objects.get_or_create(user=user_obj)[0].key
+        data["email"] = user_obj.email
 
         return data
