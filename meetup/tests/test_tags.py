@@ -23,9 +23,7 @@ def test_non_admin_user_cannot_create_tags(api_client, db, user1):
         raise AssertionError()
 
 
-def test_admin_user_cannot_create_tag_with_missing_title(
-    api_client, db, admin_user
-):
+def test_admin_user_cannot_create_tag_with_missing_title(api_client, db, admin_user):
     api_client.force_authenticate(user=admin_user)
 
     response = api_client.post(
@@ -36,7 +34,7 @@ def test_admin_user_cannot_create_tag_with_missing_title(
 
     if not response.data == {
         "status": 400,
-        "error": {"title": ["This field is required."]},
+        "error": {"title": ["This field may not be null."]}
     }:
         raise AssertionError()
 
