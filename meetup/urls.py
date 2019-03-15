@@ -19,4 +19,5 @@ urlpatterns = [
         views.AmeetupTag.as_view(),
         name="meetingtag",
     ),
+
 ]
