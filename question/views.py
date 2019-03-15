@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.db.models import ProtectedError
+from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -195,7 +195,6 @@ class OneQuestion(APIView):
                 
             user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
             result["created_by_name"] = user.username
-                        
             result["meetup_name"] = Mserializer.data[0]["title"]
             result["votes"] = votes
 
