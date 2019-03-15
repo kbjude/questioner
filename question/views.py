@@ -286,19 +286,7 @@ class OneQuestion(APIView):
             {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-<<<<<<< HEAD
 class UpVote(APIView):
-=======
-
-class Votes(APIView):
-    """
-    post:
-    Upvote or Down vote on a question
-    put:
-    Edit Vote on a question
-    """
-
->>>>>>> 1ee383fddc57ff7008f2f26e213994d6b8732770
     permission_classes = (IsAuthenticated,)
 
     @classmethod
@@ -367,9 +355,7 @@ class DownVote(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-<<<<<<< HEAD
     def post(self, request, meetup_id, question_id):
-=======
     @swagger_auto_schema(
         operation_description="Update vote",
         operation_id="Update vote on a question.",
@@ -380,8 +366,6 @@ class DownVote(APIView):
             400: "Bad Request",
         },
     )
-    def put(self, request, meetup_id, question_id):
->>>>>>> 1ee383fddc57ff7008f2f26e213994d6b8732770
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
