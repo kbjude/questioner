@@ -56,9 +56,6 @@ class TestQuestionViews(TestCase):
             "body": "this is the body of question 1"
         }
         self.question_missing_body = {"title": "Question 1 title"}
-        self.vote = {"vote": 1}
-        self.vote_edit = {"vote": -1}
-        self.vote_missing_field = {}
 
     def test_admin_cannot_add_a_question(self):
         self.client.force_authenticate(user=self.admin)
@@ -319,93 +316,92 @@ class TestQuestionViews(TestCase):
         self.assertTrue(self.qn_details.delete_status)
         self.assertEqual(self.qn_details.title, self.qn_db.title)
 
-    def test_other_users_can_vote_on_a_question(self):
+    def test_other_users_can_upvote_on_a_question(self):
         self.client.force_authenticate(user=self.user2)
 
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
         response = self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
+            url, content_type="application/json")
         self.assertEqual(response.status_code, 201)
 
-    def test_user_question_vote_missing_vote_field(self):
-        self.client.force_authenticate(user=self.user2)
-
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
-        response = self.client.post(
-            url,
-            content_type="application/json",
-            data=json.dumps(self.vote_missing_field),
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_user_question_vote_invalid_question(self):
+    def test_user_invalid_question_upvote(self):
         self.client.force_authenticate(user=self.user1)
 
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/votes/"
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/upvote/"
         response = self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
+            url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
-    def test_user_cannot_vote_on_their_question(self):
+    def test_user_cannot_upvote_on_their_question(self):
         self.client.force_authenticate(user=self.user1)
 
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
         response = self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
+            url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
-    def test_user_question_vote_edit_missing_field(self):
+    def test_user_can_cancel_upvote(self):
         self.client.force_authenticate(user=self.user2)
 
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
         self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
-        response = self.client.put(
-            url,
-            content_type="application/json",
-            data=json.dumps(self.vote_missing_field),
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_user_question_vote_edit_invalid_question(self):
-        self.client.force_authenticate(user=self.user2)
-
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1232/votes/"
-        self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
-        response = self.client.put(
-            url,
-            content_type="application/json",
-            data=json.dumps(self.vote_edit),
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_user_question_vote_edit_none_existing_vote(self):
-        self.client.force_authenticate(user=self.user2)
-
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
-        response = self.client.put(
-            url,
-            content_type="application/json",
-            data=json.dumps(self.vote_edit),
-        )
-        self.assertEqual(response.status_code, 400)
-
-    def test_user_question_vote_edit(self):
-        self.client.force_authenticate(user=self.user2)
-
-        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/votes/"
-        self.client.post(
-            url, content_type="application/json", data=json.dumps(self.vote)
-        )
-        response = self.client.put(
-            url,
-            content_type="application/json",
-            data=json.dumps(self.vote_edit),
-        )
+            url, content_type="application/json")
+        response = self.client.post(
+            url, content_type="application/json")
         self.assertEqual(response.status_code, 200)
+
+    def test_user_can_turn_downvote_to_upvote(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url_1 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
+        url_2 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
+        self.client.post(
+            url_1, content_type="application/json")
+        response = self.client.post(
+            url_2, content_type="application/json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_user_cannot_downvote_on_their_question(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
+        response = self.client.post(
+            url, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_other_users_can_downvote_on_a_question(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
+        response = self.client.post(
+            url, content_type="application/json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_user_invalid_question_downvote(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/downvote/"
+        response = self.client.post(
+            url, content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_can_cancel_downvote(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
+        self.client.post(
+            url, content_type="application/json")
+        response = self.client.post(
+            url, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_can_turn_upvote_to_downvote(self):
+        self.client.force_authenticate(user=self.user2)
+
+        url_1 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
+        url_2 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
+        self.client.post(
+            url_1, content_type="application/json")
+        response = self.client.post(
+            url_2, content_type="application/json")
+        self.assertEqual(response.status_code, 201)
