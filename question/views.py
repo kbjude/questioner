@@ -192,7 +192,7 @@ class OneQuestion(APIView):
             votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
             Mserializer = MeetingSerializer(meeting, many=True)
-                
+
             user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
             result["created_by_name"] = user.username
             result["meetup_name"] = Mserializer.data[0]["title"]
