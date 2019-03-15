@@ -27,7 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("User already exists")
         return value
 
-    def create(self, validated_data):
+    @classmethod
+    def create(cls, validated_data):
         user = User.objects.create_user(
             validated_data["username"],
             validated_data["email"],
@@ -51,7 +52,8 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ["username", "token", "password", "email"]
         extra_kwargs = {"password": {"write_only": True}}
 
-    def validate(self, data):
+    @classmethod
+    def validate(cls, data):
         user_obj = None
         username = data.get("username", None)
         password = data.get("password", None)
