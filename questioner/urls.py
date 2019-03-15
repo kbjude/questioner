@@ -44,7 +44,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("", views.Index.as_view(), name="welcome"),
     path("auth/login/", views.Login.as_view(), name="login"),
-    path("auth/logout/", views.Logout.as_view(), name="logout"),
     path("auth/signup/", views.SignUp.as_view(), name="signup"),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
