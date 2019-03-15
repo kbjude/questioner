@@ -9,14 +9,20 @@ class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
         fields = "__all__"
-        # fields = ('title', 'date', 'start', 'end', 'created_by')
 
 
 class MeetingTagSerializer(serializers.ModelSerializer):
     class Meta:
-        unique_together = (("tag", "meetup"),)
-
         model = MeetingTag
+
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset = model.objects.all(),
+                fields = ('tag', 'meetup'),
+                message = ("Tag already exists on meet up.")
+            )
+        ]
+
         fields = "__all__"
 
 

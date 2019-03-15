@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -22,9 +23,18 @@ class Questions(APIView):
     serializer_class = QuestionSerializer
 
     @classmethod
-    def get(self, request, meetup_id, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_description="Get all Questions for a meet up",
+        operation_id="Get all questions for a meetup",
+        responses={
+            200: QuestionSerializer(many=True),
+            400: "Invalid Meetup Id",
+        },
+    )
+    def get(self, request, meetup_id):
         """
-            method is for getting all questions of a meeting
+        get:
+        Get all Questions for a meet up
         """
 
         mymeeting = Meeting.objects.filter(id=meetup_id)
@@ -72,9 +82,20 @@ class Questions(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Create a question for a specific meetup.",
+        operation_id="Create a question for a specific meetup",
+        request_body=QuestionSerializer,
+        responses={
+            201: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
     def post(self, request, meetup_id):
         """
-            method is for adding a new question to a meeting
+        post:
+        Create a question for a specific meetup."
         """
 
         meeting = Meeting.objects.filter(id=meetup_id)
@@ -125,15 +146,27 @@ class Questions(APIView):
 
 class OneQuestion(APIView):
     """
-        this class helps with the following features;
-        - adding a new question to a meeting
-        - getting all questions of a particular meeting
+    get:
+    Get a question for a specific meetup."
+    put:
+    Update a question for a specific meetup."
+    delete:
+    Delete a question for a specific meetup."
     """
 
     permission_classes = (IsAuthenticated,)
     serializer_class = QuestionSerializer
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Get a question for a specific meetup.",
+        operation_id="Get a question for a specific meetup.",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
     def get(cls, request, meetup_id, question_id):
 
         meeting = Meeting.objects.filter(id=meetup_id)
@@ -185,6 +218,16 @@ class OneQuestion(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Update a question for a specific meetup.",
+        operation_id="Update a question for a specific meetup.",
+        request_body=QuestionSerializer,
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Format Data",
+            401: "Unauthorized Access",
+        },
+    )
     def put(cls, request, meetup_id, question_id):
         meeting = Meeting.objects.filter(id=meetup_id)
         if meeting.exists():
@@ -243,6 +286,16 @@ class OneQuestion(APIView):
         )
 
     @classmethod
+    @swagger_auto_schema(
+        operation_description="Delete a question for a specific meetup.",
+        operation_id="Delete a question for a specific meetup.",
+        responses={
+            200: QuestionSerializer(many=False),
+            400: "Invalid Meetup ID",
+            404: "Invalid Question ID",
+            401: "Unauthorized Access",
+        },
+    )
     def delete(cls, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             question = get_object_or_404(
@@ -288,8 +341,7 @@ class OneQuestion(APIView):
             {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-
-class Votes(APIView):
+class UpVote(APIView):
     permission_classes = (IsAuthenticated,)
     # serializer_class = VoteSerializer
 
@@ -304,14 +356,23 @@ class Votes(APIView):
                 data["question_id"] = question_id
                 data["voter_id"] = current_user.id
                 data["date_modified"] = timezone.now()
+                data['vote'] = 1
                 serializer = VoteSerializer(data=data)
-                voter_check_1 = Question.objects.filter(
-                    id=question_id, created_by=current_user.id
-                )
-                voter_check_2 = Vote.objects.filter(
-                    question_id=question_id, voter_id=current_user.id
-                )
-                if not voter_check_1 and not voter_check_2:
+                if not Question.objects.filter(id=question_id, created_by=current_user.id):
+                    my_vote = Vote.objects.filter(question_id=question_id, voter_id=current_user.id)
+                    my_vote_is_up = Vote.objects.filter(question_id=question_id, voter_id=current_user.id, vote=1)
+                    if my_vote:
+                        if my_vote_is_up:
+                            my_vote.delete()
+                            return Response(
+                                data={
+                                    "status": status.HTTP_200_OK,
+                                    "data": [{"success": "your up-vote has been cancelled"}],
+                                    },
+                                    status=status.HTTP_200_OK,
+                            )
+                        my_vote = get_object_or_404(Vote, question_id=question_id, voter_id=current_user.id, vote=-1)
+                        serializer = VoteSerializer(my_vote, data)
                     if serializer.is_valid():
                         serializer.save()
                         return Response(
@@ -319,19 +380,17 @@ class Votes(APIView):
                                 "status": status.HTTP_201_CREATED,
                                 "data": [
                                     {
-                                        "success": "Vote successfully added to question",
+                                        "vote": serializer.data,
+                                        "success": "you have up-voted this question",
                                     }
                                 ],
                             },
                             status=status.HTTP_201_CREATED,
                         )
-                    return Response(
-                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
-                    )
                 return Response(
                     {
                         "error": "vote rejected",
-                        "message": "either you already voted or question belongs to you",
+                        "message": "question belongs to you",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -340,8 +399,11 @@ class Votes(APIView):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+class DownVote(APIView):
+    permission_classes = (IsAuthenticated,)
+
     @classmethod
-    def put(self, request, meetup_id, question_id):
+    def post(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
@@ -349,37 +411,41 @@ class Votes(APIView):
                 data["question_id"] = question_id
                 data["voter_id"] = current_user.id
                 data["date_modified"] = timezone.now()
-                voter_check_1 = Question.objects.filter(
-                    id=question_id, created_by=current_user.id
-                )
-                voter_check_2 = Vote.objects.filter(
-                    question_id=question_id, voter_id=current_user.id
-                )
-                if not voter_check_1 and voter_check_2:
-                    vote = get_object_or_404(
-                        Vote, question_id=question_id, voter_id=current_user.id
-                    )
-                    serializer = VoteSerializer(vote, data)
+                data['vote'] = -1
+                serializer = VoteSerializer(data=data)
+                if not Question.objects.filter(id=question_id, created_by=current_user.id):
+                    my_vote = Vote.objects.filter(question_id=question_id, voter_id=current_user.id)
+                    my_vote_is_down = Vote.objects.filter(question_id=question_id, voter_id=current_user.id, vote=-1)
+                    if my_vote:
+                        if my_vote_is_down:
+                            my_vote.delete()
+                            return Response(
+                                data={
+                                    "status": status.HTTP_200_OK,
+                                    "data": [{"success": "your up-vote has been cancelled"}],
+                                    },
+                                    status=status.HTTP_200_OK,
+                            )
+                        my_vote = get_object_or_404(Vote, question_id=question_id, voter_id=current_user.id, vote=1)
+                        serializer = VoteSerializer(my_vote, data)
                     if serializer.is_valid():
                         serializer.save()
                         return Response(
                             data={
-                                "status": status.HTTP_200_OK,
+                                "status": status.HTTP_201_CREATED,
                                 "data": [
                                     {
-                                        "success": "Vote successfully edited",
+                                        "vote": serializer.data,
+                                        "success": "you have up-voted this question",
                                     }
                                 ],
                             },
-                            status=status.HTTP_200_OK,
+                            status=status.HTTP_201_CREATED,
                         )
-                    return Response(
-                        serializer.errors, status=status.HTTP_400_BAD_REQUEST
-                    )
                 return Response(
                     {
-                        "error": "vote edit rejected",
-                        "message": "either you have not voted yet or question belongs to you",
+                        "error": "vote rejected",
+                        "message": "question belongs to you",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
