@@ -290,16 +290,6 @@ class UpVote(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    @swagger_auto_schema(
-        operation_description="Upvote or Down vote",
-        operation_id="Upvote or Down vote on a Question",
-        request_body=VoteSerializer,
-        responses={
-            201: VoteSerializer(many=False),
-            401: "Unathorized Access",
-            400: "Bad Request",
-        },
-    )
     def post(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
@@ -356,16 +346,6 @@ class DownVote(APIView):
 
     @classmethod
     def post(self, request, meetup_id, question_id):
-    @swagger_auto_schema(
-        operation_description="Update vote",
-        operation_id="Update vote on a question.",
-        request_body=VoteSerializer,
-        responses={
-            200: VoteSerializer(many=False),
-            401: "Unathorized Access",
-            400: "Bad Request",
-        },
-    )
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
