@@ -1,13 +1,13 @@
 from django.shortcuts import get_object_or_404
-from django.http import Http404
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 from meetup.models import Meeting
 from question.models import Question, Vote, Comment
-from question.serializers import (QuestionSerializer, VoteSerializer, 
+from question.serializers import (QuestionSerializer, VoteSerializer,
                                   CommentSerializer)
 from question.permissions import IsOwnerOrReadOnly
 
@@ -345,7 +345,7 @@ class CommentList(APIView):
     def get(self, request, **kwargs):
         """Return a list of comments."""
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
-        question =  Question.objects.filter(id=self.kwargs['question_id'])
+        question = Question.objects.filter(id=self.kwargs['question_id'])
         if meetup:
             if not question:
                 return Response({
@@ -398,72 +398,66 @@ class CommentDetail(APIView):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            raise Http404
-
+            raise NotFound({"error": "Comment not found"})
 
     def get(self, request, pk, **kwargs):
         """Return a single comment to a question."""
-        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
-        question =  Question.objects.filter(id=self.kwargs['question_id'])
-        if meetup:
-            if question:
-                comment = self.get_object(pk)
-                serializer = CommentSerializer(comment)
-                return Response({
-                    "status": status.HTTP_200_OK,
-                    "comment":serializer.data
-                })
+        if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Question Not Found."
+                "error": "Meeting not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        return Response({
-            "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meetup Not Found."
-        }, status=status.HTTP_404_NOT_FOUND)
-
+        if not Question.objects.filter(id=self.kwargs['question_id']):
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        if Comment.objects.filter(question=self.kwargs['question_id']):
+            comment = self.get_object(pk)
+            serializer = CommentSerializer(comment)
+            return Response({
+                "status": status.HTTP_200_OK,
+                "comment":serializer.data
+            })
 
     def put(self, request, pk, **kwargs):
         """Update a single comment."""
-        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
-        question =  Question.objects.filter(id=self.kwargs['question_id'])
-        if meetup:
-            if question:
-                comment = self.get_object(pk)
-                serializer = CommentSerializer(comment, data=request.data)
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response({
-                        "status": status.HTTP_200_OK,
-                        "message": "Comment successfully updated."
-                    })
+        if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Question Not Found."
+                "error": "Meeting not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        return Response({
-            "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meetup Not Found."
-        }, status=status.HTTP_404_NOT_FOUND)
-
+        if not Question.objects.filter(id=self.kwargs['question_id']):
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        if Comment.objects.filter(question=self.kwargs['question_id']):
+            comment = self.get_object(pk)
+            serializer = CommentSerializer(comment, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    "status": status.HTTP_200_OK,
+                    "message": "Comment successfully updated."
+                })
 
     def delete(self, request, pk, **kwargs):
         """Delete a single question."""
-        meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
-        question =  Question.objects.filter(id=self.kwargs['question_id'])
-        if meetup:
-            if question:
-                comment = self.get_object(pk)
-                comment.delete()
-                return Response({
-                    "status": status.HTTP_204_NO_CONTENT,
-                    "message": "Comment successfully deleted."
-                }, status=status.HTTP_204_NO_CONTENT)
+        if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Question Not Found."
+                "error": "Meeting not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        return Response({
-            "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meetup Not Found."
-        }, status=status.HTTP_404_NOT_FOUND)
+        if not Question.objects.filter(id=self.kwargs['question_id']):
+            return Response({
+                "status": status.HTTP_404_NOT_FOUND,
+                "error": "Question not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        if Comment.objects.filter(question=self.kwargs['question_id']):
+            comment = self.get_object(pk)
+            comment.delete()
+            return Response({
+                "status": status.HTTP_204_NO_CONTENT,
+                "message": "Comment successfully deleted."
+            }, status=status.HTTP_204_NO_CONTENT)

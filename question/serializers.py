@@ -21,7 +21,7 @@ class VoteSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    
+
     comments = CommentSerializer(many=True, read_only=True)
     votes = VoteSerializer(many=True, read_only=True)
 
