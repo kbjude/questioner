@@ -3,20 +3,18 @@ import json
 from django.urls import reverse
 
 
-def test_cannot_anonymous_user_cannot_tag_to_meet_up(
-    api_client, db, meetup1, a_tag
-):
+def test_cannot_anonymous_user_cannot_tag_to_meet_up(api_client, db, meetup1, a_tag):
     response = api_client.post(
         reverse("meetingtags", kwargs={"meeting_id": meetup1.id}),
         content_type="application/json",
         data=json.dumps({"tag": a_tag.id}),
     )
 
-    if not response.status_code == 401:
+    if not response.status_code == 403:
         raise AssertionError()
 
     if not response.data == {
-        "status": 401,
+        "status": 403,
         "detail": "Authentication credentials were not provided.",
     }:
         raise AssertionError()
