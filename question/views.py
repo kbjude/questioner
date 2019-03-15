@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.db.models import ProtectedError, Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -8,7 +10,7 @@ from rest_framework.views import APIView
 
 from meetup.models import Meeting
 from question.models import Question, Vote
-from question.serializers import QuestionSerializer, VoteSerializer
+from question.serializers import QuestionSerializer, QuestionSerializerClass, VoteSerializer
 from meetup.serializers import MeetingSerializer
 
 
@@ -20,7 +22,7 @@ class Questions(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = QuestionSerializer
+    serializer_class = QuestionSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -63,19 +65,14 @@ class Questions(APIView):
                 votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
                 Mserializer = MeetingSerializer(mymeeting, many=True)
+                
+                user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+                result["created_by_name"] = user.username
+                           
+                result["meetup_name"] = Mserializer.data[0]["title"]
+                result["votes"] = votes
 
-                resultdata={}
-                resultdata["Id"] = result["id"]
-                resultdata["Title"] = result["title"]
-                resultdata["Body"] = result["body"]
-                resultdata["Meetup"] = Mserializer.data[0]["title"]
-                resultdata["Deleted"] = result["delete_status"]
-                resultdata["Created By"] = request.user.username
-                resultdata["Created On"] = result["date_created"]
-                resultdata["Last Updated on"] = result["date_modified"]
-                resultdata["votes"] = votes
-
-                all_questions.append(resultdata)
+                all_questions.append(result)
             return Response(all_questions)
         return Response(
             {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
@@ -110,9 +107,9 @@ class Questions(APIView):
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-            data={}
-            data["title"] = request.data.get("title", None)
-            data["body"] = request.data.get("body", None)
+            data = {}
+            for key in request.data:
+                data[key] = request.data[key]
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
 
@@ -123,8 +120,8 @@ class Questions(APIView):
 
                 serializer.save()
                 qn_dict = dict(serializer.data)
-                qn_dict["created_by"] = current_user.username
-                qn_dict["meetup_id"] = Mserializer.data[0]["title"]
+                qn_dict["created_by_name"] = current_user.username
+                qn_dict["meetup"] = Mserializer.data[0]["title"]
                 return Response(
                     data={
                         "status": status.HTTP_201_CREATED,
@@ -155,7 +152,7 @@ class OneQuestion(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = QuestionSerializer
+    serializer_class = QuestionSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -195,21 +192,17 @@ class OneQuestion(APIView):
             votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
             Mserializer = MeetingSerializer(meeting, many=True)
+                
+            user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+            result["created_by_name"] = user.username
+                        
+            result["meetup_name"] = Mserializer.data[0]["title"]
+            result["votes"] = votes
 
-            resultdata={}
-            resultdata["Id"] = result["id"]
-            resultdata["Title"] = result["title"]
-            resultdata["Body"] = result["body"]
-            resultdata["Meetup"] = Mserializer.data[0]["title"]
-            resultdata["Deleted"] = result["delete_status"]
-            resultdata["Created By"] = request.user.username
-            resultdata["Created On"] = result["date_created"]
-            resultdata["Last Updated on"] = result["date_modified"]
-            resultdata["votes"] = votes
             return Response(
                 data={
                     "status": status.HTTP_200_OK,
-                    "data": [{"question": resultdata}],
+                    "data": [{"question": result}],
                 },
                 status=status.HTTP_200_OK,
             )
@@ -250,11 +243,9 @@ class OneQuestion(APIView):
             serializer = QuestionSerializer(question, many=False)
 
             data=dict(serializer.data)
+            data["date_modified"] = timezone.now()
             data["title"] = request.data.get("title", None)
             data["body"] = request.data.get("body", None)
-            # data["meetup_id"] = meetup_id
-            # data["created_by"] = current_user.id
-            data["date_modified"] = timezone.now()
 
             serializer = QuestionSerializer(question, data)
             if serializer.is_valid():
@@ -263,8 +254,8 @@ class OneQuestion(APIView):
                 Mserializer = MeetingSerializer(meeting, many=True)
                 
                 qn_dict = dict(serializer.data)
-                qn_dict["created_by"] = current_user.username
-                qn_dict["meetup_id"] = Mserializer.data[0]["title"]
+                qn_dict["created_by_name"] = current_user.username
+                qn_dict["meetup_name"] = Mserializer.data[0]["title"]
                 return Response(
                     data={
                         "status": status.HTTP_200_OK,
@@ -343,10 +334,9 @@ class OneQuestion(APIView):
 
 class UpVote(APIView):
     permission_classes = (IsAuthenticated,)
-    # serializer_class = VoteSerializer
 
     @classmethod
-    def post(self, request, meetup_id, question_id):
+    def get(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
@@ -375,17 +365,21 @@ class UpVote(APIView):
                         serializer = VoteSerializer(my_vote, data)
                     if serializer.is_valid():
                         serializer.save()
+
+                        data = dict(serializer.data)
+                        data["voter"] = request.user.username
+
                         return Response(
                             data={
-                                "status": status.HTTP_201_CREATED,
+                                "status": status.HTTP_200_OK,
                                 "data": [
                                     {
-                                        "vote": serializer.data,
+                                        "vote": data,
                                         "success": "you have up-voted this question",
                                     }
                                 ],
                             },
-                            status=status.HTTP_201_CREATED,
+                            status=status.HTTP_200_OK,
                         )
                 return Response(
                     {
@@ -403,7 +397,7 @@ class DownVote(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    def post(self, request, meetup_id, question_id):
+    def get(self, request, meetup_id, question_id):
         if Meeting.objects.filter(id=meetup_id):
             if Question.objects.filter(id=question_id):
                 current_user = request.user
@@ -430,17 +424,21 @@ class DownVote(APIView):
                         serializer = VoteSerializer(my_vote, data)
                     if serializer.is_valid():
                         serializer.save()
+
+                        data = dict(serializer.data)
+                        data["voter"] = request.user.username
+
                         return Response(
                             data={
-                                "status": status.HTTP_201_CREATED,
+                                "status": status.HTTP_200_OK,
                                 "data": [
                                     {
-                                        "vote": serializer.data,
+                                        "vote": data,
                                         "success": "you have up-voted this question",
                                     }
                                 ],
                             },
-                            status=status.HTTP_201_CREATED,
+                            status=status.HTTP_200_OK,
                         )
                 return Response(
                     {
