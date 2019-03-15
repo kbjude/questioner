@@ -10,9 +10,9 @@ class Meeting(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
-
     def __str__(self):
         return (self.title)
+
 
 class Tag(models.Model):
     title = models.CharField(max_length=50, unique=True)
@@ -30,8 +30,6 @@ class MeetingTag(models.Model):
 
     class Meta:
         unique_together = ("tag", "meetup")
-
-
 
     def __str__(self):
         return f"{self.meetup}- {self.tag}"
