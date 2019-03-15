@@ -31,7 +31,6 @@ class SignUp(APIView):
                     "status": status.HTTP_201_CREATED,
                     "data": [
                         {
-                            "user_id": user.pk,
                             "username": user.username,
                             "email": user.email,
                             "is_admin": user.is_superuser,
@@ -61,7 +60,8 @@ class Login(APIView):
         serializer.is_valid(raise_exception=True)
 
         return Response(
-            data=serializer.data,
+            data={"Username":serializer.data['username'],
+                  "Email":serializer.data['email']},
             status=status.HTTP_200_OK
 
         )
@@ -90,7 +90,8 @@ class profile(APIView):
                 "data": [
                     {
 
-                        "user": serializer.data,
+                        "user": {"Username":serializer.data['username'],
+                                 "Email":serializer.data['email']}
 
                     }
                 ],
