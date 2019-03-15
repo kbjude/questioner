@@ -78,7 +78,7 @@ class TestQuestionViews(TestCase):
             content_type="application/json",
             data=json.dumps(self.question),
         )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(
             response.data["detail"],
             "Authentication credentials were not provided.",
@@ -263,10 +263,10 @@ class TestQuestionViews(TestCase):
         )
 
         self.assertEqual(response1.status_code, 400)
-        self.assertEqual(response1.data["title"][0], "This field is required.")
+        self.assertTrue("This field may not be null." in str(response1.data["title"][0]))
 
         self.assertEqual(response1.status_code, 400)
-        self.assertEqual(response2.data["body"][0], "This field is required.")
+        self.assertTrue("This field may not be null." in str(response2.data["body"][0]))
 
     def test_user_cannot_delete_question_created_by_another_user(self):
         self.client.force_authenticate(user=self.user2)
@@ -320,15 +320,15 @@ class TestQuestionViews(TestCase):
         self.client.force_authenticate(user=self.user2)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
     def test_user_invalid_question_upvote(self):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/upvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
@@ -336,7 +336,7 @@ class TestQuestionViews(TestCase):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
@@ -344,9 +344,9 @@ class TestQuestionViews(TestCase):
         self.client.force_authenticate(user=self.user2)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
-        self.client.post(
+        self.client.get(
             url, content_type="application/json")
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
@@ -355,17 +355,17 @@ class TestQuestionViews(TestCase):
 
         url_1 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
         url_2 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
-        self.client.post(
+        self.client.get(
             url_1, content_type="application/json")
-        response = self.client.post(
+        response = self.client.get(
             url_2, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
     def test_user_cannot_downvote_on_their_question(self):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
@@ -373,15 +373,15 @@ class TestQuestionViews(TestCase):
         self.client.force_authenticate(user=self.user2)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
     def test_user_invalid_question_downvote(self):
         self.client.force_authenticate(user=self.user1)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/1233/downvote/"
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
@@ -389,9 +389,9 @@ class TestQuestionViews(TestCase):
         self.client.force_authenticate(user=self.user2)
 
         url = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
-        self.client.post(
+        self.client.get(
             url, content_type="application/json")
-        response = self.client.post(
+        response = self.client.get(
             url, content_type="application/json")
         self.assertEqual(response.status_code, 200)
 
@@ -400,8 +400,8 @@ class TestQuestionViews(TestCase):
 
         url_1 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/upvote/"
         url_2 = f"/meetups/{int(self.qn_db.meetup_id.id)}/questions/{int(self.qn_db.id)}/downvote/"
-        self.client.post(
+        self.client.get(
             url_1, content_type="application/json")
-        response = self.client.post(
+        response = self.client.get(
             url_2, content_type="application/json")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
