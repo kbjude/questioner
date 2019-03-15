@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
-from .serializers import UserSerializer
+from .serializers import UserSerializer, LoginSerializer
 
 
 class Index(APIView):
@@ -84,17 +84,13 @@ class Login(APIView):
         serializer.is_valid(raise_exception=True)
 
         return Response(
-            data={"Username":serializer.data['username'],
-                  "Email":serializer.data['email']},
+            data={"Username": serializer.data['username'],
+                  "Email": serializer.data['email'],
+                  "token": serializer.data['token']},
             status=status.HTTP_200_OK
 
         )
 
-class Logout(APIView):
-    def get(self, request, format=None):
-        # simply delete the token to force a login
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
 
 # accounts/profile/
 class profile(APIView):
@@ -114,7 +110,7 @@ class profile(APIView):
                 "data": [
                     {
 
-                        "user": {"Username":serializer.data['username'],
+                        "user": {"Username": serializer.data['username'],
                                  "Email":serializer.data['email']}
 
                     }
