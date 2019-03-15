@@ -1,4 +1,4 @@
-import datetime
+
 from django.contrib.auth.models import User
 from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404
@@ -188,7 +188,7 @@ class AMeeting(APIView):
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            
+
             result = dict(serializer.data)
 
             user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
