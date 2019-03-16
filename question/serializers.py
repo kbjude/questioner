@@ -28,3 +28,4 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = "__all__"
+        read_only_fields = ["created_by", "meetup_id", "delete_status"]

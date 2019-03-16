@@ -50,26 +50,30 @@ Provide your credentials under the body tab
 
 ## Endpoints
 
-| Method        | Endpoint               | Description                |
-|:--------------|:-----------------------|:---------------------------|
-| GET           | /                      | Index                      |
-| POST          | /auth/login            | login                      |
-| POST          | /auth/signup           | signup                     |
-| **Questions** |                        |                            |
-| POST          | meetups/2/questions/   | Add a question             |
-| GET           | meetups/2/questions/   | Get all questions          |
-| GET           | meetups/2/questions/12 | Get question 12            |
-| PUT           | meetups/2/questions/12 | Update question 12         |
-| DELETE        | meetups/2/questions/12 | Delete question 12         |
-| **Meetups**   |                        |                            |
-| POST          | /meetups               | Add a meetup               |
-| GET           | /meetups               | Get all meetups            |
-| GET           | /meetups/2             | Get meetup 2               |
-| PUT           | /meetups/2             | Update meetup 2            |
-| DELETE        | /meetups/2             | Delete meetup 2            |
-| **Tags**      |                        |                            |
-| POST          | /tags                  | create a tag               |
-| GET           | /tags                  | Get all tags               |
-| DELETE        | /tags/2                | Delete tag 2               |
-| POST          | /meetups/tags          | Add tag 2 to meetup 2      |
-| DELETE        | /meetups/2/tags/2      | remove tag 2 from meetup 2 |
+| Method        | Endpoint                          | Description                |
+|:--------------|:--------------------------------- |:---------------------------|
+| **User**      |                                   |                            |
+| GET           | /                                 | Index                      |
+| POST          | /auth/login                       | login                      |
+| POST          | /auth/signup                      | signup                     |
+| **Meetups**   |                                   |                            |
+| POST          | /meetups                          | Add a meetup               |
+| GET           | /meetups                          | Get all meetups            |
+| GET           | /meetups/2                        | Get meetup 2               |
+| PUT           | /meetups/2                        | Update meetup 2            |
+| DELETE        | /meetups/2                        | Delete meetup 2            |
+| **Tags**      |                                   |                            |
+| POST          | /tags                             | create a tag               |
+| GET           | /tags                             | Get all tags               |
+| DELETE        | /tags/2                           | Delete tag 2               |
+| POST          | /meetups/tags                     | Add tag 2 to meetup 2      |
+| DELETE        | /meetups/2/tags/2                 | remove tag 2 from meetup 2 |
+| **Questions** |                                   |                            |
+| POST          | meetups/2/questions/              | Add a question             |
+| GET           | meetups/2/questions/              | Get all questions          |
+| GET           | meetups/2/questions/12            | Get question 12            |
+| PUT           | meetups/2/questions/12            | Update question 12         |
+| DELETE        | meetups/2/questions/12            | Delete question 12         |
+| **Votes**     |                                   |                            |
+| POST          | meetups/2/questions/12/upvote     | Upvote question 12         |
+| POST          | meetups/2/questions/12/downvote   | Downvote question 12       |

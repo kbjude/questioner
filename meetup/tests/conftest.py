@@ -43,6 +43,7 @@ def user2():
 def meetup1(admin_user):
     return Meeting.objects.create(
         title="The Django Meetup",
+        body="The Django meetup description",
         date="2019-03-07",
         start="10:21:39",
         end="12:21:39",

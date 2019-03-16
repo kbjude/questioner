@@ -10,7 +10,8 @@ class Question(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_modified = models.DateTimeField(auto_now_add=True)
-    meetup_id = models.ForeignKey(Meeting, on_delete=models.CASCADE)
+    meetup_id = models.ForeignKey(
+        Meeting, on_delete=models.CASCADE)
     delete_status = models.BooleanField(default=False)
 
     def __str__(self):
