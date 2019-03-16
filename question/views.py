@@ -422,42 +422,42 @@ class CommentDetail(APIView):
 
     def put(self, request, pk, **kwargs):
         """Update a single comment."""
-        if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
-            return Response({
-                "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meeting not found"
-            }, status=status.HTTP_404_NOT_FOUND)
-        if not Question.objects.filter(id=self.kwargs['question_id']):
+        if Meeting.objects.filter(id=self.kwargs['meetup_id']):
+            if Question.objects.filter(id=self.kwargs['question_id']):
+                if Comment.objects.filter(question=self.kwargs['question_id']):
+                    comment = self.get_object(pk)
+                    serializer = CommentSerializer(comment, data=request.data)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response({
+                            "status": status.HTTP_200_OK,
+                            "message": "Comment successfully updated."
+                        })
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
                 "error": "Question not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        if Comment.objects.filter(question=self.kwargs['question_id']):
-            comment = self.get_object(pk)
-            serializer = CommentSerializer(comment, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({
-                    "status": status.HTTP_200_OK,
-                    "message": "Comment successfully updated."
-                })
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meeting not found"
+        }, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, pk, **kwargs):
         """Delete a single question."""
-        if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
-            return Response({
-                "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meeting not found"
-            }, status=status.HTTP_404_NOT_FOUND)
-        if not Question.objects.filter(id=self.kwargs['question_id']):
+        if Meeting.objects.filter(id=self.kwargs['meetup_id']):
+            if Question.objects.filter(id=self.kwargs['question_id']):
+                if Comment.objects.filter(question=self.kwargs['question_id']):
+                    comment = self.get_object(pk)
+                    comment.delete()
+                    return Response({
+                        "status": status.HTTP_204_NO_CONTENT,
+                        "message": "Comment successfully deleted."
+                    }, status=status.HTTP_204_NO_CONTENT)
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
                 "error": "Question not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        if Comment.objects.filter(question=self.kwargs['question_id']):
-            comment = self.get_object(pk)
-            comment.delete()
-            return Response({
-                "status": status.HTTP_204_NO_CONTENT,
-                "message": "Comment successfully deleted."
-            }, status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            "status": status.HTTP_404_NOT_FOUND,
+            "error": "Meeting not found"
+        }, status=status.HTTP_404_NOT_FOUND)
