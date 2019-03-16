@@ -1,10 +1,9 @@
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
-from .serializers import UserSerializer
+from .serializers import UserSerializer, LoginSerializer
 
 
 class Index(APIView):
@@ -30,6 +29,8 @@ class SignUp(APIView):
     Register a user.
     """
 
+    serializer_class = UserSerializer
+
     @classmethod
     @swagger_auto_schema(
         operation_description="Create a user account.",
@@ -47,7 +48,6 @@ class SignUp(APIView):
                     "status": status.HTTP_201_CREATED,
                     "data": [
                         {
-                            "user_id": user.pk,
                             "username": user.username,
                             "email": user.email,
                             "is_admin": user.is_superuser,
@@ -62,11 +62,13 @@ class SignUp(APIView):
         )
 
 
-class Login(ObtainAuthToken):
+class Login(APIView):
     """
     post:
     login a user.
     """
+
+    serializer_class = LoginSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -76,17 +78,40 @@ class Login(ObtainAuthToken):
         responses={200: UserSerializer(many=False), 401: "Invalid Login"},
     )
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
+
+        serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token = Token.objects.get_or_create(user=user)[0]
+
+        return Response(
+            data={"Username": serializer.data['username'],
+                  "Email": serializer.data['email'],
+                  "token": serializer.data['token']},
+            status=status.HTTP_200_OK
+
+        )
+
+
+# accounts/profile/
+class profile(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @classmethod
+    def get(cls, request):
+
+        user = request.user
+        serializer = UserSerializer(user, many=False)
         return Response(
             data={
-                "status": 200,
-                "token": token.key,
-                "data": [{"user_id": user.pk, "email": user.email}],
+
+                "status": status.HTTP_200_OK,
+                "data": [
+                    {
+
+                        "user": {"Username": serializer.data['username'],
+                                 "Email":serializer.data['email']}
+
+                    }
+                ],
             },
             status=status.HTTP_200_OK,
         )

@@ -1,6 +1,6 @@
-import datetime
 
-from django.db.models import ProtectedError
+from django.contrib.auth.models import User
+from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -12,9 +12,9 @@ from rest_framework.views import APIView
 from .models import Meeting
 from .models import MeetingTag
 from .models import Tag
-from .serializers import MeetingSerializer
-from .serializers import MeetingTagSerializer
-from .serializers import TagSerializer
+from .serializers import MeetingSerializer, MeetingSerializerClass
+from .serializers import MeetingTagSerializer, MeetingTagSerializerClass
+from .serializers import TagSerializer, TagSerializerClass
 
 
 # list all meetup or create a new meetup
@@ -28,6 +28,7 @@ class MeetingList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -41,6 +42,9 @@ class MeetingList(APIView):
 
         meetupwithtags = []
         for meetup in serializer.data:
+
+            user = User.objects.filter(Q(id=meetup["created_by"])).distinct().first()
+            meetup["created_by_name"] = user.username
 
             meetingtags = MeetingTag.objects.filter(meetup=meetup["id"])
             serial_tags = MeetingTagSerializer(meetingtags, many=True)
@@ -83,19 +87,25 @@ class MeetingList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        data = request.data
-        data["created_by"] = request.user.id
-        data["created_at"] = str(datetime.datetime.now())
+        data = {}
+        for key in request.data:
+            data[key] = request.data[key]
+        data["created_by_name"] = request.user.id
 
         serializer = MeetingSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
             return Response(
                 data={
                     "status": status.HTTP_201_CREATED,
                     "data": [
                         {
-                            "meetup": serializer.data,
+                            "meetup": data,
                             "success": "Meet up created successfully",
                         }
                     ],
@@ -115,6 +125,7 @@ class MeetingList(APIView):
 # meetups/1
 class AMeeting(APIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -141,6 +152,9 @@ class AMeeting(APIView):
 
         result = serial_meeting.data
         result["tags"] = tags
+
+        user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+        result["created_by_name"] = user.username
 
         return Response(
             data={"status": status.HTTP_200_OK, "data": [{"meetup": result}]},
@@ -170,18 +184,22 @@ class AMeeting(APIView):
             )
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
-        data = request.data
-        data["created_by"] = request.user.id
 
         serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
             serializer.save()
+
+            result = dict(serializer.data)
+
+            user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
+            result["created_by_name"] = user.username
+
             return Response(
                 data={
                     "status": status.HTTP_200_OK,
                     "data": [
                         {
-                            "meetup": serializer.data,
+                            "meetup": result,
                             "success": "Meet updated successfully",
                         }
                     ],
@@ -240,6 +258,7 @@ class TagList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = TagSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -254,10 +273,18 @@ class TagList(APIView):
     def get(cls, request):
         tags = Tag.objects.all()
         serializer = TagSerializer(tags, many=True)
+
+        tags = []
+        for tag in serializer.data:
+
+            user = User.objects.filter(Q(id=tag["created_by"])).distinct().first()
+            tag["created_by_name"] = user.username
+            tags.append(tag)
+
         return Response(
             data={
                 "status": status.HTTP_200_OK,
-                "data": [{"tags": serializer.data}],
+                "data": [{"tags": tags}],
             },
             status=status.HTTP_200_OK,
         )
@@ -284,18 +311,23 @@ class TagList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        data = request.data
+        data={}
+        data["title"] = request.data.get("title", None)
         data["created_by"] = request.user.id
 
         serializer = TagSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
             return Response(
                 data={
                     "status": status.HTTP_201_CREATED,
                     "data": [
                         {
-                            "tag": serializer.data,
+                            "tag": data,
                             "success": "Tag created successfully",
                         }
                     ],
@@ -320,6 +352,7 @@ class ATag(APIView):
     """
 
     permission_classes = (IsAdminUser,)
+    serializer_class = TagSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -349,7 +382,6 @@ class ATag(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-
         except ProtectedError:
             tag.is_active = False
             tag.save()
@@ -367,11 +399,12 @@ class ATag(APIView):
 # /meetups/{meet_up_id}tags/
 class AddMeetupTag(APIView):
     """
-    put:
+    post:
     A tag to a meet up
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializerClass
 
     @classmethod
     @swagger_auto_schema(
@@ -388,7 +421,9 @@ class AddMeetupTag(APIView):
     )
     def post(cls, request, meeting_id):
 
-        data = request.data
+
+        data={}
+        data["tag"] = request.data["tag"]
         data["created_by"] = request.user.id
         data["meetup"] = meeting_id
         try:
@@ -416,12 +451,16 @@ class AddMeetupTag(APIView):
 
         elif serializer.is_valid():
             serializer.save()
+
+            data = dict(serializer.data)
+            data["created_by_name"] = request.user.username
+
             response = Response(
                 data={
                     "status": status.HTTP_201_CREATED,
                     "data": [
                         {
-                            "tag": serializer.data,
+                            "tag": data,
                             "success": "Tag successfully added to meetup",
                         }
                     ],
@@ -449,6 +488,7 @@ class AmeetupTag(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = MeetingTagSerializerClass
 
     @classmethod
     @swagger_auto_schema(

@@ -17,9 +17,9 @@ class MeetingTagSerializer(serializers.ModelSerializer):
 
         validators = [
             serializers.UniqueTogetherValidator(
-                queryset = model.objects.all(),
-                fields = ('tag', 'meetup'),
-                message = ("Tag already exists on meet up.")
+                queryset=model.objects.all(),
+                fields=('tag', 'meetup'),
+                message=("Tag already exists on meet up.")
             )
         ]
 
@@ -30,3 +30,33 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = "__all__"
+
+
+class TagSerializerClass(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
+        read_only_fields = ["created_by", "active"]
+
+
+class MeetingTagSerializerClass(serializers.ModelSerializer):
+    class Meta:
+        model = MeetingTag
+
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('tag', 'meetup'),
+                message=("Tag already exists on meet up.")
+            )
+        ]
+
+        fields = "__all__"
+        read_only_fields = ["created_by"]
+
+
+class MeetingSerializerClass(serializers.ModelSerializer):
+    class Meta:
+        model = Meeting
+        fields = "__all__"
+        read_only_fields = ["created_by"]

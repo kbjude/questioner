@@ -7,6 +7,7 @@ meetup = {
     "date": "2019-03-07",
     "start": "10:21:39",
     "end": "12:21:39",
+    "created_by":1
 }
 meetup_wrong = {"date": "2019-03-07", "start": "10:21:39", "end": "12:21:39"}
 
@@ -47,6 +48,7 @@ def test_post_meetup(api_client, db, admin_user):
                 "date": "2019-03-07",
                 "start": "10:21:39",
                 "end": "12:21:39",
+                "created_by":admin_user.id
             }
         ),
     )
@@ -76,7 +78,7 @@ def test_post_wrong_meetup(api_client, db, admin_user):
 
     if not response.data == {
         "status": 400,
-        "error": {"title": ["This field is required."]},
+        "error": {"title": ["This field is required."], "created_by": ["This field is required."]},
     }:
         raise AssertionError()
 
@@ -119,6 +121,8 @@ def test_non_admin_cannot_edit_meetup(api_client, db, user1, meetup1):
 def test_admin_can_edit_meetup(api_client, db, admin_user, meetup1):
     api_client.force_authenticate(user=admin_user)
 
+    meetup["created_by"] = admin_user.id
+
     response = api_client.put(
         reverse("meeting", kwargs={"meeting_id": meetup1.id}),
         content_type="application/json",
@@ -149,7 +153,8 @@ def test_edit_meetup_with_missing_data(api_client, db, admin_user, meetup1):
 
     if not response.data == {
         "status": 400,
-        "error": {"title": ["This field is required."]},
+        "error": {"title": ["This field is required."],
+                  "created_by": ["This field is required."]},
     }:
         raise AssertionError()
 

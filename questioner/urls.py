@@ -50,6 +50,9 @@ urlpatterns = [
     path("tags/", meetup_views.TagList.as_view(), name="tags"),
     path("tags/<int:tag_id>", meetup_views.ATag.as_view(), name="tag"),
     path("admin/", admin.site.urls),
+    path('accounts/', include('rest_framework.urls', namespace='rest_framework')),
+    path("accounts/signup/", views.SignUp.as_view(), name="signup2"),
+    path("accounts/profile/", views.profile.as_view(), name="signup2"),
     path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),
