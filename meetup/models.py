@@ -4,6 +4,7 @@ from django.db import models
 
 class Meeting(models.Model):
     title = models.CharField(max_length=50)
+    body = models.TextField()
     date = models.DateField(null=False)
     start = models.TimeField()
     end = models.TimeField()

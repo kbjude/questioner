@@ -4,10 +4,10 @@ from django.urls import reverse
 
 meetup = {
     "title": "Meetup title",
+    "body": "body of meetup this meetup",
     "date": "2019-03-07",
     "start": "10:21:39",
-    "end": "12:21:39",
-    "created_by":1
+    "end": "12:21:39"
 }
 meetup_wrong = {"date": "2019-03-07", "start": "10:21:39", "end": "12:21:39"}
 
@@ -21,6 +21,7 @@ def test_non_admin_user_cannot_create_meetup(api_client, db, user1):
         data=json.dumps(
             {
                 "title": "Meetup title",
+                "body": "body of meetup this meetup",
                 "date": "2019-03-07",
                 "start": "10:21:39",
                 "end": "12:21:39",
@@ -45,10 +46,10 @@ def test_post_meetup(api_client, db, admin_user):
         data=json.dumps(
             {
                 "title": "Meetup title",
+                "body": "body of meetup this meetup",
                 "date": "2019-03-07",
                 "start": "10:21:39",
-                "end": "12:21:39",
-                "created_by":admin_user.id
+                "end": "12:21:39"
             }
         ),
     )
@@ -78,7 +79,7 @@ def test_post_wrong_meetup(api_client, db, admin_user):
 
     if not response.data == {
         "status": 400,
-        "error": {"title": ["This field is required."], "created_by": ["This field is required."]},
+        "error": {"title": ["This field is required."], "body": ["This field is required."]},
     }:
         raise AssertionError()
 
@@ -153,8 +154,7 @@ def test_edit_meetup_with_missing_data(api_client, db, admin_user, meetup1):
 
     if not response.data == {
         "status": 400,
-        "error": {"title": ["This field is required."],
-                  "created_by": ["This field is required."]},
+        "error": {"title": ["This field is required."], "body": ["This field is required."], "created_by": ["This field is required."]},
     }:
         raise AssertionError()
 
