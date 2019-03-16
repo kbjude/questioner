@@ -144,7 +144,6 @@ class TestCommentDetail(APIUserAPITestCase):
         comment = Comment.objects.create(comment='blemishes only',
                                          question=self.question, created_by=self.user)
         data = {"comment": "life is cool", "question": 1}
-        self.user
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
         response = self.client.put(url, data, format="json")
