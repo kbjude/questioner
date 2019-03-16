@@ -33,4 +33,4 @@ class MeetingTag(models.Model):
         unique_together = ("tag", "meetup")
 
     def __str__(self):
-        return f"{self.meetup}- {self.tag}"
+        return (self.tag)
