@@ -31,14 +31,22 @@ class Vote(models.Model):
 class Comment(models.Model):
     """This class represents the comment model."""
 
-    question = models.ForeignKey(Question, related_name='comments',
-                                 on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     comment = models.TextField()
-    created_by = models.ForeignKey(User, related_name='comments',
-                                   on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        """Return a readable representation of the comment model instance."""
-        return "{}".format(self.comment)
+        return (self.comment)
+
+
+class Mycomment(models.Model):
+    comment = models.TextField()
+    date_modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = False
+
+    def __str__(self):
+        return (self.comment)
