@@ -91,6 +91,7 @@ class MeetingList(APIView):
         for key in request.data:
             data[key] = request.data[key]
         data["created_by_name"] = request.user.id
+        data["created_by"] = request.user.id
 
         serializer = MeetingSerializer(data=data)
 
