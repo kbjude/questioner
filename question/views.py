@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from meetup.models import Meeting
 from question.models import Question, Vote, Comment
-from question.serializers import QuestionSerializer, QuestionSerializerClass, VoteSerializer, CommentSerializer
+from question.serializers import (QuestionSerializer, QuestionSerializerClass,
+                                  VoteSerializer, CommentSerializer, CommentSerializerclass)
 from meetup.serializers import MeetingSerializer
 from question.permissions import IsOwnerOrReadOnly
 
@@ -459,6 +460,7 @@ class CommentList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = CommentSerializerclass
 
     def get(self, request, **kwargs):
         """Return a list of comments."""
@@ -472,9 +474,17 @@ class CommentList(APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
             queryset = Comment.objects.filter(question=self.kwargs['question_id'])
             serializer = CommentSerializer(queryset, many=True)
+
+            data=[]
+            for comment in serializer.data:
+                user = User.objects.filter(Q(username=comment["created_by"])).distinct().first()
+                comment["created_by_id"]=user.id
+                comment["question_name"]=question.first().title
+                data.append(comment)
+
             return Response({
                 "status": status.HTTP_200_OK,
-                "comments":serializer.data
+                "comments":data
             })
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
@@ -492,12 +502,18 @@ class CommentList(APIView):
                     "status": status.HTTP_404_NOT_FOUND,
                     "error": "Question Not Found."
                 }, status=status.HTTP_404_NOT_FOUND)
-            serializer = CommentSerializer(data=request.data)
+            
+            data={}
+            data["question"]=question.first().id
+            data["comment"]=request.data["comment"]
+            
+            serializer = CommentSerializer(data=data)
             if serializer.is_valid():
-                serializer.save(
-                    created_by=self.request.user,
-                    question_id=self.kwargs['question_id'])
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer.save(created_by_id=request.user.id,)
+                data=dict(serializer.data)
+                data["created_by_id"]=request.user.id
+                data["question_name"]=question.first().title
+                return Response(data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
@@ -511,6 +527,7 @@ class CommentDetail(APIView):
     """
 
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    serializer_class = CommentSerializerclass
 
     def get_object(self, pk):
         try:
@@ -525,7 +542,9 @@ class CommentDetail(APIView):
                 "status": status.HTTP_404_NOT_FOUND,
                 "error": "Meeting not found"
             }, status=status.HTTP_404_NOT_FOUND)
-        if not Question.objects.filter(id=self.kwargs['question_id']):
+
+        question=Question.objects.filter(id=self.kwargs['question_id'])
+        if not question:
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
                 "error": "Question not found"
@@ -533,24 +552,34 @@ class CommentDetail(APIView):
         if Comment.objects.filter(question=self.kwargs['question_id']):
             comment = self.get_object(pk)
             serializer = CommentSerializer(comment)
+
+            data=dict(serializer.data)
+            user = User.objects.filter(Q(username=data["created_by"])).distinct().first()
+            data["created_by_id"]=user.id
+            data["question_name"]=question.first().title
+
             return Response({
                 "status": status.HTTP_200_OK,
-                "comment":serializer.data
+                "comment":data
             })
 
     def put(self, request, pk, **kwargs):
         """Update a single comment."""
         if Meeting.objects.filter(id=self.kwargs['meetup_id']):
             if Question.objects.filter(id=self.kwargs['question_id']):
-                if Comment.objects.filter(question=self.kwargs['question_id']):
-                    comment = self.get_object(pk)
-                    serializer = CommentSerializer(comment, data=request.data)
-                    if serializer.is_valid():
-                        serializer.save()
-                        return Response({
-                            "status": status.HTTP_200_OK,
-                            "message": "Comment successfully updated."
-                        })
+                comment = self.get_object(pk)
+
+                serializer = CommentSerializer(comment, many=False)
+                data=dict(serializer.data)
+                data["comment"] = request.data["comment"]
+
+                serializer = CommentSerializer(comment, data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({
+                        "status": status.HTTP_200_OK,
+                        "message": "Comment successfully updated."
+                    })
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
                 "error": "Question not found"
