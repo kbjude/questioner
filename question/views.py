@@ -471,7 +471,7 @@ class CommentList(APIView):
                 return Response(
                     {
                         "status": status.HTTP_404_NOT_FOUND,
-                        "error": "Question Not Found."
+                        "error": "Question not found."
                     },
                     status=status.HTTP_404_NOT_FOUND
                 )
@@ -480,13 +480,13 @@ class CommentList(APIView):
             return Response(
                 {
                     "status": status.HTTP_200_OK,
-                    "comments":serializer.data
+                    "comments": serializer.data
                 }
             )
         return Response(
             {
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meetup Not Found."
+                "error": "Meetup not found."
             },
             status=status.HTTP_404_NOT_FOUND
         )
@@ -504,24 +504,30 @@ class CommentList(APIView):
                         created_by=self.request.user,
                         question_id=self.kwargs['question_id'])
                     return Response(
-                        serializer.data,
+                        {
+                            "comment": serializer.data,
+                            "message": "Comment successfully created."
+                        },
                         status=status.HTTP_201_CREATED
                     )
                 return Response(
-                    serializer.errors,
+                    {
+                        "status": status.HTTP_400_BAD_REQUEST,
+                        "error": "Fields cannot be left empty or missing."
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question Not Found."
+                    "error": "Question not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
         return Response(
             {
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meetup Not Found."
+                "error": "Meetup not found."
             },
             status=status.HTTP_404_NOT_FOUND
         )
@@ -539,7 +545,7 @@ class CommentDetail(APIView):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            raise NotFound({"error": "Comment not found"})
+            raise NotFound({"error": "Comment not found."})
 
     def get(self, request, pk, **kwargs):
         """Return a single comment to a question."""
@@ -547,7 +553,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Meeting Not Found."
+                    "error": "Meetup not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -555,7 +561,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question Not Found"
+                    "error": "Question not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -575,7 +581,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Meeting not found"
+                    "error": "Meetup not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -583,7 +589,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question not found"
+                    "error": "Question not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -616,14 +622,14 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question not found"
+                    "error": "Question not found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
         return Response(
             {
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meeting not found"
+                "error": "Meetup not found."
             },
             status=status.HTTP_404_NOT_FOUND
         )

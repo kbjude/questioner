@@ -47,12 +47,14 @@ class TestCommentList(APIUserAPITestCase):
         url = reverse('comment', kwargs={'meetup_id': 100, 'question_id': 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Meetup not found.')
 
     @pytest.mark.django_db
     def test_get_comment_list_with_invalid_question(self):
         url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 100})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Question not found.')
 
     @pytest.mark.django_db
     def test_post_a_comment(self):
@@ -63,6 +65,7 @@ class TestCommentList(APIUserAPITestCase):
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()['message'], 'Comment successfully created.')
 
     @pytest.mark.django_db
     def test_post_a_comment_with_invalid_meetup(self):
@@ -73,6 +76,7 @@ class TestCommentList(APIUserAPITestCase):
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Meetup not found.')
 
     @pytest.mark.django_db
     def test_post_a_comment_with_invalid_question(self):
@@ -83,15 +87,18 @@ class TestCommentList(APIUserAPITestCase):
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Question not found.')
 
     @pytest.mark.django_db
-    def test_can_post_a_comment_with_missing_field(self):
+    def test_post_a_comment_with_missing_field(self):
         url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 1})
         data = {
             "question": 1
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['error'],
+                         'Fields cannot be left empty or missing.')
 
 
 class TestCommentDetail(APIUserAPITestCase):
@@ -114,6 +121,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 120, 'question_id': 1, 'pk': comment.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Meetup not found.')
 
     @pytest.mark.django_db
     def test_get_a_comment_with_invalid_question(self):
@@ -123,6 +131,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 1, 'question_id': 199, 'pk': comment.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Question not found.')
 
     @pytest.mark.django_db
     def test_get_a_missing_comment(self):
@@ -135,7 +144,7 @@ class TestCommentDetail(APIUserAPITestCase):
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': 1000})
         response = self.client.get(url)
-        self.assertEqual(response.json()['error'], 'Comment not found')
+        self.assertEqual(response.json()['error'], 'Comment not found.')
 
     @pytest.mark.django_db
     def test_update_a_comment(self):
@@ -146,6 +155,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['message'], 'Comment successfully updated.')
 
     @pytest.mark.django_db
     def test_update_a_comment_with_invalid_meetup(self):
@@ -156,6 +166,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 127, 'question_id': 1, 'pk': comment.id})
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Meetup not found.')
 
     @pytest.mark.django_db
     def test_update_a_comment_with_invalid_question(self):
@@ -166,6 +177,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 1, 'question_id': 211, 'pk': comment.id})
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Question not found.')
 
     @pytest.mark.django_db
     def test_delete_a_single_comment(self):
@@ -175,6 +187,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Comment.objects.count(), 0)
 
     @pytest.mark.django_db
     def test_delete_a_comment_with_invalid_meetup(self):
@@ -184,6 +197,7 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 100, 'question_id': 1, 'pk': comment.id})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Meetup not found.')
 
     @pytest.mark.django_db
     def test_delete_a_comment_with_invalid_question(self):
@@ -193,3 +207,4 @@ class TestCommentDetail(APIUserAPITestCase):
                       kwargs={'meetup_id': 1, 'question_id': 100, 'pk': comment.id})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()['error'], 'Question not found.')
