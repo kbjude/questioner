@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from question.models import Question, Comment
 from meetup.models import Meeting
+from question.serializers import CommentSerializer
 
 
 
@@ -134,9 +135,10 @@ class TestCommentDetail(APIUserAPITestCase):
     def test_get_a_missing_comment(self):
         comment = Comment.objects.create(comment='blemishes only',
                                          question=self.question, created_by=self.user)
+        serializer = (CommentSerializer, comment)
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': 1000})
-        response = self.client.put(url)
+        response = self.client.get(url)
         self.assertEqual(response.json()['error'], 'Comment not found')
 
     @pytest.mark.django_db
