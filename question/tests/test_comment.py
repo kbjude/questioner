@@ -5,12 +5,10 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from question.models import Question, Comment
 from meetup.models import Meeting
-from question.serializers import CommentSerializer
 
 
 
 UserModel = get_user_model()
-
 
 class APIUserAPITestCase(APITestCase):
     """Test suite for the comment API views."""
