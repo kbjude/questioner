@@ -497,7 +497,7 @@ class CommentList(APIView):
         meetup = Meeting.objects.filter(id=self.kwargs['meetup_id'])
         question = Question.objects.filter(id=self.kwargs['question_id'])
         if meetup:
-            if question: 
+            if question:
                 serializer = CommentSerializer(data=request.data)
                 if serializer.is_valid():
                     serializer.save(
@@ -547,7 +547,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Meeting not found"
+                    "error": "Meeting Not Found."
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -555,7 +555,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question not found"
+                    "error": "Question Not Found"
                 },
                 status=status.HTTP_404_NOT_FOUND
             )

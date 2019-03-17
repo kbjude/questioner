@@ -5,7 +5,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Custom permission class to allow only question owners update them.
     """
-   
+
     @classmethod
     def has_object_permission(cls, request, view, obj):
         # Read permissions are allowed to any request
