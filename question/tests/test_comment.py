@@ -133,9 +133,12 @@ class TestCommentDetail(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_get_a_missing_comment(self):
-        comment = Comment.objects.create(comment='blemishes only',
-                                         question=self.question, created_by=self.user)
-        serializer = (CommentSerializer, comment)
+        url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 1})
+        data = {
+            "comment": "blabla....",
+            "question": 1
+        }
+        self.client.post(url, data, format="json")
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': 1000})
         response = self.client.get(url)

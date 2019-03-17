@@ -565,7 +565,7 @@ class CommentDetail(APIView):
             return Response(
                 {
                     "status": status.HTTP_200_OK,
-                    "comment":serializer.data
+                    "comment": serializer.data
                 }
             )
 
