@@ -144,7 +144,7 @@ class TestCommentDetail(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_update_a_comment(self):
-        comment = Comment.objects.create(comment='blemishes only',
+        comment = Comment.objects.create(comment='uganda zabu',
                                          question=self.question, created_by=self.user)
         data = {"comment": "life is cool", "question": 1}
         url = reverse('comment_detail',
@@ -154,11 +154,11 @@ class TestCommentDetail(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_update_a_comment_with_invalid_meetup(self):
-        comment = Comment.objects.create(comment='blemishes only',
+        comment = Comment.objects.create(comment='what kind of qn is this?',
                                          question=self.question, created_by=self.user)
-        data = {"comment": "life is cool", "question": 1}
+        data = {"comment": 'What kind of Qusetion is this?', "question": 1}
         url = reverse('comment_detail',
-                      kwargs={'meetup_id': 113, 'question_id': 1, 'pk': comment.id})
+                      kwargs={'meetup_id': 127, 'question_id': 1, 'pk': comment.id})
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
