@@ -532,9 +532,10 @@ class CommentDetail(APIView):
     Retrieve, update or delete a comment instance.
     """
 
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
 
-    def get_object(self, pk):
+    @classmethod
+    def get_object(cls, pk):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
