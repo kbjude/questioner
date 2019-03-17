@@ -7,7 +7,6 @@ from question.models import Question, Comment
 from meetup.models import Meeting
 
 
-
 UserModel = get_user_model()
 
 class APIUserAPITestCase(APITestCase):
@@ -104,7 +103,7 @@ class TestCommentDetail(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_get_a_single_comment(self):
-        comment = Comment.objects.create(comment='blemishes only',
+        comment = Comment.objects.create(comment='Add more color',
                                          question=self.question, created_by=self.user)
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
@@ -174,7 +173,7 @@ class TestCommentDetail(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_delete_a_single_comment(self):
-        comment = Comment.objects.create(comment='blemishes only',
+        comment = Comment.objects.create(comment='Question not clear',
                                          question=self.question, created_by=self.user)
         url = reverse('comment_detail',
                       kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
