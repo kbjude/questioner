@@ -17,13 +17,9 @@ class APIUserAPITestCase(APITestCase):
         """Define the test client and other test variables."""
 
         # Create user
-        self.user = UserModel.objects.create(
-            username='test', email='test@test.com', password='test123')
+        self.user = UserModel.objects.create(username='test')
         # Create superuser
-        self.admin = UserModel.objects.create(
-            username='admin', email='admin@example.com', password='admin12345',
-            is_superuser=True
-        )
+        self.admin = UserModel.objects.create(username='admin', is_superuser=True)
         # Create meetup
         self.meetup = Meeting.objects.create(
             id=1, title='The Django Meetup', date='2019-03-07', start='10:21:39',
