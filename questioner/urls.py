@@ -14,21 +14,53 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
-from rest_framework.urlpatterns import format_suffix_patterns
 from django.conf.urls import include
+from django.contrib import admin
 from django.urls import path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.urlpatterns import format_suffix_patterns
+
 from meetup import views as meetup_views
 from . import views
 
+
+api_info = openapi.Info(
+    title="Questioner API",
+    default_version="v1",
+    description=(
+        "Crowd-source questions for a meetup. Questioner "
+        "helps the meetup organizer prioritize"
+        "questions to be answered. Other users can vote "
+        "on asked questions and they bubble to the top "
+        "or bottom of the log. description"
+    ),
+    license=openapi.License(name="Andela License"),
+)
+schema_view = get_schema_view(
+    public=True, permission_classes=(permissions.AllowAny,)
+)
 urlpatterns = [
     path("", views.Index.as_view(), name="welcome"),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
-    path('tags/', meetup_views.TagList.as_view(), name='tags'),
-    path('tags/<int:tag_id>', meetup_views.ATag.as_view(), name='tag'),
-    path('admin/', admin.site.urls),
-
+    path("tags/", meetup_views.TagList.as_view(), name="tags"),
+    path("tags/<int:tag_id>", meetup_views.ATag.as_view(), name="tag"),
+    path("admin/", admin.site.urls),
+    path('accounts/', include('rest_framework.urls', namespace='rest_framework')),
+    path("accounts/signup/", views.SignUp.as_view(), name="signup2"),
+    path("accounts/profile/", views.profile.as_view(), name="signup2"),
+    path(
+        "docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path(
+        "redoc/",
+        schema_view.with_ui("redoc", cache_timeout=0),
+        name="schema-redoc",
+    ),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+format_suffix_patterns(urlpatterns, suffix_required=False, allowed=None)

@@ -8,7 +8,15 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = "__all__"
 
+
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = "__all__"
+
+
+class QuestionSerializerClass(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = "__all__"
+        read_only_fields = ["created_by", "meetup_id", "delete_status"]
