@@ -47,6 +47,3 @@ class Mycomment(models.Model):
 
     class Meta:
         managed = False
-
-    def __str__(self):
-        return (self.comment)
