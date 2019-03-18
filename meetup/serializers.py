@@ -8,11 +8,7 @@ from .models import Tag
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
-<<<<<<< HEAD
-        fields = '__all__'
-=======
         fields = "__all__"
->>>>>>> upstream/develop
 
 
 class MeetingTagSerializer(serializers.ModelSerializer):
