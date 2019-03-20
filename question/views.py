@@ -502,7 +502,7 @@ class CommentList(APIView):
                     "status": status.HTTP_404_NOT_FOUND,
                     "error": "Question not found."
                 }, status=status.HTTP_404_NOT_FOUND)
-            
+
             data={}
             data["question"]=question.first().id
             data["comment"]=request.data.get("comment")
