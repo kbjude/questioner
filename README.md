@@ -54,8 +54,8 @@ Provide your credentials under the body tab
 |:--------------|:--------------------------------- |:---------------------------|
 | **User**      |                                   |                            |
 | GET           | /                                 | Index                      |
-| POST          | /auth/login                       | login                      |
-| POST          | /auth/signup                      | signup                     |
+| POST          | /accounts/login                   | login                      |
+| POST          | /accounts/signup                  | signup                     |
 | **Meetups**   |                                   |                            |
 | POST          | /meetups                          | Add a meetup               |
 | GET           | /meetups                          | Get all meetups            |

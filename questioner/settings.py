@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "question.apps.QuestionConfig",
+    "accounts.apps.AccountsConfig",
     "rest_framework_swagger",
     "drf_yasg",
 ]
@@ -148,7 +149,6 @@ SWAGGER_SETTINGS = {
             "type": "apiKey",
             "name": "Token Authorization",
             "in": "header",
-            "bearerFormat": "JWT",
         }
     },
 }

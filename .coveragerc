@@ -10,6 +10,7 @@ omit =
   */__init__.py
   \Users\Bison\AppData\*
   */meetup/tests/*
+  */users/tests/*
   */wsgi.py
   */travis_ci_settings.py
   */manage.py

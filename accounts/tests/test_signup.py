@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 
 
-class TestLogin(APITestCase):
-    def test_login_with_wrong_email(self):
+class TestSignup(APITestCase):
+    def test_signup_with_wrong_email(self):
         """
         Ensure we cannot signup with wrong email.
         """
@@ -25,7 +25,7 @@ class TestLogin(APITestCase):
             username="user1", email="user1@questioner.com", is_superuser=False)
         self.client.force_authenticate(user=data)
 
-        url = "/accounts/profile/"
+        url = reverse('profile')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
