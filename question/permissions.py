@@ -1,22 +1,27 @@
-# from rest_framework import permissions
+from rest_framework import permissions
 
 
-# class IsOwnerOrReadOnly(permissions.BasePermission):
-#     """
-#     Custom permission class to allow only question owners update them.
-#     """
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission class to allow only question owners update them.
+    """
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     @classmethod
     def has_object_permission(cls, request, view, obj):
+=======
+    def has_object_permission(self, request, view, obj):
+>>>>>>> parent of 06356ca... Update permissions.py
         # Read permissions are allowed to any request
         if request.method in permissions.SAFE_METHODS:
             return True
         # Write permissions are only allowed to the owner
         return obj.created_by == request.user
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> parent of 8b363b8... Update permissions.py
@@ -40,3 +45,5 @@
 >>>>>>> parent of 8b363b8... Update permissions.py
 =======
 >>>>>>> parent of 8b363b8... Update permissions.py
+=======
+>>>>>>> parent of 06356ca... Update permissions.py
