@@ -41,7 +41,6 @@ class Comment(models.Model):
 
     def __str__(self):
         """Return a readable representation of the comment model instance."""
-        return "{}".format(self.comment)
         return (self.comment)
 
 
