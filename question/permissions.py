@@ -9,6 +9,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     @classmethod
     def has_object_permission(cls, request, view, obj):
         # Read permissions are allowed to any request
@@ -21,6 +22,8 @@
 >>>>>>> parent of 8b363b8... Update permissions.py
 =======
 >>>>>>> parent of 8b363b8... Update permissions.py
+=======
+>>>>>>> parent of 8b363b8... Update permissions.py
 #     def has_object_permission(self, request, view, obj):
 #         # Read permissions are allowed to any request
 #         if request.method in permissions.SAFE_METHODS:
@@ -29,6 +32,9 @@
 #         return obj.created_by == request.user
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 8b363b8... Update permissions.py
+=======
 >>>>>>> parent of 8b363b8... Update permissions.py
 =======
 >>>>>>> parent of 8b363b8... Update permissions.py
