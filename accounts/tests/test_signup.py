@@ -51,7 +51,7 @@ class TestSignup(APITestCase):
 
     def test_signup_user_with_common_password(self):
         """
-        Ensure user cannot signup with a password 
+        Ensure user cannot signup with a password
         similar to his username or among common passwords.
         """
         data = {"username": "bisonlou", "password": 'bison',
