@@ -90,22 +90,15 @@ class TestCommentList(APIUserAPITestCase):
         self.assertEqual(response.json()['error'], 'Question not found.')
 
     @pytest.mark.django_db
-<<<<<<< HEAD
     def test_post_a_comment_with_missing_field(self):
-=======
-    def test_can_post_a_comment_with_missing_field(self):
->>>>>>> parent of 9ddf587... Update test_comment.py
         url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 1})
         data = {
             "question": 1
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-<<<<<<< HEAD
         self.assertEqual(response.json()['error'],
                          'Fields cannot be left empty or missing.')
-=======
->>>>>>> parent of 9ddf587... Update test_comment.py
 
 
 class TestCommentDetail(APIUserAPITestCase):

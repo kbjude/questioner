@@ -186,7 +186,12 @@ class AMeeting(APIView):
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
 
-        serializer = MeetingSerializer(meetup, data=request.data)
+        data = {}
+        for key in request.data:
+            data[key] = request.data[key]
+        data["created_by"] = meetup.created_by.pk
+
+        serializer = MeetingSerializer(meetup, data=data)
         if serializer.is_valid():
             serializer.save()
 
@@ -384,7 +389,7 @@ class ATag(APIView):
                 status=status.HTTP_200_OK,
             )
         except ProtectedError:
-            tag.is_active = False
+            tag.active = False
             tag.save()
             response = Response(
                 data={
