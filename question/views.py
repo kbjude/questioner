@@ -506,7 +506,7 @@ class CommentList(APIView):
             data={}
             data["question"]=question.first().id
             data["comment"]=request.data.get("comment")
-            
+
             serializer = CommentSerializer(data=data)
             if serializer.is_valid():
                 serializer.save(created_by_id=request.user.id,)
@@ -535,7 +535,8 @@ class CommentDetail(APIView):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     serializer_class = CommentSerializerclass
 
-    def get_object(self, pk):
+    @classmethod
+    def get_object(cls, pk):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
