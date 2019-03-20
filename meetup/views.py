@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from .models import Meeting
 from tag.models import MeetingTag, Tag
 from .serializers import MeetingSerializer, MeetingSerializerClass
-from tag.serializers import MeetingTagSerializer, TagSerializer
+from tag.serializers import MeetingTagSerializer
 
 
 # list all meetup or create a new meetup
