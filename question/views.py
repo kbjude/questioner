@@ -470,7 +470,7 @@ class CommentList(APIView):
             if not question:
                 return Response({
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question Not Found."
+                    "error": "Question not found."
                 }, status=status.HTTP_404_NOT_FOUND)
             queryset = Comment.objects.filter(question=self.kwargs['question_id'])
             serializer = CommentSerializer(queryset, many=True)
@@ -488,7 +488,7 @@ class CommentList(APIView):
             })
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meetup Not Found."
+            "error": "Meetup not found."
         }, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -500,12 +500,12 @@ class CommentList(APIView):
             if not question:
                 return Response({
                     "status": status.HTTP_404_NOT_FOUND,
-                    "error": "Question Not Found."
+                    "error": "Question not found."
                 }, status=status.HTTP_404_NOT_FOUND)
             
             data={}
             data["question"]=question.first().id
-            data["comment"]=request.data["comment"]
+            data["comment"]=request.data.get("comment")
             
             serializer = CommentSerializer(data=data)
             if serializer.is_valid():
@@ -513,14 +513,17 @@ class CommentList(APIView):
                 data=dict(serializer.data)
                 data["created_by_id"]=request.user.id
                 data["question_name"]=question.first().title
-                return Response(data, status=status.HTTP_201_CREATED)
+                return Response({
+                                    "comment": data,
+                                    "message": "Comment successfully created."
+                                }, status=status.HTTP_201_CREATED)
             return Response({
                         "status": status.HTTP_400_BAD_REQUEST,
                         "error": "Fields cannot be left empty or missing."
                     }, status=status.HTTP_400_BAD_REQUEST)
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meetup Not Found."
+            "error": "Meetup not found."
         }, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -536,21 +539,21 @@ class CommentDetail(APIView):
         try:
             return Comment.objects.get(pk=pk)
         except Comment.DoesNotExist:
-            raise NotFound({"error": "Comment not found"})
+            raise NotFound({"error": "Comment not found."})
 
     def get(self, request, pk, **kwargs):
         """Return a single comment to a question."""
         if not Meeting.objects.filter(id=self.kwargs['meetup_id']):
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Meeting not found"
+                "error": "Meetup not found."
             }, status=status.HTTP_404_NOT_FOUND)
 
         question=Question.objects.filter(id=self.kwargs['question_id'])
         if not question:
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Question not found"
+                "error": "Question not found."
             }, status=status.HTTP_404_NOT_FOUND)
         if Comment.objects.filter(question=self.kwargs['question_id']):
             comment = self.get_object(pk)
@@ -585,11 +588,11 @@ class CommentDetail(APIView):
                     })
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
-                "error": "Question not found"
+                "error": "Question not found."
             }, status=status.HTTP_404_NOT_FOUND)
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
-            "error": "Meeting not found"
+            "error": "Meetup not found."
         }, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, pk, **kwargs):
