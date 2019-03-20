@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, LoginSerializer
+from django.contrib.auth.password_validation import ValidationError
 
 
 class SignUp(APIView):
@@ -24,7 +25,15 @@ class SignUp(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            try:
+                user = serializer.save()
+            except ValidationError as errors:
+                return Response(
+                        data={"status": 400,
+                              "errors": [errors]
+                              },
+                        status=status.HTTP_400_BAD_REQUEST,
+                )
 
             return Response(
                 data={
