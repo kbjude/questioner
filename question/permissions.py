@@ -7,7 +7,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     """
 
     @classmethod
-    def has_object_permission(cls, request, view, obj):
+    def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request
         if request.method in permissions.SAFE_METHODS:
             return True
