@@ -1,20 +1,14 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.contrib.auth.models import User
-from django.db.models import Q
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound
 
 from meetup.models import Meeting
 from question.models import Question
 from vote.models import Vote
 from vote.serializers import VoteSerializer
-from question.permissions import IsOwnerOrReadOnly
-
 
 class UpVote(APIView):
     permission_classes = (IsAuthenticated,)
