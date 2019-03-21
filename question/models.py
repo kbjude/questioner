@@ -15,7 +15,7 @@ class Question(models.Model):
     delete_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return (self.title, self.body)  # pragma: no cover
+        return f"{self.title}, {self.body}"  # pragma: no cover
 
 
 class Vote(models.Model):
@@ -25,7 +25,7 @@ class Vote(models.Model):
     date_voted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return (self.voter_id, self.vote)  # pragma: no cover
+        return f"{self.voter_id}, {self.vote}"  # pragma: no cover
 
 
 class Comment(models.Model):

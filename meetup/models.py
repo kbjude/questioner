@@ -12,7 +12,7 @@ class Meeting(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
-        return (self.title)
+        return f"{self.title}"
 
 
 class Tag(models.Model):
@@ -21,7 +21,7 @@ class Tag(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return (self.title)
+        return f"{self.title}"
 
 
 class MeetingTag(models.Model):
@@ -33,4 +33,4 @@ class MeetingTag(models.Model):
         unique_together = ("tag", "meetup")
 
     def __str__(self):
-        return (self.tag)
+        return f"{self.tag}"
