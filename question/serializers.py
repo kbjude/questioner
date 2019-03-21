@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from question.models import Question, Vote, Comment
+from question.models import Question, Comment
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -12,20 +12,12 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = "__all__"
 
-
 class QuestionSerializer(serializers.ModelSerializer):
 
     comments = CommentSerializer(many=True, read_only=True)
     class Meta:
         model = Question
         fields = "__all__"
-
-
-class VoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Vote
-        fields = "__all__"
-
 
 class QuestionSerializerClass(serializers.ModelSerializer):
     class Meta:
