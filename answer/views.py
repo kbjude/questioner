@@ -18,6 +18,7 @@ class CreateReadAnswers(APIView):
 
     permission_classes = (IsAuthenticated,)
 
+    @classmethod
     def post(self, request, meetup_id, question_id, format=None):
         """
         Creates an answer for a specific question.
@@ -73,6 +74,7 @@ class CreateReadAnswers(APIView):
             )
         return response
 
+    @classmethod
     def get(self, request, meetup_id, question_id, format=None):
         """
         Creates an answer for a specific question.
@@ -113,6 +115,7 @@ class EditDeleteAnswers(APIView):
 
     permission_classes = (IsAuthenticated,)
 
+    @classmethod
     def delete(self, request, meetup_id, question_id, answer_id):
         response = None
         current_user = request.user
@@ -161,7 +164,7 @@ class EditDeleteAnswers(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return response
-
+    @classmethod
     def put(self, request, meetup_id, question_id, answer_id):
         response = None
         current_user = request.user
