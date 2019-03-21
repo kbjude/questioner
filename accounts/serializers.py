@@ -1,34 +1,33 @@
-from django.contrib.auth.models import User
-from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from django.db.models import Q
+from rest_framework import serializers
+from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from rest_framework.validators import UniqueValidator
+from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())],
+        validators=[UniqueValidator(queryset=User.objects.all(),
+                                    message='email already in use')
+                    ],
+
     )
     username = serializers.CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(),
+                                    message='username already in use')
+                    ],
     )
-    password = serializers.CharField(min_length=8)
-
-    def validate_username(self, value):
-        ModelClass = self.Meta.model
-        if ModelClass.objects.filter(username=value).exists():
-            raise serializers.ValidationError("User already exists")
-        return value
-
-    def validate_email(self, value):
-        ModelClass = self.Meta.model
-        if ModelClass.objects.filter(email=value).exists():
-            raise serializers.ValidationError("User already exists")
-        return value
+    password = serializers.CharField()
 
     @classmethod
     def create(cls, validated_data):
+        validate_password(validated_data["password"],
+                          user=None,
+                          password_validators=None)
+
         user = User.objects.create_user(
             validated_data["username"],
             validated_data["email"],
