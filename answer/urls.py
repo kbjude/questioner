@@ -1,6 +1,6 @@
 from django.urls import path
 
-from answer.views import CreateReadAnswers,EditDeleteAnswers
+from answer.views import CreateReadAnswers, EditDeleteAnswers
 
 urlpatterns = [
     path(
