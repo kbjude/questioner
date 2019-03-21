@@ -9,7 +9,7 @@ class Answers(models.Model):
     body = models.TextField(null=False, blank=False)
     meetup = models.ForeignKey(Meeting, on_delete=models.PROTECT)
     question = models.ForeignKey(Question, on_delete=models.PROTECT)
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT,to_field='username')
     created_at = models.DateTimeField(auto_now_add=True)
 
 

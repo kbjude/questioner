@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Answers
+from question.serializers import QuestionSerializer
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -8,6 +9,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answers
+
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=model.objects.all(),

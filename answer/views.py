@@ -40,7 +40,7 @@ class CreateReadAnswers(APIView):
         try:
             question = Question.objects.get(id=question_id, meetup_id=meetup_id)
             data  = request.data
-            data['created_by'] = request.user.id
+            data['created_by'] = request.user.username
             data['question'] = question_id
             data['meetup'] = meetup_id
             serializer = AnswerSerializer(data = data)
@@ -50,7 +50,7 @@ class CreateReadAnswers(APIView):
                     data = {
                         "status": 201,
                         "data":[{
-                            "answer": serializer.data,
+                            "answers": serializer.data,
                             "success": "Answer added successfully"
 
                         }],
@@ -66,6 +66,37 @@ class CreateReadAnswers(APIView):
                     status = status.HTTP_400_BAD_REQUEST
                 )
 
+        except Question.DoesNotExist:
+
+            response = Response(
+                data ={
+                    "status": 404,
+                    "error": "Meetup or question does not exist"
+                },
+                status = status.HTTP_404_NOT_FOUND
+            )
+        return response
+
+    def get(self, request, meetup_id, question_id, format=None):
+        """
+        Creates an answer for a specific question.
+        Only staff can answer a question
+        """
+        response = None
+        try:
+            question = Question.objects.get(id=question_id, meetup_id=meetup_id)
+            answers = Answers.objects.filter(question=question_id,meetup=meetup_id)
+            serializer = AnswerSerializer(answers, many=True)
+            response = Response(
+                data = {
+                    "status": 200,
+                    "data":[{
+                        "answers": serializer.data,
+
+                    }],
+                },
+                status = status.HTTP_200_OK
+            )
         except Question.DoesNotExist:
 
             response = Response(

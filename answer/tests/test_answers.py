@@ -159,7 +159,7 @@ def test_admin_user_can_answer_a_question_with_valid_data(api_client, db,questio
         not response.status_code == 201
         or not response.data['status'] == 201
         or not response.data['data'][0]['success'] == "Answer added successfully"
-        or not response.data['data'][0]['answer']['body'] == "Django is a Python framework"
+        or not response.data['data'][0]['answers']['body'] == "Django is a Python framework"
     ):
         raise AssertionError()
 
