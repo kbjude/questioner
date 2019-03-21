@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from meetup.models import Meeting
-from question.models import Question, Vote, Comment
+from question.models import Question, Comment
+from vote.models import Vote
 from question.serializers import (QuestionSerializer, QuestionSerializerClass,
                                   CommentSerializer, CommentSerializerclass)
 from meetup.serializers import MeetingSerializer
