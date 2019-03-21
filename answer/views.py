@@ -40,7 +40,7 @@ class CreateReadAnswers(APIView):
             )
             data = request.data
             data["created_by"] = request.user.username
-            data["question"] = question_id
+            data["question"] = question.id
             data["meetup"] = meetup_id
             serializer = AnswerSerializer(data=data)
             if serializer.is_valid():
