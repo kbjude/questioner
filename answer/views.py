@@ -1,12 +1,11 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Answers
-from question.models import Question
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from answer.serializers import AnswerSerializer
+from question.models import Question
+from .models import Answers
 
 
 class CreateReadAnswers(APIView):
@@ -132,7 +131,7 @@ class EditDeleteAnswers(APIView):
                 id=answer_id, meetup=meetup_id, question_id=question_id
             )
             if not current_user.is_superuser and not str(
-                answer.created_by
+                    answer.created_by
             ) == str(current_user.username):
                 response = Response(
                     data={

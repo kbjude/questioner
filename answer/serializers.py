@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from .models import Answers
-from question.serializers import QuestionSerializer
 
 
 class AnswerSerializer(serializers.ModelSerializer):

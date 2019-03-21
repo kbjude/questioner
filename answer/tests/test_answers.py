@@ -1,9 +1,10 @@
 import json
+
 from django.urls import reverse
 
 
 def test_anonymous_user_cannot_answer_a_question(
-    api_client, db, question1, meetup1
+        api_client, db, question1, meetup1
 ):
     response = api_client.post(
         reverse(
@@ -24,7 +25,7 @@ def test_anonymous_user_cannot_answer_a_question(
 
 
 def test_non_staff_user_cannot_answer_a_question(
-    api_client, db, question1, meetup1, user1
+        api_client, db, question1, meetup1, user1
 ):
     api_client.force_authenticate(user=user1)
     response = api_client.post(
@@ -46,7 +47,7 @@ def test_non_staff_user_cannot_answer_a_question(
 
 
 def test_admin_user_cannot_answer_a_question_with_invalid_meetup_or_quesiton_id(
-    api_client, db, question1, meetup1, admin_user
+        api_client, db, question1, meetup1, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response1 = api_client.post(
@@ -77,7 +78,7 @@ def test_admin_user_cannot_answer_a_question_with_invalid_meetup_or_quesiton_id(
 
 
 def test_admin_user_cannot_answer_a_question_with_invalid_data(
-    api_client, db, question1, meetup1, admin_user
+        api_client, db, question1, meetup1, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response1 = api_client.post(
@@ -97,18 +98,18 @@ def test_admin_user_cannot_answer_a_question_with_invalid_data(
         data=json.dumps({"body": ""}),
     )
     if (
-        not response1.status_code == 400
-        # or not response2.status_code == 400
-        or not response1.data
-        == {"status": 400, "error": {"body": ["This field is required."]}}
-        or not response2.data
-        == {"status": 400, "error": {"body": ["This field may not be blank."]}}
+            not response1.status_code == 400
+            # or not response2.status_code == 400
+            or not response1.data
+                   == {"status": 400, "error": {"body": ["This field is required."]}}
+            or not response2.data
+                   == {"status": 400, "error": {"body": ["This field may not be blank."]}}
     ):
         raise AssertionError()
 
 
 def test_admin_user_can_answer_a_question_with_valid_data(
-    api_client, db, question1, meetup1, admin_user
+        api_client, db, question1, meetup1, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(
@@ -121,18 +122,18 @@ def test_admin_user_can_answer_a_question_with_valid_data(
     )
 
     if (
-        not response.status_code == 201
-        or not response.data["status"] == 201
-        or not response.data["data"][0]["success"]
-        == "Answer added successfully"
-        or not response.data["data"][0]["answers"]["body"]
-        == "Django is a Python framework"
+            not response.status_code == 201
+            or not response.data["status"] == 201
+            or not response.data["data"][0]["success"]
+                   == "Answer added successfully"
+            or not response.data["data"][0]["answers"]["body"]
+                   == "Django is a Python framework"
     ):
         raise AssertionError()
 
 
 def test_admin_user_cannot_add_a_duplicate_answer_to_a_question(
-    api_client, db, answered_question, admin_user
+        api_client, db, answered_question, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response = api_client.post(

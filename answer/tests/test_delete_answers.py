@@ -6,7 +6,7 @@ from django.urls import reverse
 
 
 def test_anonymous_user_cannot_delete_an_answer(
-    api_client, db, answered_question
+        api_client, db, answered_question
 ):
     response = api_client.delete(
         reverse(
@@ -29,7 +29,7 @@ def test_anonymous_user_cannot_delete_an_answer(
 
 
 def test_non_Staff_user_cannot_delete_an_answer(
-    api_client, db, user1, answered_question
+        api_client, db, user1, answered_question
 ):
     api_client.force_authenticate(user=user1)
     response = api_client.delete(
@@ -53,7 +53,7 @@ def test_non_Staff_user_cannot_delete_an_answer(
 
 
 def test_Staff_user_cannot_delete_an_answer_with_invalid_answer_id(
-    api_client, db, user1, answered_question
+        api_client, db, user1, answered_question
 ):
     api_client.force_authenticate(user=answered_question.created_by)
     response = api_client.delete(
@@ -74,7 +74,7 @@ def test_Staff_user_cannot_delete_an_answer_with_invalid_answer_id(
 
 
 def test_admin_user_can_delete_any_answer(
-    api_client, db, admin_user, answered_question
+        api_client, db, admin_user, answered_question
 ):
     api_client.force_authenticate(user=admin_user)
     response = api_client.delete(
@@ -95,7 +95,7 @@ def test_admin_user_can_delete_any_answer(
 
 
 def test_staff_cannot_delete__an_answer_created_by_another_staff_them(
-    api_client, db, staff2, answered_question
+        api_client, db, staff2, answered_question
 ):
     api_client.force_authenticate(user=staff2)
     response = api_client.delete(
@@ -119,7 +119,7 @@ def test_staff_cannot_delete__an_answer_created_by_another_staff_them(
 
 
 def test_staff_can_delete_answer_created_by_them(
-    api_client, db, staff1, answered_question
+        api_client, db, staff1, answered_question
 ):
     api_client.force_authenticate(user=answered_question.created_by)
     response = api_client.delete(

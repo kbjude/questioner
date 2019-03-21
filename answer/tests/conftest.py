@@ -1,9 +1,8 @@
 import pytest
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from question.models import Question
-from meetup.models import Meeting
+
 from answer.models import Answers
+from meetup.models import Meeting
+from question.models import Question
 
 
 @pytest.mark.django_db

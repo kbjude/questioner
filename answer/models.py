@@ -1,7 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import User
-from question.models import Question
+from django.db import models
+
 from meetup.models import Meeting
+from question.models import Question
 
 
 class Answers(models.Model):

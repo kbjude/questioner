@@ -1,9 +1,8 @@
-import json
 from django.urls import reverse
 
 
 def test_anonymous_user_cannot_get_answers_to_a_question(
-    api_client, db, question1, meetup1
+        api_client, db, question1, meetup1
 ):
     response = api_client.get(
         reverse(
@@ -22,7 +21,7 @@ def test_anonymous_user_cannot_get_answers_to_a_question(
 
 
 def test_authenticated_user_cannot_get_answers_to_a_question_with_invalid_meetup_or_quesiton_id(
-    api_client, db, question1, meetup1, admin_user
+        api_client, db, question1, meetup1, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response1 = api_client.get(
@@ -49,7 +48,7 @@ def test_authenticated_user_cannot_get_answers_to_a_question_with_invalid_meetup
 
 
 def test_authenticated_user_can_get_answers_to__a_question(
-    api_client, db, question1, meetup1, admin_user
+        api_client, db, question1, meetup1, admin_user
 ):
     api_client.force_authenticate(user=admin_user)
     response = api_client.get(
@@ -60,8 +59,8 @@ def test_authenticated_user_can_get_answers_to__a_question(
     )
 
     if (
-        not response.status_code == 200
-        or not response.data["status"] == 200
-        or not response.data["data"][0]["answers"] == []
+            not response.status_code == 200
+            or not response.data["status"] == 200
+            or not response.data["data"][0]["answers"] == []
     ):
         raise AssertionError()
