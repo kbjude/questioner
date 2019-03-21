@@ -19,7 +19,7 @@ class CreateReadAnswers(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    def post(self, request, meetup_id, question_id, format=None):
+    def post(cls, request, meetup_id, question_id, format=None):
         """
         Creates an answer for a specific question.
         Only staff can answer a question
@@ -75,7 +75,7 @@ class CreateReadAnswers(APIView):
         return response
 
     @classmethod
-    def get(self, request, meetup_id, question_id, format=None):
+    def get(cls, request, meetup_id, question_id, format=None):
         """
         Creates an answer for a specific question.
         Only staff can answer a question
@@ -86,7 +86,7 @@ class CreateReadAnswers(APIView):
                 id=question_id, meetup_id=meetup_id
             )
             answers = Answers.objects.filter(
-                question=question_id, meetup=meetup_id
+                question=question.id, meetup=question.meetup_id
             )
             serializer = AnswerSerializer(answers, many=True)
             response = Response(
