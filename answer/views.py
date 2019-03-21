@@ -13,10 +13,6 @@ class CreateReadAnswers(APIView):
     Create an answer to a specific question
     get:
     Get answers to a specific question
-    put:
-    Edit an answer to a specific question
-    delete:
-    Delete an answer to a specific question
     """
 
     permission_classes = (IsAuthenticated,)
@@ -103,6 +99,74 @@ class CreateReadAnswers(APIView):
                 data ={
                     "status": 404,
                     "error": "Meetup or question does not exist"
+                },
+                status = status.HTTP_404_NOT_FOUND
+            )
+        return response
+
+class EditDeleteAnswers(APIView):
+    """
+    put:
+    Edit an answer to a specific question
+    delete:
+    Delete an answer to a specific question
+    """
+    permission_classes = (IsAuthenticated,)
+
+
+
+
+    def delete(self, request, meetup_id, question_id, answer_id):
+        response = None
+        current_user = request.user
+
+        if not current_user.is_staff:
+            return Response(
+                data = {
+                "status": 401,
+                "error": "Only staff are allowed to delete answers"
+                },
+                status = status.HTTP_401_UNAUTHORIZED
+            )
+
+        try:
+            answer = Answers.objects.get(
+                id=answer_id,
+                meetup=meetup_id,
+                question_id=question_id
+            )
+            if (
+                not current_user.is_superuser
+                and not str(answer.created_by) == str(current_user.username)
+
+            ):
+                response = Response(
+                    data={
+                        "status": status.HTTP_401_UNAUTHORIZED,
+                        "error": "You cannot delete an answer created by another user",
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            else:
+                answer.delete()
+                response =  Response(
+                    data={
+                        "status": status.HTTP_200_OK,
+                        "data": [
+                            {
+                                "success": "Answer deleted deleted",
+                                "status": status.HTTP_200_OK,
+                            }
+                        ],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+        except Answers.DoesNotExist:
+            response = Response(
+                data ={
+                    "status": 404,
+                    "error": "Answer does not exist"
                 },
                 status = status.HTTP_404_NOT_FOUND
             )

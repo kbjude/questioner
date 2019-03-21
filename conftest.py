@@ -33,3 +33,18 @@ def user2():
     return get_user_model().objects.create(
         username="user2", email="user2@questioner.com", is_superuser=False
     )
+
+
+@pytest.mark.django_db
+@pytest.fixture
+def staff1():
+    return get_user_model().objects.create(
+        username="staff1", email="staff1@questioner.com", is_staff = True
+    )
+
+@pytest.mark.django_db
+@pytest.fixture
+def staff2():
+    return get_user_model().objects.create(
+        username="staff2", email="staff2@questioner.com", is_staff = True,is_superuser=False
+    )

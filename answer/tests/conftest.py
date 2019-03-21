@@ -31,10 +31,10 @@ def meetup1(admin_user):
 
 @pytest.mark.django_db
 @pytest.fixture
-def answered_question(admin_user,question1,meetup1):
+def answered_question(staff1,question1,meetup1):
     return Answers.objects.create(
         body="Django is a Python framework",
-        created_by=admin_user,
+        created_by=staff1,
         meetup = meetup1,
         question = question1
     )
