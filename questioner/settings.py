@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "rest_framework_swagger",
     "drf_yasg",
+    "answer.apps.AnswersConfig",
 ]
 
 REST_FRAMEWORK = {
@@ -151,7 +152,6 @@ SWAGGER_SETTINGS = {
             "type": "apiKey",
             "name": "Token Authorization",
             "in": "header",
-            "bearerFormat": "JWT",
         }
     },
 }
