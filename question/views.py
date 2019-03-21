@@ -13,7 +13,6 @@ from question.models import Question, Vote, Comment
 from question.serializers import (QuestionSerializer, QuestionSerializerClass,
                                   VoteSerializer, CommentSerializer, CommentSerializerclass)
 from meetup.serializers import MeetingSerializer
-from question.permissions import IsOwnerOrReadOnly
 
 
 class Questions(APIView):
@@ -31,7 +30,7 @@ class Questions(APIView):
         operation_description="Get all Questions for a meet up",
         operation_id="Get all questions for a meetup",
         responses={
-            200: QuestionSerializer(many=True),
+            200: "QuestionSerializer(many=True)",
             400: "Invalid Meetup Id",
         },
     )
@@ -41,8 +40,8 @@ class Questions(APIView):
         Get all Questions for a meet up
         """
 
-        mymeeting = Meeting.objects.filter(id=meetup_id)
-        if mymeeting.exists():
+        mymeeting = Meeting.objects.filter(id=meetup_id).first()
+        if mymeeting:
             questions = Question.objects.filter(meetup_id=meetup_id)
             serializer = QuestionSerializer(questions, many=True)
             results = serializer.data
@@ -66,12 +65,12 @@ class Questions(APIView):
                 )
                 votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
-                Mserializer = MeetingSerializer(mymeeting, many=True)
+                Mserializer = MeetingSerializer(mymeeting, many=False)
 
                 user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
                 result["created_by_name"] = user.username
 
-                result["meetup_name"] = Mserializer.data[0]["title"]
+                result["meetup_name"] = Mserializer.data["title"]
                 result["votes"] = votes
 
                 all_questions.append(result)
@@ -97,8 +96,8 @@ class Questions(APIView):
         Create a question for a specific meetup."
         """
 
-        meeting = Meeting.objects.filter(id=meetup_id)
-        if meeting.exists():
+        meeting = Meeting.objects.filter(id=meetup_id).first()
+        if meeting:
             current_user = request.user
             if current_user.is_superuser:
                 return Response(
@@ -115,7 +114,7 @@ class Questions(APIView):
             data["meetup_id"] = meetup_id
             data["created_by"] = current_user.id
 
-            Mserializer = MeetingSerializer(meeting, many=True)
+            Mserializer = MeetingSerializer(meeting, many=False)
 
             serializer = QuestionSerializer(data=data)
             if serializer.is_valid():
@@ -123,7 +122,7 @@ class Questions(APIView):
                 serializer.save()
                 qn_dict = dict(serializer.data)
                 qn_dict["created_by_name"] = current_user.username
-                qn_dict["meetup"] = Mserializer.data[0]["title"]
+                qn_dict["meetup"] = Mserializer.data["title"]
                 return Response(
                     data={
                         "status": status.HTTP_201_CREATED,
@@ -168,8 +167,8 @@ class OneQuestion(APIView):
     )
     def get(cls, request, meetup_id, question_id):
 
-        meeting = Meeting.objects.filter(id=meetup_id)
-        if meeting.exists():
+        meeting = Meeting.objects.filter(id=meetup_id).first()
+        if meeting:
             question = get_object_or_404(
                 Question, id=question_id, meetup_id=meetup_id
             )
@@ -193,11 +192,11 @@ class OneQuestion(APIView):
             )
             votes = [{"up votes": up_votes, "down votes": dwn_votes}]
 
-            Mserializer = MeetingSerializer(meeting, many=True)
+            Mserializer = MeetingSerializer(meeting, many=False)
 
             user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
             result["created_by_name"] = user.username
-            result["meetup_name"] = Mserializer.data[0]["title"]
+            result["meetup_name"] = Mserializer.data["title"]
             result["votes"] = votes
 
             return Response(
@@ -223,8 +222,8 @@ class OneQuestion(APIView):
         },
     )
     def put(cls, request, meetup_id, question_id):
-        meeting = Meeting.objects.filter(id=meetup_id)
-        if meeting.exists():
+        meeting = Meeting.objects.filter(id=meetup_id).first()
+        if meeting:
             current_user = request.user
             if current_user.is_superuser:
                 return Response(
@@ -252,11 +251,11 @@ class OneQuestion(APIView):
             if serializer.is_valid():
                 serializer.save()
 
-                Mserializer = MeetingSerializer(meeting, many=True)
+                Mserializer = MeetingSerializer(meeting, many=False)
 
                 qn_dict = dict(serializer.data)
                 qn_dict["created_by_name"] = current_user.username
-                qn_dict["meetup_name"] = Mserializer.data[0]["title"]
+                qn_dict["meetup_name"] = Mserializer.data["title"]
                 return Response(
                     data={
                         "status": status.HTTP_200_OK,
@@ -532,7 +531,7 @@ class CommentDetail(APIView):
     Retrieve, update or delete a comment instance.
     """
 
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (IsAuthenticated,)
     serializer_class = CommentSerializerclass
 
     @classmethod
