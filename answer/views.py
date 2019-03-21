@@ -116,7 +116,7 @@ class EditDeleteAnswers(APIView):
     permission_classes = (IsAuthenticated,)
 
     @classmethod
-    def delete(self, request, meetup_id, question_id, answer_id):
+    def delete(cls, request, meetup_id, question_id, answer_id):
         response = None
         current_user = request.user
 
@@ -165,7 +165,7 @@ class EditDeleteAnswers(APIView):
             )
         return response
     @classmethod
-    def put(self, request, meetup_id, question_id, answer_id):
+    def put(cls, request, meetup_id, question_id, answer_id):
         response = None
         current_user = request.user
 
