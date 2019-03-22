@@ -184,7 +184,6 @@ class TestQuestionViews(TestCase):
 
     def test_user_can_get_meetup_questions(self):
         self.client.force_authenticate(user=self.user1)
-
         url = f"/meetups/{self.meetup.id}/questions/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

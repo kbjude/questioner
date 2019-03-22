@@ -1,11 +1,11 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
-from question.models import Question, Comment
-from meetup.models import Meeting
 
+from meetup.models import Meeting
+from question.models import Question, Comment
 
 UserModel = get_user_model()
 
@@ -38,6 +38,12 @@ class TestCommentList(APIUserAPITestCase):
 
     @pytest.mark.django_db
     def test_get_comment_list(self):
+        url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 1})
+        data = {
+            "comment": "blabla....",
+            "question": 1
+        }
+        self.client.post(url, data, format="json")
         url = reverse('comment', kwargs={'meetup_id': 1, 'question_id': 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
