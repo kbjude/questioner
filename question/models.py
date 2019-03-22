@@ -17,6 +17,7 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.title}, {self.body}"  # pragma: no cover
 
+
 class Comment(models.Model):
     """This class represents the comment model."""
 

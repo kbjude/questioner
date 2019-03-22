@@ -4,7 +4,3 @@ from .models import Question, Comment
 
 admin.site.register(Question)
 admin.site.register(Comment)
-
-
-
-# Register your models here.

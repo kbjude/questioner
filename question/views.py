@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import Q
+from operator import itemgetter
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
@@ -73,10 +74,12 @@ class Questions(APIView):
                 result["created_by_name"] = user.username
 
                 result["meetup_name"] = Mserializer.data["title"]
+                result["order_by"] = up_votes
                 result["votes"] = votes
 
                 all_questions.append(result)
-            return Response(all_questions)
+            return_list = sorted(all_questions, key=itemgetter('order_by'), reverse=True)
+            return Response(return_list)
         return Response(
             {"error": "invalid meetup id"}, status=status.HTTP_400_BAD_REQUEST
         )

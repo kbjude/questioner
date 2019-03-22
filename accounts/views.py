@@ -1,5 +1,7 @@
 from rest_framework import status
+from django.contrib.auth import login
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
@@ -73,6 +75,8 @@ class Login(APIView):
 
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = User.objects.get(username=serializer.data['username'])
+        login(request, user)
 
         return Response(
             data={"Username": serializer.data['username'],

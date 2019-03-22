@@ -29,8 +29,6 @@ def user1():
         username="user1", email="user1@questioner.com", is_superuser=False
     )
 
-
-
 @pytest.mark.django_db
 @pytest.fixture
 def staff1():
