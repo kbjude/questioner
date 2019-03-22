@@ -1,5 +1,10 @@
 from django.contrib import admin
 
-from .models import Question
+from .models import Question, Comment
 
 admin.site.register(Question)
+admin.site.register(Comment)
+
+
+
+# Register your models here.

@@ -46,6 +46,7 @@ urlpatterns = [
     path("accounts/", include('accounts.urls')),
     path("meetups/", include("meetup.urls")),
     path("meetups/", include("question.urls")),
+    path("meetups/", include("answer.urls")),
     path("meetups/", include("vote.urls")),
     path("tags/", tag_views.TagList.as_view(), name="tags"),
     path("tags/<int:tag_id>", tag_views.ATag.as_view(), name="tag"),

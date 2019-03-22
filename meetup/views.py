@@ -7,10 +7,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Meeting
+
 from tag.models import MeetingTag, Tag
-from .serializers import MeetingSerializer, MeetingSerializerClass
 from tag.serializers import MeetingTagSerializer
+from .models import Meeting
+from .serializers import MeetingSerializer, MeetingSerializerClass
 
 
 # list all meetup or create a new meetup
