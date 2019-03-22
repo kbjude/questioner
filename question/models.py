@@ -15,7 +15,8 @@ class Question(models.Model):
     delete_status = models.BooleanField(default=False)
 
     def __str__(self):
-        return (self.title, self.body)  # pragma: no cover
+        return f"{self.title}, {self.body}"  # pragma: no cover
+
 
 class Comment(models.Model):
     """This class represents the comment model."""
