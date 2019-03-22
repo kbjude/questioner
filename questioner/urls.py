@@ -14,22 +14,53 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
-from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework.urlpatterns import format_suffix_patterns
 from django.conf.urls import include
+from django.contrib import admin
 from django.urls import path
-from meetup import views as tag_views
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.urlpatterns import format_suffix_patterns
+
+from tag import views as tag_views
 from . import views
 
+
+api_info = openapi.Info(
+    title="Questioner API",
+    default_version="v1",
+    description=(
+        "Crowd-source questions for a meetup. Questioner "
+        "helps the meetup organizer prioritize"
+        "questions to be answered. Other users can vote "
+        "on asked questions and they bubble to the top "
+        "or bottom of the log. description"
+    ),
+    license=openapi.License(name="Andela License"),
+)
+schema_view = get_schema_view(
+    public=True, permission_classes=(permissions.AllowAny,)
+)
 urlpatterns = [
-    path('', views.Index.as_view(), name="welcome"),
-    path('admin/', admin.site.urls),
-    path('auth/login/', obtain_auth_token, name='api_token_auth'),
-    path('meetups/', include('meetup.urls')),
-    path('questions/', include('question.urls')),
-    path('tags/', tag_views.TagList.as_view(), name='tags'),
-    path('tags/<int:tag_id>', tag_views.ATag.as_view(), name='tag'),
+    path("", views.Index.as_view(), name="welcome"),
+    path("accounts/", include('accounts.urls')),
+    path("meetups/", include("meetup.urls")),
+    path("meetups/", include("question.urls")),
+    path("meetups/", include("vote.urls")),
+    path("tags/", tag_views.TagList.as_view(), name="tags"),
+    path("tags/<int:tag_id>", tag_views.ATag.as_view(), name="tag"),
+    path("admin/", admin.site.urls),
+    path('session/', include('rest_framework.urls', namespace='rest_framework')),
+    path(
+        "docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path(
+        "redoc/",
+        schema_view.with_ui("redoc", cache_timeout=0),
+        name="schema-redoc",
+    ),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+format_suffix_patterns(urlpatterns, suffix_required=False, allowed=None)
