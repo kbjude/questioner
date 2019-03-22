@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Meeting
+from question.models import Question
 from tag.models import MeetingTag, Tag
 from .serializers import MeetingSerializer, MeetingSerializerClass
 from tag.serializers import MeetingTagSerializer
@@ -44,6 +45,8 @@ class MeetingList(APIView):
 
             meetingtags = MeetingTag.objects.filter(meetup=meetup["id"])
             serial_tags = MeetingTagSerializer(meetingtags, many=True)
+            questions_count = Question.objects.filter(Q(meetup_id=meetup["id"])).count()
+            meetup["questions_count"] = questions_count
 
             meetuptags = []
             for meetuptag in serial_tags.data:
@@ -149,6 +152,9 @@ class AMeeting(APIView):
 
         result = serial_meeting.data
         result["tags"] = tags
+
+        questions_count = Question.objects.filter(Q(meetup_id=result["id"])).count()
+        result["questions_count"] = questions_count
 
         user = User.objects.filter(Q(id=result["created_by"])).distinct().first()
         result["created_by_name"] = user.username
