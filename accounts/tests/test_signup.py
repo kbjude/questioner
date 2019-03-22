@@ -28,6 +28,9 @@ class TestSignup(APITestCase):
         url = reverse('profile')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['data'][0]['user'], {
+            'Username': 'user1', 'Email': 'user1@questioner.com'
+        })
 
     def test_signup_user_with_valid_data(self):
         """
@@ -38,6 +41,32 @@ class TestSignup(APITestCase):
         url = reverse("signup")
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['data'][0], {
+            'username': 'bisonlou',
+            'email': 'bisonlou@gmail.com',
+            'is_admin': False}
+        )
+
+    def test_signup_user_with_short_password(self):
+        """
+        Ensure user cannot signup with a password shorter than 8 chars.
+        """
+        data = {"username": "bisonlou", "password": "123",
+                "email": "bisonlou@gmail.com"}
+        url = reverse("signup")
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_signup_user_with_common_password(self):
+        """
+        Ensure user cannot signup with a password
+        similar to his username or among common passwords.
+        """
+        data = {"username": "bisonlou", "password": 'bison',
+                "email": "bisonlou@gmail.com"}
+        url = reverse("signup")
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 400)
 
     def test_signup_user_with_short_password(self):
         """

@@ -1,20 +1,21 @@
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db.models import Q
 from operator import itemgetter
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound
+
 from meetup.models import Meeting
+from meetup.serializers import MeetingSerializer
 from question.models import Question, Comment
-from vote.models import Vote
 from question.serializers import (QuestionSerializer, QuestionSerializerClass,
                                   CommentSerializer, CommentSerializerclass)
-from meetup.serializers import MeetingSerializer
+from vote.models import Vote
 
 
 class Questions(APIView):
@@ -357,16 +358,16 @@ class CommentList(APIView):
             queryset = Comment.objects.filter(question=self.kwargs['question_id'])
             serializer = CommentSerializer(queryset, many=True)
 
-            data=[]
+            data = []
             for comment in serializer.data:
                 user = User.objects.filter(Q(username=comment["created_by"])).distinct().first()
-                comment["created_by_id"]=user.id
-                comment["question_name"]=question.first().title
+                comment["created_by_id"] = user.id
+                comment["question_name"] = question.first().title
                 data.append(comment)
 
             return Response({
                 "status": status.HTTP_200_OK,
-                "comments":data
+                "comments": data
             })
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
@@ -385,24 +386,24 @@ class CommentList(APIView):
                     "error": "Question not found."
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            data={}
-            data["question"]=question.first().id
-            data["comment"]=request.data.get("comment")
+            data = {}
+            data["question"] = question.first().id
+            data["comment"] = request.data.get("comment")
 
             serializer = CommentSerializer(data=data)
             if serializer.is_valid():
-                serializer.save(created_by_id=request.user.id,)
-                data=dict(serializer.data)
-                data["created_by_id"]=request.user.id
-                data["question_name"]=question.first().title
+                serializer.save(created_by_id=request.user.id, )
+                data = dict(serializer.data)
+                data["created_by_id"] = request.user.id
+                data["question_name"] = question.first().title
                 return Response({
-                                    "comment": data,
-                                    "message": "Comment successfully created."
-                                }, status=status.HTTP_201_CREATED)
+                    "comment": data,
+                    "message": "Comment successfully created."
+                }, status=status.HTTP_201_CREATED)
             return Response({
                         "status": status.HTTP_400_BAD_REQUEST,
                         "error": "Fields cannot be left empty or missing."
-                    }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_400_BAD_REQUEST)
         return Response({
             "status": status.HTTP_404_NOT_FOUND,
             "error": "Meetup not found."
@@ -432,7 +433,7 @@ class CommentDetail(APIView):
                 "error": "Meetup not found."
             }, status=status.HTTP_404_NOT_FOUND)
 
-        question=Question.objects.filter(id=self.kwargs['question_id'])
+        question = Question.objects.filter(id=self.kwargs['question_id'])
         if not question:
             return Response({
                 "status": status.HTTP_404_NOT_FOUND,
@@ -442,14 +443,14 @@ class CommentDetail(APIView):
             comment = self.get_object(pk)
             serializer = CommentSerializer(comment)
 
-            data=dict(serializer.data)
+            data = dict(serializer.data)
             user = User.objects.filter(Q(username=data["created_by"])).distinct().first()
-            data["created_by_id"]=user.id
-            data["question_name"]=question.first().title
+            data["created_by_id"] = user.id
+            data["question_name"] = question.first().title
 
             return Response({
                 "status": status.HTTP_200_OK,
-                "comment":data
+                "comment": data
             })
 
     def put(self, request, pk, **kwargs):
@@ -459,7 +460,7 @@ class CommentDetail(APIView):
                 comment = self.get_object(pk)
 
                 serializer = CommentSerializer(comment, many=False)
-                data=dict(serializer.data)
+                data = dict(serializer.data)
                 data["comment"] = request.data["comment"]
 
                 serializer = CommentSerializer(comment, data=data)
