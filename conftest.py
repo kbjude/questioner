@@ -27,12 +27,12 @@ def user1():
     )
 
 
-@pytest.mark.django_db
-@pytest.fixture
-def user2():
-    return get_user_model().objects.create(
-        username="user2", email="user2@questioner.com", is_superuser=False
-    )
+# @pytest.mark.django_db
+# @pytest.fixture
+# def user2():
+#     return get_user_model().objects.create(
+#         username="user2", email="user2@questioner.com", is_superuser=False
+#     )
 
 
 @pytest.mark.django_db
