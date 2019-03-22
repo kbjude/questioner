@@ -51,7 +51,6 @@ urlpatterns = [
     path("tags/", tag_views.TagList.as_view(), name="tags"),
     path("tags/<int:tag_id>", tag_views.ATag.as_view(), name="tag"),
     path("admin/", admin.site.urls),
-    path('session/', include('rest_framework.urls', namespace='rest_framework')),
     path(
         "docs/",
         schema_view.with_ui("swagger", cache_timeout=0),
