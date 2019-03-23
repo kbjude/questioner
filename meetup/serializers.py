@@ -4,7 +4,8 @@ from tag.models import Tag
 
 
 class TagsListingField(serializers.RelatedField):
-    def to_representation(self, value, queryset=Tag.objects.all()):
+    @classmethod
+    def to_representation(cls, value, queryset=Tag.objects.all()):
         return value.title
 
 
