@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from .models import Answers
-from question.serializers import QuestionSerializer
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -13,8 +12,8 @@ class AnswerSerializer(serializers.ModelSerializer):
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=model.objects.all(),
-                fields=('body', 'meetup','question'),
-                message=("You cannot add a duplicate Answer.")
+                fields=("body", "meetup", "question"),
+                message=("You cannot add a duplicate Answer."),
             )
         ]
         fields = "__all__"

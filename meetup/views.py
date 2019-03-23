@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 from .models import Meeting
 from question.models import Question
 from tag.models import MeetingTag, Tag
-from .serializers import MeetingSerializer, MeetingSerializerClass
 from tag.serializers import MeetingTagSerializer
+from .serializers import MeetingSerializer
 
 
 # list all meetup or create a new meetup
@@ -25,7 +25,7 @@ class MeetingList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = MeetingSerializerClass
+    serializer_class = MeetingSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -43,23 +43,15 @@ class MeetingList(APIView):
             user = User.objects.filter(Q(id=meetup["created_by"])).distinct().first()
             meetup["created_by_name"] = user.username
 
-            meetingtags = MeetingTag.objects.filter(meetup=meetup["id"])
-            serial_tags = MeetingTagSerializer(meetingtags, many=True)
             questions_count = Question.objects.filter(Q(meetup_id=meetup["id"])).count()
             meetup["questions_count"] = questions_count
 
-            meetuptags = []
-            for meetuptag in serial_tags.data:
-                tag = Tag.objects.get(id=meetuptag["tag"])
-                meetuptags.append(tag.title)
-
-            meetup["tags"] = meetuptags
             meetupwithtags.append(meetup)
 
         return Response(
             data={
                 "status": status.HTTP_200_OK,
-                "data": [{"meetup": meetupwithtags}],
+                "data": [{"meetups": meetupwithtags}],
             },
             status=status.HTTP_200_OK,
         )
@@ -86,16 +78,10 @@ class MeetingList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        data = {}
-        for key in request.data:
-            data[key] = request.data[key]
-        data["created_by_name"] = request.user.id
-        data["created_by"] = request.user.id
-
-        serializer = MeetingSerializer(data=data)
+        serializer = MeetingSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(created_by=request.user)
 
             data = dict(serializer.data)
             data["created_by_name"] = request.user.username
@@ -125,7 +111,7 @@ class MeetingList(APIView):
 # meetups/1
 class AMeeting(APIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = MeetingSerializerClass
+    serializer_class = MeetingSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -188,12 +174,7 @@ class AMeeting(APIView):
 
         meetup = get_object_or_404(Meeting, pk=meeting_id)
 
-        data = {}
-        for key in request.data:
-            data[key] = request.data[key]
-        data["created_by"] = meetup.created_by.pk
-
-        serializer = MeetingSerializer(meetup, data=data)
+        serializer = MeetingSerializer(meetup, data=request.data)
         if serializer.is_valid():
             serializer.save()
 
