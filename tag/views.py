@@ -75,7 +75,7 @@ class TagList(APIView):
                     "error": "Action restricted to Admins!",
                 },
                 status=status.HTTP_401_UNAUTHORIZED,
-            )        
+            )
 
         serializer = TagSerializer(data=request.data)
         if serializer.is_valid():
