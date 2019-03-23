@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 
 from .models import MeetingTag
 from .models import Tag
-from .serializers import MeetingTagSerializer, MeetingTagSerializerClass
-from .serializers import TagSerializer, TagSerializerClass
+from .serializers import MeetingTagSerializer
+from .serializers import TagSerializer
 
 
 # list all tags or create a tag
@@ -25,7 +25,7 @@ class TagList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = TagSerializerClass
+    serializer_class = TagSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -75,17 +75,14 @@ class TagList(APIView):
                     "error": "Action restricted to Admins!",
                 },
                 status=status.HTTP_401_UNAUTHORIZED,
-            )
+            )        
 
-        data = {}
-        data["title"] = request.data.get("title", None)
-        data["created_by"] = request.user.id
-
-        serializer = TagSerializer(data=data)
+        serializer = TagSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(created_by=request.user)
 
             data = dict(serializer.data)
+            data["created_by"] = request.user.id
             data["created_by_name"] = request.user.username
 
             return Response(
@@ -118,7 +115,7 @@ class ATag(APIView):
     """
 
     permission_classes = (IsAdminUser,)
-    serializer_class = TagSerializerClass
+    serializer_class = TagSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -170,7 +167,7 @@ class AddMeetupTag(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = MeetingTagSerializerClass
+    serializer_class = MeetingTagSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -215,7 +212,7 @@ class AddMeetupTag(APIView):
             )
 
         elif serializer.is_valid():
-            serializer.save()
+            serializer.save(created_by= request.user)
 
             data = dict(serializer.data)
             data["created_by_name"] = request.user.username
@@ -253,7 +250,7 @@ class AmeetupTag(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = MeetingTagSerializerClass
+    serializer_class = MeetingTagSerializer
 
     @classmethod
     @swagger_auto_schema(
