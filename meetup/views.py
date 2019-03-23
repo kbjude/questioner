@@ -11,7 +11,6 @@ from .models import Meeting
 from question.models import Question
 from tag.models import MeetingTag, Tag
 from tag.serializers import MeetingTagSerializer
-from .models import Meeting
 from .serializers import MeetingSerializer
 
 
