@@ -262,10 +262,10 @@ class TestQuestionViews(TestCase):
         )
 
         self.assertEqual(response1.status_code, 400)
-        self.assertTrue("This field may not be null." in str(response1.data["title"][0]))
+        self.assertEqual("This field is required.", str(response1.data["title"][0]))
 
         self.assertEqual(response1.status_code, 400)
-        self.assertTrue("This field may not be null." in str(response2.data["body"][0]))
+        self.assertTrue("This field is required." in str(response2.data["body"][0]))
 
     def test_user_cannot_delete_question_created_by_another_user(self):
         self.client.force_authenticate(user=self.user2)
