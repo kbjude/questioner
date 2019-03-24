@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import ValidationError
 from .serializers import (
     UserSerializer,

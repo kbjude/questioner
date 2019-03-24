@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "question.apps.QuestionConfig",
     "vote.apps.VoteConfig",
-    
     "rest_framework_swagger",
     "drf_yasg",
     "answer.apps.AnswersConfig",
