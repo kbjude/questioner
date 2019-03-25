@@ -16,12 +16,12 @@ def test_anonymous_user_cannot_edit_an_answer(
             },
         )
     )
-    if not response.status_code == 403:
+    if not response.status_code == 401:
         raise AssertionError()
 
     if not response.data == {
         "detail": "Authentication credentials were not provided.",
-        "status": 403,
+        "status": 401,
     }:
         raise AssertionError()
 
