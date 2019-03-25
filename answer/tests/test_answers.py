@@ -14,12 +14,12 @@ def test_anonymous_user_cannot_answer_a_question(
         content_type="application/json",
         data=json.dumps({"body": "Django is a Python framework"}),
     )
-    if not response.status_code == 403:
+    if not response.status_code == 401:
         raise AssertionError()
 
     if not response.data == {
         "detail": "Authentication credentials were not provided.",
-        "status": 403,
+        "status": 401,
     }:
         raise AssertionError()
 
