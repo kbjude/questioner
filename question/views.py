@@ -13,20 +13,19 @@ from rest_framework.views import APIView
 from meetup.models import Meeting
 from meetup.serializers import MeetingSerializer
 from question.models import Question, Comment
-from question.serializers import (QuestionSerializer, QuestionSerializerClass,
-                                  CommentSerializer, CommentSerializerclass)
+from question.serializers import (QuestionSerializer, CommentSerializer)
 from vote.models import Vote
 
 
 class Questions(APIView):
     """
-        this class helps with the following features;
+        This class includes the following features;
         - adding a new question to a meeting
         - getting all questions of a particular meeting
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = QuestionSerializerClass
+    serializer_class = QuestionSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -113,20 +112,16 @@ class Questions(APIView):
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
-            data = {}
-            for key in request.data:
-                data[key] = request.data[key]
-            data["meetup_id"] = meetup_id
-            data["created_by"] = current_user.id
-
             Mserializer = MeetingSerializer(meeting, many=False)
 
-            serializer = QuestionSerializer(data=data)
+            serializer = QuestionSerializer(data=request.data)
             if serializer.is_valid():
 
-                serializer.save()
+                serializer.save(created_by=current_user,meetup_id=meeting)
                 qn_dict = dict(serializer.data)
+                qn_dict["created_by"] = current_user.id
                 qn_dict["created_by_name"] = current_user.username
+                qn_dict["meetup_id"] = meetup_id
                 qn_dict["meetup"] = Mserializer.data["title"]
                 return Response(
                     data={
@@ -158,7 +153,7 @@ class OneQuestion(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = QuestionSerializerClass
+    serializer_class = QuestionSerializer
 
     @classmethod
     @swagger_auto_schema(
@@ -247,14 +242,9 @@ class OneQuestion(APIView):
             )
             serializer = QuestionSerializer(question, many=False)
 
-            data=dict(serializer.data)
-            data["date_modified"] = timezone.now()
-            data["title"] = request.data.get("title", None)
-            data["body"] = request.data.get("body", None)
-
-            serializer = QuestionSerializer(question, data)
+            serializer = QuestionSerializer(question, request.data)
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(date_modified=timezone.now())
 
                 Mserializer = MeetingSerializer(meeting, many=False)
 
@@ -343,7 +333,7 @@ class CommentList(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = CommentSerializerclass
+    serializer_class = CommentSerializer
 
     def get(self, request, **kwargs):
         """Return a list of comments."""
@@ -360,8 +350,8 @@ class CommentList(APIView):
 
             data = []
             for comment in serializer.data:
-                user = User.objects.filter(Q(username=comment["created_by"])).distinct().first()
-                comment["created_by_id"] = user.id
+                user = User.objects.filter(Q(id=comment["created_by"])).distinct().first()
+                comment["created_by_name"] = user.username
                 comment["question_name"] = question.first().title
                 data.append(comment)
 
@@ -386,15 +376,10 @@ class CommentList(APIView):
                     "error": "Question not found."
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            data = {}
-            data["question"] = question.first().id
-            data["comment"] = request.data.get("comment")
-
-            serializer = CommentSerializer(data=data)
+            serializer = CommentSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save(created_by_id=request.user.id, )
+                serializer.save(created_by_id=request.user.id, question=question.first())
                 data = dict(serializer.data)
-                data["created_by_id"] = request.user.id
                 data["question_name"] = question.first().title
                 return Response({
                     "comment": data,
@@ -416,7 +401,7 @@ class CommentDetail(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = CommentSerializerclass
+    serializer_class = CommentSerializer
 
     @classmethod
     def get_object(cls, pk):
@@ -444,8 +429,8 @@ class CommentDetail(APIView):
             serializer = CommentSerializer(comment)
 
             data = dict(serializer.data)
-            user = User.objects.filter(Q(username=data["created_by"])).distinct().first()
-            data["created_by_id"] = user.id
+            user = User.objects.filter(Q(id=data["created_by"])).distinct().first()
+            data["created_by_name"] = user.username
             data["question_name"] = question.first().title
 
             return Response({
@@ -459,11 +444,7 @@ class CommentDetail(APIView):
             if Question.objects.filter(id=self.kwargs['question_id']):
                 comment = self.get_object(pk)
 
-                serializer = CommentSerializer(comment, many=False)
-                data = dict(serializer.data)
-                data["comment"] = request.data["comment"]
-
-                serializer = CommentSerializer(comment, data=data)
+                serializer = CommentSerializer(comment, data=request.data)
                 if serializer.is_valid():
                     serializer.save()
                     return Response({
