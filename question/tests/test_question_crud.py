@@ -78,7 +78,7 @@ class TestQuestionViews(TestCase):
             content_type="application/json",
             data=json.dumps(self.question),
         )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(
             response.data["detail"],
             "Authentication credentials were not provided.",
