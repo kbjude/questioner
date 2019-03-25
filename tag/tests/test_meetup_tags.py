@@ -11,11 +11,11 @@ def test_cannot_anonymous_user_cannot_tag_to_meet_up(api_client, db, meetup1, a_
     )
     print(response.data)
 
-    if not response.status_code == 403:
+    if not response.status_code == 401:
         raise AssertionError()
 
     if not response.data == {
-        "status": 403,
+        "status": 401,
         "detail": "Authentication credentials were not provided.",
     }:
         raise AssertionError()
