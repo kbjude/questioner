@@ -9,6 +9,7 @@ def test_cannot_anonymous_user_cannot_tag_to_meet_up(api_client, db, meetup1, a_
         content_type="application/json",
         data=json.dumps({"tag": a_tag.id}),
     )
+    print(response.data)
 
     if not response.status_code == 403:
         raise AssertionError()
