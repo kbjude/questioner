@@ -228,3 +228,14 @@ class TestCommentDetail(APIUserAPITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json()['error'], 'Question not found.')
+
+    @pytest.mark.django_db
+    def test_delete_a_comment_with_a_non_owner(self):
+        comment = Comment.objects.create(comment='blemishes only',
+                                         question=self.question, created_by=self.user)
+        self.client.force_authenticate(user=self.user2)
+        url = reverse('comment_detail',
+                      kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json()['error'], 'You cannot delete this comment.')
