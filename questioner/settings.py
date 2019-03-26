@@ -49,12 +49,13 @@ INSTALLED_APPS = [
     "rest_framework_swagger",
     "drf_yasg",
     "answer.apps.AnswersConfig",
+    "comment.apps.CommentConfig",
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        "questioner.auth.auth_default.BearerAuthentication"
+        "questioner.auth.auth_default.BearerAuthentication",
     ],
     "EXCEPTION_HANDLER": "questioner.utils.exception_handler.custom_exception_handler",
 }
