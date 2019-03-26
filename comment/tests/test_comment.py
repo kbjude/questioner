@@ -16,9 +16,10 @@ class APIUserAPITestCase(APITestCase):
     @pytest.mark.django_db
     def setUp(self):
         """Define the test client and other test variables."""
-
         # Create user
         self.user = UserModel.objects.create(username='test')
+        # Create user2
+        self.user2 = UserModel.objects.create(username='test2')
         # Create superuser
         self.admin = UserModel.objects.create(username='admin', is_superuser=True)
         # Create meetup
@@ -185,6 +186,18 @@ class TestCommentDetail(APIUserAPITestCase):
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json()['error'], 'Question not found.')
+
+    @pytest.mark.django_db
+    def test_update_a_comment_with_a_non_owner(self):
+        comment = Comment.objects.create(comment='blemishes alone',
+                                         question=self.question, created_by=self.user)
+        data = {"comment": "life is not cool", "question": 1}
+        self.client.force_authenticate(user=self.user2)
+        url = reverse('comment_detail',
+                      kwargs={'meetup_id': 1, 'question_id': 1, 'pk': comment.id})
+        response = self.client.put(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json()['error'], 'You cannot update this comment.')
 
     @pytest.mark.django_db
     def test_delete_a_single_comment(self):
