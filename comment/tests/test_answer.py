@@ -73,7 +73,7 @@ class TestUserListing(APITestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    def test_non_existent_meetup(self):
+    def test_non_existent_comment(self):
         """
         Ensure non admin cannot toggle a comment to an answer
         """

@@ -115,19 +115,12 @@ class ToggleAnswer(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    @classmethod
-    def get_object(cls, pk):
-        try:
-            return Comment.objects.get(pk=pk)
-        except Comment.DoesNotExist:
-            raise NotFound({"error": "Comment not found."})
 
     def patch(self, request, *args, **kwags):
 
         try:
             question_id = self.kwargs['question_id']
             comment_id = self.kwargs['pk']
-            response = None
 
             if request.user.is_superuser:
                 comment = Comment.objects.get(id=comment_id,
@@ -149,13 +142,7 @@ class ToggleAnswer(APIView):
                                     "status": status.HTTP_200_OK,
                                     "message": "Comment successfully updated."
                                 }
-                                    )
-                else:
-                    return Response(
-                        data={"status": 400,
-                              "error": serializer.errors},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+                                    )                
             return Response(
                 {
                     "status": status.HTTP_403_FORBIDDEN,
