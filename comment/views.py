@@ -142,7 +142,7 @@ class ToggleAnswer(APIView):
                                     "status": status.HTTP_200_OK,
                                     "message": "Comment successfully updated."
                                 }
-                                    )                
+                                    )
             return Response(
                 {
                     "status": status.HTTP_403_FORBIDDEN,
