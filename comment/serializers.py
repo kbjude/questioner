@@ -20,7 +20,7 @@ class CommentSerializer(serializers.ModelSerializer):
         """Map serializer fields to comment model fields."""
         model = Comment
         fields = "__all__"
-        # read_only_fields = ("created_by_name", "question_name", )
+        read_only_fields = ("is_answer", "question", )
 
 
 class ReactionSerializer(serializers.ModelSerializer):
