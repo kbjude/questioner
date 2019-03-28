@@ -57,6 +57,22 @@ class TestUserListing(APITestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_missing_comment_toggle(self):
+        """
+        Ensure admin can toggle a comment to an answer
+        """
+
+        url = reverse("toggle_answer",
+                      kwargs={'meetup_id': self.meetup.id,
+                              'question_id': self.question.id,
+                              'pk': 100
+                              }
+                      )
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.patch(url, format="json")
+
+        self.assertEqual(response.status_code, 404)
+
     def test_non_admin_comment_answer_toggle(self):
         """
         Ensure non admin cannot toggle a comment to an answer
