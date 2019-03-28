@@ -23,6 +23,7 @@ from rest_framework import permissions
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from tag import views as tag_views
+from comment import views as comment_views
 from . import views
 
 
@@ -50,6 +51,8 @@ urlpatterns = [
     path("meetups/", include("vote.urls")),
     path("meetups/", include("comment.urls")),
     path("tags/", tag_views.TagList.as_view(), name="tags"),
+    path("comments/<int:comment_id>/reactions",
+         comment_views.AddReaction.as_view(), name="reaction"),
     path("tags/<int:tag_id>", tag_views.ATag.as_view(), name="tag"),
     path("admin/", admin.site.urls),
     path(
