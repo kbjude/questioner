@@ -161,20 +161,29 @@ class CommentDetail(APIView):
         """Update a single comment."""
         if Meeting.objects.filter(id=self.kwargs['meetup_id']):
             if Question.objects.filter(id=self.kwargs['question_id']):
-                comment = self.get_object(pk)
+                if Comment.objects.filter(question=self.kwargs['question_id']):
+                    comment = self.get_object(pk)
+                    comment_owner = comment.created_by
+                    if comment_owner == request.user:
+                        serializer = CommentSerializer(comment, many=False)
+                        data = dict(serializer.data)
+                        data["comment"] = request.data["comment"]
 
-                serializer = CommentSerializer(comment, many=False)
-                data = dict(serializer.data)
-                data["comment"] = request.data["comment"]
-
-                serializer = CommentSerializer(comment, data=data)
-                if serializer.is_valid():
-                    serializer.save()
+                        serializer = CommentSerializer(comment, data=data)
+                        if serializer.is_valid():
+                            serializer.save()
+                            return Response(
+                                {
+                                    "status": status.HTTP_200_OK,
+                                    "message": "Comment successfully updated."
+                                }
+                            )
                     return Response(
                         {
-                            "status": status.HTTP_200_OK,
-                            "message": "Comment successfully updated."
-                        }
+                            "status": status.HTTP_403_FORBIDDEN,
+                            "error": "You cannot update this comment."
+                        },
+                        status=status.HTTP_403_FORBIDDEN
                     )
             return Response(
                 {
@@ -197,13 +206,22 @@ class CommentDetail(APIView):
             if Question.objects.filter(id=self.kwargs['question_id']):
                 if Comment.objects.filter(question=self.kwargs['question_id']):
                     comment = self.get_object(pk)
-                    comment.delete()
+                    comment_owner = comment.created_by
+                    if comment_owner == request.user:
+                        comment.delete()
+                        return Response(
+                            {
+                                "status": status.HTTP_204_NO_CONTENT,
+                                "message": "Comment successfully deleted."
+                            },
+                            status=status.HTTP_204_NO_CONTENT
+                        )
                     return Response(
                         {
-                            "status": status.HTTP_204_NO_CONTENT,
-                            "message": "Comment successfully deleted."
+                            "status": status.HTTP_403_FORBIDDEN,
+                            "error": 'You cannot delete this comment.'
                         },
-                        status=status.HTTP_204_NO_CONTENT
+                        status=status.HTTP_403_FORBIDDEN
                     )
             return Response(
                 {
