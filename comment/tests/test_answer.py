@@ -53,7 +53,7 @@ class TestUserListing(APITestCase):
                               }
                       )
         self.client.force_authenticate(user=self.admin)
-        response = self.client.patch(url, format="json")
+        response = self.client.get(url, format="json")
 
         self.assertEqual(response.status_code, 200)
 
@@ -69,7 +69,7 @@ class TestUserListing(APITestCase):
                               }
                       )
         self.client.force_authenticate(user=self.admin)
-        response = self.client.patch(url, format="json")
+        response = self.client.get(url, format="json")
 
         self.assertEqual(response.status_code, 404)
 
@@ -85,7 +85,7 @@ class TestUserListing(APITestCase):
                               }
                       )
         self.client.force_authenticate(user=self.user)
-        response = self.client.patch(url, format="json")
+        response = self.client.get(url, format="json")
 
         self.assertEqual(response.status_code, 403)
 
@@ -96,6 +96,6 @@ class TestUserListing(APITestCase):
 
         url = f"/meetups/{self.meetup.id}/questions/{self.question.id}/comment/100/toggle_answer/"
         self.client.force_authenticate(user=self.admin)
-        response = self.client.patch(url, format="json")
+        response = self.client.get(url, format="json")
 
         self.assertEqual(response.status_code, 404)
