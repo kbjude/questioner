@@ -25,9 +25,7 @@ SECRET_KEY = "n%fg(03shlp=ipqb_u%_o@=&7bhcwq8hpedk-sn)+5tnx6#*kb"
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "snaketech.herokuapp.com",
-    "questionerdojo.herokuapp.com",
+    "*",
 ]
 
 # Application definition
