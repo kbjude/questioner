@@ -323,7 +323,7 @@ class AddReaction(APIView):
             comment = Comment.objects.get(pk=data["comment_id"])
             serializer = ReactionSerializer(data=data)
 
-        except comment.DoesNotExist:
+        except Exception:
             return Response(
                 data={
                     "status": status.HTTP_404_NOT_FOUND,
