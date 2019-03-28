@@ -78,7 +78,7 @@ class TestUserListing(APITestCase):
         Ensure non admin cannot toggle a comment to an answer
         """
 
-        url = f"/meetups/{self.meetup.id}/questions/{self.question.id}/comment/100/toggle_answer/"
+        url = f"/meetups/{self.meetup.id}/questions/{self.question.id}/comments/100/toggle_answer/"
         self.client.force_authenticate(user=self.admin)
         response = self.client.patch(url, format="json")
 

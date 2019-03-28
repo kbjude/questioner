@@ -115,12 +115,6 @@ class ToggleAnswer(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    @classmethod
-    def get_object(cls, pk):
-        try:
-            return Comment.objects.get(pk=pk)
-        except Comment.DoesNotExist:
-            raise NotFound({"error": "Comment not found."})
 
     def patch(self, request, *args, **kwags):
 
