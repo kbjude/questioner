@@ -107,6 +107,59 @@ class CommentList(APIView):
         )
 
 
+class ToggleAnswer(APIView):
+    """
+    Turn a comment into an answer
+    Or tun an answer into a comment
+    Only the admin has rights to this endpoint
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def patch(self, request, *args, **kwags):
+
+        try:
+            question_id = self.kwargs['question_id']
+            comment_id = self.kwargs['pk']
+
+            if request.user.is_superuser:
+                comment = Comment.objects.get(id=comment_id,
+                                              question=question_id
+                                              )
+
+                serializer = CommentSerializer(comment, many=False)
+
+                data = dict(serializer.data)
+                data["is_answer"] = not data["is_answer"]
+
+                serializer = CommentSerializer(comment, data=data,
+                                               partial=True
+                                               )
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(
+                                {
+                                    "status": status.HTTP_200_OK,
+                                    "message": "Comment successfully updated."
+                                }
+                                    )                
+            return Response(
+                {
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "error": "Insurfficient rights."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Comment.DoesNotExist:
+            return Response(
+                data={
+                    "status": 404,
+                    "error": "Meetup or question does not exist",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
 class CommentDetail(APIView):
     """
     Retrieve, update or delete a comment instance.
