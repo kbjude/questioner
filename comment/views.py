@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from meetup.models import Meeting
 from question.models import Question
 from .models import Comment
-from .serializers import CommentSerializer
+from .serializers import CommentSerializer, ReactionSerializer
 
 
 class CommentList(APIView):
@@ -136,7 +136,7 @@ class ToggleAnswer(APIView):
                                                partial=True
                                                )
                 if serializer.is_valid():
-                    serializer.save()
+                    serializer.save(is_answer=True)
                     return Response(
                                 {
                                     "status": status.HTTP_200_OK,
@@ -290,3 +290,75 @@ class CommentDetail(APIView):
             },
             status=status.HTTP_404_NOT_FOUND
         )
+
+# Add a reaction
+class AddReaction(APIView):
+    """
+    post: reaction
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ReactionSerializer
+
+    @classmethod
+    # @swagger_auto_schema(
+    #     operation_description="Add a tag to a meetup",
+    #     operation_id="Add a tag to a meetup.",
+    #     request_body=MeetingTagSerializer,
+    #     responses={
+    #         201: MeetingTagSerializer(many=False),
+    #         401: "Unathorized Access",
+    #         403: "Tag is disabled",
+    #         404: "Tag Does not exist",
+    #         400: "Meet up does not exist or Tag already exists",
+    #     },
+    # )
+    def post(cls, request, comment_id):
+
+        try:
+            comment = Comment.objects.get(pk=comment_id)
+            serializer = ReactionSerializer(data=request.data)
+
+        except Exception:
+            return Response(
+                data={
+                    "status": status.HTTP_404_NOT_FOUND,
+                    "error": "Comment does not exist!",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        response = None
+        if not comment.is_answer:
+            response = Response(
+                data={
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "error": "Sorry, reactions can only be made on answers.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        elif serializer.is_valid():
+            serializer.save(comment_id=comment_id)
+
+            response = Response(
+                data={
+                    "status": status.HTTP_201_CREATED,
+                    "data": [
+                        {
+                            "success": "Reaction successfully added.",
+                        }
+                    ],
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        else:
+            response = Response(
+                data={
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "detail": serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return response
