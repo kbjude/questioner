@@ -13,6 +13,7 @@ class Comment(models.Model):
                                    on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    is_answer = models.BooleanField(default=False)
 
     def __str__(self):
         """Return a readable representation of the comment model instance."""

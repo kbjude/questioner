@@ -56,6 +56,7 @@ Provide your credentials under the body tab
 | GET           | /                                 | Index                           |
 | POST          | /accounts/login                   | login                           |
 | POST          | /accounts/signup                  | signup                          |
+| GET           | /accounts/users                   | get users                       |
 | **Meetups**   |                                   |                                 |
 | POST          | /meetups                          | Add a meetup                    |
 | GET           | /meetups                          | Get all meetups                 |
@@ -81,3 +82,5 @@ Provide your credentials under the body tab
 | GET           | meetups/2/questions/12/answers/   | GET answers to a question       |
 | PUT           | meetups/2/questions/12/answers/1/ | EDIT an answers to a question   |
 | DELETE        | meetups/2/questions/12/answers/1/ | DELETE an answers to a question |
+| **Comments**  |                                   |                                 |
+| PATCH         | /meetups/1/.../toggle_answer/     | Turn comment into an answer     |
