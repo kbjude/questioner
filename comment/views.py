@@ -135,8 +135,8 @@ class ToggleAnswer(APIView):
                 serializer = CommentSerializer(comment, data=data,
                                                partial=True
                                                )
-                if serializer.is_valid(is_answer=True):
-                    serializer.save()
+                if serializer.is_valid():
+                    serializer.save(is_answer=True)
                     return Response(
                                 {
                                     "status": status.HTTP_200_OK,
