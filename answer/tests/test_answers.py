@@ -153,3 +153,44 @@ def test_admin_user_cannot_add_a_duplicate_answer_to_a_question(
         "error": {"non_field_errors": ["You cannot add a duplicate Answer."]},
     }:
         raise AssertionError()
+
+
+def test_post_a_reaction(api_client, db, admin_user, answer_comment):
+    api_client.force_authenticate(user=admin_user)
+    url = reverse('reaction', kwargs={'comment_id': answer_comment.id})
+    data = {
+        "reaction": "my cool reaction"
+    }
+    response = api_client.post(url, data, format="json")
+    if not response.status_code == 201:
+        raise AssertionError()
+
+def test_post_wrong_reaction(api_client, db, admin_user, answer_comment):
+    api_client.force_authenticate(user=admin_user)
+    url = reverse('reaction', kwargs={'comment_id': answer_comment.id})
+    data = {
+        "itisjoel": "my cool reaction"
+    }
+    response = api_client.post(url, data, format="json")
+    if not response.status_code == 400:
+        raise AssertionError()
+
+def test_reaction_on_non_answer(api_client, db, admin_user, just_comment):
+    api_client.force_authenticate(user=admin_user)
+    url = reverse('reaction', kwargs={'comment_id': just_comment.id})
+    data = {
+        "reaction": "my cool reaction"
+    }
+    response = api_client.post(url, data, format="json")
+    if not response.status_code == 403:
+        raise AssertionError()
+
+def test_reaction_on_missing_comment(api_client, db, admin_user, just_comment):
+    api_client.force_authenticate(user=admin_user)
+    url = reverse('reaction', kwargs={'comment_id': 100})
+    data = {
+        "reaction": "my cool reaction"
+    }
+    response = api_client.post(url, data, format="json")
+    if not response.status_code == 404:
+        raise AssertionError()

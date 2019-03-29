@@ -18,3 +18,12 @@ class Comment(models.Model):
     def __str__(self):
         """Return a readable representation of the comment model instance."""
         return self.comment
+
+
+class Reaction(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.DO_NOTHING,
+                                related_name='reactions')
+    reaction = models.TextField()
+
+    def __str__(self):
+        return (self.reaction, self.comment,)
