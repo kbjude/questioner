@@ -116,7 +116,7 @@ class ToggleAnswer(APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def put(self, request, *args, **kwags):
+    def get(self, request, *args, **kwags):
 
         try:
             question_id = self.kwargs['question_id']
@@ -135,7 +135,7 @@ class ToggleAnswer(APIView):
                 serializer = CommentSerializer(comment, data=data,
                                                partial=True
                                                )
-                if serializer.is_valid():
+                if serializer.is_valid(is_answer=True):
                     serializer.save()
                     return Response(
                                 {
