@@ -1,5 +1,5 @@
 import pytest
-
+from comment.models import Comment
 from answer.models import Answers
 from meetup.models import Meeting
 from question.models import Question
@@ -37,5 +37,26 @@ def answered_question(staff1, question1, meetup1):
         body="Django is a Python framework",
         created_by=staff1,
         meetup=meetup1,
+        question=question1,
+    )
+
+
+@pytest.mark.django_db
+@pytest.fixture
+def answer_comment(staff1, question1):
+    return Comment.objects.create(
+        is_answer=True,
+        created_by=staff1,
+        comment="test comment",
+        question=question1,
+    )
+
+
+@pytest.mark.django_db
+@pytest.fixture
+def just_comment(staff1, question1):
+    return Comment.objects.create(
+        created_by=staff1,
+        comment="test comment",
         question=question1,
     )
