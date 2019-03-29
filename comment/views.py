@@ -315,13 +315,9 @@ class AddReaction(APIView):
     # )
     def post(cls, request, comment_id):
 
-        data = {}
-        data["comment_id"] = comment_id
-        data["reaction"] = request.data["reaction"]
-
         try:
-            comment = Comment.objects.get(pk=data["comment_id"])
-            serializer = ReactionSerializer(data=data)
+            comment = Comment.objects.get(pk=comment_id)
+            serializer = ReactionSerializer(data=request.data)
 
         except Exception:
             return Response(
