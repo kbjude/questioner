@@ -116,7 +116,7 @@ class ToggleAnswer(APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwags):
+    def put(self, request, *args, **kwags):
 
         try:
             question_id = self.kwargs['question_id']
